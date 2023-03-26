@@ -1,6 +1,14 @@
 # dnbradio-player
 
-> dnbradio-player
+Live example:
+
+> A production instance of `dnbradio-player` can be found here: https://dnbradio.com/player
+
+![dnbradio-player](https://github.com/dnbradio/dnbradio-player/raw/main/static/dnbradio-screenshot.png)
+
+This project can be run with minimal setup.
+
+> See env.example for environment variables to get you started.
 
 ## Build Setup
 
