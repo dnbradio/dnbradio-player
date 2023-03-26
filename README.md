@@ -6,17 +6,16 @@
 
 ``` bash
 # install dependencies
-$ npm run install
+$ pnpm i
 
-# serve with hot reload at localhost:3000
-$ npm run dev
+# serve with hot reload on your localhost
+$ pnpm run dev
 
 # build for production and launch server
-$ npm run build
-$ npm run start
+$ pnpm run build
+$ pnpm run start
 
 # generate static project
-$ npm run generate
+This is what is currently deployed to the dnbradio.com website.
+$ pnpm run generate
 ```
-
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
