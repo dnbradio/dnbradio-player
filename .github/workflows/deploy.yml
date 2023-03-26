@@ -22,7 +22,7 @@ jobs:
         run: pnpm i
       - name: Get current date
         id: date
-        run: echo "APP_VERSION=$(date +'%y%m%d.%H%M')" >> $GITHUB_OUTPUT
+        run: echo "APP_VERSION=$(date +'%y%m%d.%H%M')" >> $GITHUB_OUTPUT && echo "${{ env.APP_VERSION }}"
       - name: pnpm run generate
         run: pnpm run generate
       - name: copy file via scp
