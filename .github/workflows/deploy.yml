@@ -20,6 +20,8 @@ jobs:
         run: pnpm --version
       - name: pnpm i
         run: pnpm i
+      - name: pnpm run generate
+        run: pnpm run generate
       - name: copy file via scp
         uses: appleboy/scp-action@master
         with:
