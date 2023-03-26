@@ -14,7 +14,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "16"
-      - name: Install bats
-        run: npm install -g bats
-      - name: Check bats version
-        run: bats --version
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Check pnpm version
+        run: pnpm --version
+      - name: pnpm i
+        run: pnpm i
+      - name: copy file via scp
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH2 }}
+          port: ${{ secrets.PORT }}
+          source: "dist"
+          target: "/var/www/dnbradio_site/html/player"
