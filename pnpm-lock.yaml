@@ -49,6 +49,7 @@ specifiers:
   vue-headful: ^2.1.0
   vue-meta: ^2.4.0
   vue-no-ssr: ^1.1.1
+  vue-router: ^3.2.0
   vue-screen-size: ^1.0.1
   vue-server-renderer: ^2.7.14
   vue-template-compiler: ^2.7.14
@@ -100,6 +101,7 @@ dependencies:
   vue-headful: registry.npmjs.org/vue-headful/2.1.0_vue@2.7.14
   vue-meta: registry.npmjs.org/vue-meta/2.4.0
   vue-no-ssr: registry.npmjs.org/vue-no-ssr/1.1.1
+  vue-router: registry.npmjs.org/vue-router/3.6.5_vue@2.7.14
   vue-screen-size: registry.npmjs.org/vue-screen-size/1.0.1
   vue-server-renderer: registry.npmjs.org/vue-server-renderer/2.7.14
   vuetify: registry.npmjs.org/vuetify/2.6.14_vue@2.7.14
