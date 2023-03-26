@@ -1,4 +1,9 @@
 const nodeExternals = require("webpack-node-externals");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
+const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
+const IgnorePlugin = require("webpack").IgnorePlugin;
+const MomentTimezoneDataPlugin = require("moment-timezone-data-webpack-plugin");
 const colors = require("vuetify/es5/util/colors").default;
 const rightNow = new Date();
 const APP_VERSION = rightNow
@@ -17,8 +22,9 @@ const features = [
 ].join("%2C");
 
 module.exports = {
-  ssr: "true",
+  ssr: true,
   target: "static",
+  telemetry: false,
   privateRuntimeConfig: {
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY,
@@ -91,7 +97,7 @@ module.exports = {
     ],
     script: [
       { src: "https://code.createjs.com/1.0.0/soundjs.min.js", mode: "client" },
-      { src: "https://player.twitch.tv/js/embed/v1.js", mode: "client" },
+      // { src: "https://player.twitch.tv/js/embed/v1.js", mode: "client" },
       {
         src: `https://polyfill.io/v3/polyfill.min.js?features=${features}`,
         body: true
@@ -101,17 +107,18 @@ module.exports = {
   loading: { color: "#fff" },
   css: [],
   plugins: [
+    { ssr: false, src: "~/plugins/vuetify.js" },
     { ssr: false, src: "~plugins/createjs.js" },
     { ssr: false, src: "~plugins/headful.js" }
   ],
-  buildModules: ["@nuxtjs/vuetify"],
+  //buildModules: ["@nuxtjs/vuetify"],
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
     "@nuxtjs/axios",
     "@nuxtjs/proxy",
+    "nuxtjs-mdi-font",
     "vuetify-dialog/nuxt",
     "@nuxtjs/pwa",
-    "@nuxtjs/dotenv",
     "@nuxtjs/device"
   ],
   pwa: {
@@ -147,7 +154,24 @@ module.exports = {
   build: {
     postcss: null,
     extractCSS: true,
-    extend(config, ctx) {}
+    extend(config, ctx) {
+      if (ctx && ctx.isClient) {
+        if (process.env.NODE_ENV !== "production") {
+          config.plugins.push(new BundleAnalyzerPlugin());
+        }
+        config.plugins.push(new VuetifyLoaderPlugin());
+        config.plugins.push(
+          new IgnorePlugin(/^\.\/locale$/, /moment-timezone$/)
+        );
+        const currentYear = new Date().getFullYear();
+        const plugin = new MomentTimezoneDataPlugin({
+          startYear: currentYear - 2,
+          endYear: currentYear + 10
+        });
+        config.plugins.push(plugin);
+        config.optimization.splitChunks.maxSize = 51200;
+      }
+    }
   },
   router: {
     // middleware: 'user-agent',
