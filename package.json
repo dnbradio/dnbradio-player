@@ -54,6 +54,7 @@
     "vuetify": "^2.6.14",
     "vuetify-confirm": "^2.0.6",
     "vuetify-dialog": "^2.0.17",
+    "vuetify-loader": "^1.9.2",
     "vuex": "^2.5.0"
   },
   "devDependencies": {

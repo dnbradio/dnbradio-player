@@ -4,7 +4,6 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
 const IgnorePlugin = require("webpack").IgnorePlugin;
 const MomentTimezoneDataPlugin = require("moment-timezone-data-webpack-plugin");
-const colors = require("vuetify/es5/util/colors").default;
 const rightNow = new Date();
 const APP_VERSION = rightNow
   .toISOString()
@@ -129,27 +128,6 @@ module.exports = {
   server: {
     port: process.env.NODE_PORT || 8000,
     host: process.env.NODE_HOST || "0.0.0.0"
-  },
-
-  vuetify: {
-    globalImports: {
-      directives: ["Touch"]
-    },
-    customVariables: ["~/assets/variables.scss"],
-    theme: {
-      dark: true,
-      themes: {
-        dark: {
-          primary: colors.grey.lighten2,
-          accent: colors.grey.darken3,
-          secondary: colors.amber.darken3,
-          info: colors.teal.lighten1,
-          warning: colors.amber.base,
-          error: colors.deepOrange.accent4,
-          success: colors.green.accent3
-        }
-      }
-    }
   },
   build: {
     postcss: null,
