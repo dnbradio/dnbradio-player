@@ -4,17 +4,29 @@
 
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
-$ pnpm i
+$ pnpm run install
+```
 
-# serve with hot reload on your localhost
+## Local
+
+```bash
+# serve with hot reload at localhost:3000
 $ pnpm run dev
+```
 
+## Production - SSR
+
+```bash
 # build for production and launch server
 $ pnpm run build
 $ pnpm run start
+```
 
+## Production - Static
+
+```bash
 # generate static project
 This is what is currently deployed to the dnbradio.com website.
 $ pnpm run generate
