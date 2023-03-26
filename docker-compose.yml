@@ -1,35 +1,18 @@
 version: "3.4"
 
 services:
-
   app:
-    # depends_on: 
+    # depends_on:
     #   - 'mongo'
     build: ./
     container_name: app
     restart: always
     ports:
       - "${NODE_PORT}:${NODE_PORT}"
-    command:
-      "npm run start"
+    command: "npm run start"
     networks:
       - app-network
-    
-  # mongo:
-  #   image: 'mongo'
-  #   container_name: 'mongo'
-  #   environment:
-  #     - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
-  #     - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-  #     - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-  #   volumes:
-  #     - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-  #     - ./mongo-volume:/data/db
-  #   ports:
-  #     - '27017-27019:27017-27019'
-  #   networks:
-  #     - app-network
-      
+
 networks:
   app-network:
     driver: bridge
