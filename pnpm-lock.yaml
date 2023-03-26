@@ -53,6 +53,7 @@ specifiers:
   vuetify: ^2.6.14
   vuetify-confirm: ^2.0.6
   vuetify-dialog: ^2.0.17
+  vuex: ^2.5.0
   webpack: ^4.46.0
 
 dependencies:
@@ -100,6 +101,7 @@ dependencies:
   vuetify: registry.npmjs.org/vuetify/2.6.14_vue@2.7.14
   vuetify-confirm: registry.npmjs.org/vuetify-confirm/2.0.6_vue@2.7.14+vuetify@2.6.14
   vuetify-dialog: registry.npmjs.org/vuetify-dialog/2.0.17_vue@2.7.14+vuetify@2.6.14
+  vuex: registry.npmjs.org/vuex/2.5.0
 
 devDependencies:
   '@nuxtjs/vuetify': registry.npmjs.org/@nuxtjs/vuetify/1.12.3_vue@2.7.14+webpack@4.46.0
@@ -2493,7 +2495,7 @@ packages:
       git-url-parse: registry.npmjs.org/git-url-parse/13.1.0
       inquirer: registry.npmjs.org/inquirer/7.3.3
       jiti: registry.npmjs.org/jiti/1.18.2
-      nanoid: registry.npmjs.org/nanoid/3.3.4
+      nanoid: registry.npmjs.org/nanoid/3.3.6
       node-fetch: registry.npmjs.org/node-fetch/2.6.9
       parse-git-config: registry.npmjs.org/parse-git-config/3.0.0
       rc9: registry.npmjs.org/rc9/2.0.1
@@ -8127,10 +8129,10 @@ packages:
     version: 2.17.0
     optional: true
 
-  registry.npmjs.org/nanoid/3.3.4:
-    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/nanoid/-/nanoid-3.3.4.tgz}
+  registry.npmjs.org/nanoid/3.3.6:
+    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/nanoid/-/nanoid-3.3.6.tgz}
     name: nanoid
-    version: 3.3.4
+    version: 3.3.6
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -9861,7 +9863,7 @@ packages:
     version: 8.4.21
     engines: {node: ^10 || ^12 || >=14}
     dependencies:
-      nanoid: registry.npmjs.org/nanoid/3.3.4
+      nanoid: registry.npmjs.org/nanoid/3.3.6
       picocolors: registry.npmjs.org/picocolors/1.0.0
       source-map-js: registry.npmjs.org/source-map-js/1.0.2
 
@@ -12114,6 +12116,12 @@ packages:
       vue: ^2.6.4
     dependencies:
       vue: registry.npmjs.org/vue/2.7.14
+
+  registry.npmjs.org/vuex/2.5.0:
+    resolution: {integrity: sha512-5oJPOJySBgSgSzoeO+gZB/BbN/XsapgIF6tz34UwJqnGZMQurzIO3B4KIBf862gfc9ya+oduY5sSkq+5/oOilQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/vuex/-/vuex-2.5.0.tgz}
+    name: vuex
+    version: 2.5.0
+    dev: false
 
   registry.npmjs.org/vuex/3.6.2_vue@2.7.14:
     resolution: {integrity: sha512-ETW44IqCgBpVomy520DT5jf8n0zoCac+sxWnn+hMe/CzaSejb/eVw2YToiXYX+Ex/AuHHia28vWTq4goAexFbw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/vuex/-/vuex-3.6.2.tgz}
