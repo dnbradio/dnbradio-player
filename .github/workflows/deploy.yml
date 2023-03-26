@@ -13,7 +13,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "16.19.1"
       - name: Install pnpm
         run: npm install -g pnpm
       - name: Check pnpm version
@@ -24,7 +24,7 @@ jobs:
         id: date
         run: echo "APP_VERSION=$(date +'%y%m%d.%H%M')" >> $GITHUB_OUTPUT
       - name: pnpm run generate
-        run: APP_VERSION="${{ env.APP_VERSION }}" pnpm run generate
+        run: APP_VERSION=$APP_VERSION pnpm run generate
       - name: copy file via scp
         uses: appleboy/scp-action@master
         with:
