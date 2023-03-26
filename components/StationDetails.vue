@@ -75,7 +75,6 @@
         flat
         class="categoryCont transparent"
         v-if="station"
-        v-show="1"
       >
         <small><small>STATION</small></small>
         <h2 class="categoryTitle">{{ station.title }}</h2>
