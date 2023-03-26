@@ -24,7 +24,7 @@ jobs:
         id: date
         run: echo "VERSION=date::$(date +'%y%m%d.%H%M')" >> $GITHUB_OUTPUT
       - name: pnpm run generate
-        run: VERSION={{ env.VERSION }} pnpm run generate
+        run: VERSION="${{ env.action_state }}" pnpm run generate
       - name: copy file via scp
         uses: appleboy/scp-action@master
         with:
