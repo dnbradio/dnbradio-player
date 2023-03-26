@@ -22,7 +22,7 @@ module.exports = {
     MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD
   },
   publicRuntimeConfig: {
-    VERSION: process.env.VERSION || "0.0.0-dev"
+    APP_VERSION: process.env.APP_VERSION || "0.0.0-dev"
   },
   /*
    ** Headers of the page

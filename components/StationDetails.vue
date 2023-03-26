@@ -308,7 +308,7 @@
               href="https://github.com/dnbradio/dnbradio-player"
               title="dnbradio-player on github"
               style="text-decoration: none; color: #a0a0a0;"
-              >v.{{ version }}</a
+              >v.{{ APP_VERSION }}</a
             ></span
           >
         </v-col>
@@ -1019,8 +1019,8 @@ export default {
     }
   },
   computed: {
-    version() {
-      return this.$config.VERSION;
+    APP_VERSION() {
+      return this.$config.APP_VERSION;
     },
     isOffline() {
       return this.$nuxt.isOffline;
