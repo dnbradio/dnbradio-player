@@ -4,7 +4,7 @@ Live example:
 
 > A production instance of `dnbradio-player` can be found here: https://dnbradio.com/player
 
-![dnbradio-player](https://github.com/dnbradio/dnbradio-player/raw/main/static/dnbradio-screenshot.png)
+![dnbradio-player](https://github.com/dnbradio/dnbradio-player/raw/main/static/dnbradio-screenshot.png =300x)
 
 This project can be run with minimal setup.
 
