@@ -135,7 +135,7 @@ module.exports = {
     extend(config, ctx) {
       if (ctx && ctx.isClient) {
         if (process.env.NODE_ENV !== "production") {
-          config.plugins.push(new BundleAnalyzerPlugin());
+          //config.plugins.push(new BundleAnalyzerPlugin());
         }
         config.plugins.push(new VuetifyLoaderPlugin());
         config.plugins.push(
