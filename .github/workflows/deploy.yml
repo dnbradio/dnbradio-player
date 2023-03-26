@@ -1,5 +1,4 @@
 name: Deploy
-description: Deploy
 on:
   workflow_dispatch:
   push:
