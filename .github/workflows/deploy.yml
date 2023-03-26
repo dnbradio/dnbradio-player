@@ -22,6 +22,8 @@ jobs:
         run: pnpm i
       - name: pnpm run generate
         run: pnpm run generate
+      - name: echo version
+        run: date +v%y%m%d.%H%M > static/VERSION
       - name: copy file via scp
         uses: appleboy/scp-action@master
         with:
