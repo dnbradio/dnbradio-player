@@ -54,6 +54,7 @@
     "vue-breakpoints": "^1.1.0",
     "vue-client-only": "^2.1.0",
     "vue-headful": "^2.1.0",
+    "vue-meta": "^2.4.0",
     "vue-screen-size": "^1.0.1",
     "vue-server-renderer": "^2.7.14",
     "vuetify": "^2.6.14",
