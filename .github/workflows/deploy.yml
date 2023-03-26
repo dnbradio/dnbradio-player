@@ -20,7 +20,11 @@ jobs:
         run: pnpm --version
       - name: pnpm i
         run: pnpm i
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%y%m%d.%H%M')"
       - name: pnpm run generate
+        env: VERSION=${{ steps.date.outputs.date }}
         run: pnpm run generate
       - name: copy file via scp
         uses: appleboy/scp-action@master

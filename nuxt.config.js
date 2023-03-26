@@ -21,7 +21,9 @@ module.exports = {
     MONGO_INITDB_ROOT_USERNAME: process.env.MONGO_INITDB_ROOT_USERNAME,
     MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD
   },
-  publicRuntimeConfig: {},
+  publicRuntimeConfig: {
+    VERSION: process.env.VERSION || "0.0.0-dev"
+  },
   /*
    ** Headers of the page
    */

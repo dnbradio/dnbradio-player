@@ -75,7 +75,6 @@
         flat
         class="categoryCont transparent"
         v-if="station"
-        v-show="1"
       >
         <small><small>STATION</small></small>
         <h2 class="categoryTitle">{{ station.title }}</h2>
@@ -303,6 +302,15 @@
               >Keepin' the beats rollin' on dnbradio!</small
             >
           </v-btn>
+          <br />
+          <span style="font-size: 8px;"
+            ><a
+              href="https://github.com/dnbradio/dnbradio-player"
+              title="dnbradio-player on github"
+              style="text-decoration: none; color: #a0a0a0;"
+              >v.{{ version }}</a
+            ></span
+          >
         </v-col>
       </v-row>
     </v-card>
@@ -1011,6 +1019,9 @@ export default {
     }
   },
   computed: {
+    version() {
+      return this.$config.VERSION;
+    },
     isOffline() {
       return this.$nuxt.isOffline;
     },
