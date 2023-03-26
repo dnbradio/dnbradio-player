@@ -9,7 +9,6 @@ specifiers:
   '@fortawesome/pro-light-svg-icons': ^5.15.4
   '@fortawesome/vue-fontawesome': ^0.1.10
   '@mdi/font': ^5.9.55
-  '@nuxt/ufo': ^0.5.4
   '@nuxtjs/axios': ^5.13.6
   '@nuxtjs/device': ^1.2.7
   '@nuxtjs/dotenv': ^1.4.1
@@ -42,6 +41,7 @@ specifiers:
   react-dom: ^16.14.0
   simple-media-element: ^1.1.0
   soundjs: ^1.0.1
+  ufo: ^1.1.1
   vue: ^2.7.14
   vue-audio-visual: ^2.5.0
   vue-breakpoints: ^1.1.0
@@ -64,7 +64,6 @@ dependencies:
   '@fortawesome/pro-light-svg-icons': 5.15.4
   '@fortawesome/vue-fontawesome': 0.1.10_dh3wzfumpzw6zsszdpw5cxouqy
   '@mdi/font': registry.npmjs.org/@mdi/font/5.9.55
-  '@nuxt/ufo': registry.npmjs.org/@nuxt/ufo/0.5.4
   '@nuxtjs/axios': registry.npmjs.org/@nuxtjs/axios/5.13.6
   '@nuxtjs/device': registry.npmjs.org/@nuxtjs/device/1.2.7
   '@nuxtjs/dotenv': registry.npmjs.org/@nuxtjs/dotenv/1.4.1
@@ -90,6 +89,7 @@ dependencies:
   nuxt: registry.npmjs.org/nuxt/2.16.3_5akvq66j4h7akgofu463k3tlpu
   simple-media-element: registry.npmjs.org/simple-media-element/1.1.0
   soundjs: registry.npmjs.org/soundjs/1.0.1
+  ufo: registry.npmjs.org/ufo/1.1.1
   vue: registry.npmjs.org/vue/2.7.14
   vue-audio-visual: registry.npmjs.org/vue-audio-visual/2.5.0
   vue-breakpoints: registry.npmjs.org/vue-breakpoints/1.1.0
@@ -2500,13 +2500,6 @@ packages:
       std-env: registry.npmjs.org/std-env/3.3.2
     transitivePeerDependencies:
       - encoding
-    dev: false
-
-  registry.npmjs.org/@nuxt/ufo/0.5.4:
-    resolution: {integrity: sha512-JZOGDlt2BvLCBmLhrchhRJ6tP9PBfSWLdsHC+JVJ5Qp8/hT/2u61cSsLS30zUOwcPRaQ3y2oHNkEiKJ5v90iEQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@nuxt/ufo/-/ufo-0.5.4.tgz}
-    name: '@nuxt/ufo'
-    version: 0.5.4
-    deprecated: please migrate to ufo npm package
     dev: false
 
   registry.npmjs.org/@nuxt/utils/2.16.3:
