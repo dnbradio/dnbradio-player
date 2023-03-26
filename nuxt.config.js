@@ -1,5 +1,12 @@
 const nodeExternals = require("webpack-node-externals");
 const colors = require("vuetify/es5/util/colors").default;
+const rightNow = new Date();
+const APP_VERSION = rightNow
+  .toISOString()
+  .slice(0, 16)
+  .replace(/-/g, ".")
+  .replace(/:/g, ".")
+  .replace(/T/g, "-");
 require("dotenv").config();
 const features = [
   "fetch",
@@ -22,7 +29,7 @@ module.exports = {
     MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD
   },
   publicRuntimeConfig: {
-    APP_VERSION: process.env.APP_VERSION || "0.0.0-dev"
+    APP_VERSION: process.env.APP_VERSION || APP_VERSION
   },
   /*
    ** Headers of the page
