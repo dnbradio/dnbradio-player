@@ -1,0 +1,21 @@
+name: Deploy
+description: Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+jobs:
+  check-bats-version:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Install bats
+        run: npm install -g bats
+      - name: Check bats version
+        run: bats --version
