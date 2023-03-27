@@ -32,5 +32,4 @@ jobs:
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
-          rm: true
-          target: "/var/www/player/"
+          target: "/tmp/var/www/dnbradio_site/html/"
