@@ -1026,7 +1026,7 @@ export default {
   },
   computed: {
     APP_BRANCH() {
-      return this.$config.APP_BRANCH;
+      return this.$config.APP_BRANCH || "main";
     },
     APP_VERSION() {
       return this.$config.APP_VERSION;
