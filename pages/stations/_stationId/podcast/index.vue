@@ -155,7 +155,18 @@ export default {
     }
   },
   mounted() {
-    this.fetchData();
+    this.$nextTick(() => {
+      if (this.station && this.station.podcast) {
+        this.$axios
+          .get(this.station.podcast.url + "?page=" + this.page)
+          .then(res => {
+            this.pagination = res.data.pagination;
+            this.items = res.data.data;
+          });
+      } else {
+        console.log("no podcast");
+      }
+    });
   }
 };
 </script>
