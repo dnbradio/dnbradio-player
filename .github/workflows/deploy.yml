@@ -20,9 +20,9 @@ jobs:
         run: pnpm --version
       - name: pnpm i
         run: pnpm i
-      - name: pnpm run prod-generate
+      - name: pnpm run generate-prod
         run: |
-          pnpm run prod-generate
+          pnpm run generate-prod
           mv dist player
       - name: scp -> dnbradio.com/player
         uses: appleboy/scp-action@master

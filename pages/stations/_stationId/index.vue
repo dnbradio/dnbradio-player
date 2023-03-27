@@ -36,44 +36,44 @@ export default {
         {
           hid: "description",
           name: "description",
-          content: `${station.description}`
+          content: `${station.description}`,
         },
         {
           hid: `keywords`,
           name: "keywords",
-          keywords: `${station.title} ${station.subtitle}`
+          keywords: `${station.title} ${station.subtitle}`,
         },
         {
           hid: `og:title`,
           property: "og:title",
-          content: `${station.title} -  ${station.subtitle}`
+          content: `${station.title} -  ${station.subtitle}`,
         },
         {
           hid: `og:description`,
           property: "og:description",
-          content: `${station.description}`
+          content: `${station.description}`,
         },
         // { hid: `og:url`, property: 'og:url', content: product.name },
         { hid: `og:image`, property: "og:image", content: `${station.cover}` },
         {
           hid: `og:site_name`,
           property: "og:site_name",
-          content: `${station.title}`
+          content: `${station.title}`,
         },
         {
           hid: `twitter:card`,
           property: "twitter:card",
-          content: `${station.title} ${station.subtitle}`
+          content: `${station.title} ${station.subtitle}`,
         },
         {
           hid: `twitter:site`,
           property: "twitter:site",
-          content: `${station.twitterId || "dnbradio"}`
+          content: `${station.twitterId || "dnbradio"}`,
         },
         {
           hid: `twitter:creator`,
           property: "twitter:creator",
-          content: `${station.twitterId || "dnbradio"}`
+          content: `${station.twitterId || "dnbradio"}`,
         },
         // { hid: `twitter:card`, property: 'twitter:card', content: 'player' },
         // { hid: `twitter:player:stream`, property: 'twitter:player:stream', content: 'https://dnbradio.com:10128/dnbradio_main.mp3' },
@@ -84,42 +84,42 @@ export default {
         {
           hid: `twitter:image`,
           property: "twitter:image",
-          content: `${station.cover}`
+          content: `${station.cover}`,
         },
         {
           hid: `twitter:title`,
           property: "twitter:title",
-          content: `${station.title} - ${station.subtitle}`
+          content: `${station.title} - ${station.subtitle}`,
         },
         {
           hid: `twitter:description`,
           property: "twitter:description",
-          content: `${station.description}`
+          content: `${station.description}`,
         },
         {
           hid: `apple-mobile-web-app-capable`,
           rel: "apple-mobile-web-app-capable",
-          content: "yes"
-        }
+          content: "yes",
+        },
       ],
       link: [
         { rel: "image_src", href: `${station.cover}` },
         { rel: "favicon", href: `${station.cover}` },
         { rel: "shortcut icon", href: `${station.cover}` },
         { rel: "icon", href: `${station.cover}` },
-        { rel: "apple-touch-icon", href: `${station.cover}` }
+        { rel: "apple-touch-icon", href: `${station.cover}` },
         // { rel: 'canonical', href="//section8recs.com/r/fringe-recall-monatomic-gold-oblivion/9710" }
-      ]
+      ],
     };
   },
   components: {
     Logo,
-    StationList
+    StationList,
   },
-  async fetch() {
-    const stationsInitData = await stations();
-    Station.create({ data: stationsInitData });
-  },
+  // async fetch() {
+  //   const stationsInitData = await stations();
+  //   Station.create({ data: stationsInitData });
+  // },
   data() {
     return {};
   },
@@ -127,7 +127,7 @@ export default {
     currenStationIndex() {
       if (this.stations) {
         let station = this.stations.find(
-          item => item.pathname && item.pathname == this.$route.name
+          (item) => item.pathname && item.pathname == this.$route.name
         );
         //console.log('station', station, this.stations, this.$route)
         if (station) {
@@ -148,13 +148,13 @@ export default {
       let currenStationIndex = this.currenStationIndex
         ? this.currenStationIndex
         : 1;
-      return this.stations.filter(item => item.id == currenStationIndex)[0];
-    }
+      return this.stations.filter((item) => item.id == currenStationIndex)[0];
+    },
   },
   async mounted() {
     const stationsInitData = await stations();
     Station.create({ data: stationsInitData });
-  }
+  },
 };
 </script>
 <style>
