@@ -307,6 +307,7 @@
             ><a
               href="https://github.com/dnbradio/dnbradio-player"
               title="dnbradio-player on github"
+              target="_blank"
               style="text-decoration: none; color: #a0a0a0;"
               >v.{{ APP_VERSION }}</a
             ></span
