@@ -311,9 +311,9 @@
               style="text-decoration: none; color: #a0a0a0;"
               >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}
               <img
-                src="/github-mark-white.svg"
+                src="/player/github-mark-white.svg"
                 height="12"
-                alt="github"
+                alt="GitHub"
                 style="margin-left: 3px;"
               /> </a
           ></span>
