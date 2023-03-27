@@ -1,6 +1,8 @@
-# dnbradio-player
+# dnbradio-player - Static site generated using Nuxt.
 
-Live example:
+> Note: Please ignore server components found in `./server/` and also ignore any proxy definitions found in the `nuxt.config.js`. They are deprecated.
+
+## Live example:
 
 > A production instance of `dnbradio-player` can be found here: https://dnbradio.com/player
 
