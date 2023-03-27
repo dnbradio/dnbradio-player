@@ -8,9 +8,9 @@ const rightNow = new Date();
 const APP_VERSION = rightNow
   .toISOString()
   .slice(0, 16)
-  .replace(/-/g, ".")
-  .replace(/:/g, ".")
-  .replace(/T/g, "-");
+  .replace(/-/g, "")
+  .replace(/:/g, "")
+  .replace(/T/g, "T");
 require("dotenv").config();
 const features = [
   "fetch",
