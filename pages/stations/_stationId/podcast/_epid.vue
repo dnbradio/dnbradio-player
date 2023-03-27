@@ -481,6 +481,9 @@ export default {
   computed: {
     durationString() {
       const date = new Date(null);
+      if (!this.duration) {
+        return "00:00";
+      }
       date.setSeconds(this.duration); // specify value for SECONDS here
       const result = date.toISOString().slice(11, 19);
       return result;
