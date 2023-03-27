@@ -5,14 +5,16 @@
   "author": "keybrdistt",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt",
+    "start": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt start",
+    "build": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt build",
+    "generate": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt generate",
+    "upload": "tar czf - dist/ | ssh dnbradio 'rm -rf .dnbradio-deploy-tmp; mkdir -p ./.dnbradio-deploy-tmp; cd ./.dnbradio-deploy-tmp && tar xvzf - && rm -rf /var/www/dnbradio_site/html/player && mv dist /var/www/dnbradio_site/html/player';  echo \"\n\nDeployed to -> https://dnbradio.com/player/\"",
+    "branch-generate": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=\"/player-$APP_BRANCH/\" nuxt generate --devtools; echo $APP_BRANCH",
+    "branch-upload": "export APP_BRANCH=$(git symbolic-ref --short HEAD); tar czf - dist/ | ssh dnbradio \"rm -rf \".dnbradio-deploy-$APP_BRANCH\"; mkdir -p \"./.dnbradio-deploy-$APP_BRANCH\"; cd \"./.dnbradio-deploy-$APP_BRANCH\" && tar xvzf - && rm -rf \"/var/www/dnbradio_site/html/player-$APP_BRANCH\" && mv dist \"/var/www/dnbradio_site/html/player-$APP_BRANCH\"\"; echo \"\n\nDeployed to -> https://dnbradio.com/player-$APP_BRANCH/\"",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "dev:server": "cross-env NODE_ENV=development nodemon server/index.js --watch server",
-    "build": "nuxt build",
-    "start": "cross-env NODE_ENV=production node server/index.js",
-    "generate": "nuxt generate",
-    "generatew": "cross-env NODE_ENV=wdevelopment nuxt generate",
-    "generated": "cross-env NODE_ENV=development nuxt generate",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
+    "debug": "export APP_BRANCH=$(git symbolic-ref --short HEAD); nuxt generate --devtools && nuxt start"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
@@ -26,7 +28,6 @@
     "@vuex-orm/core": "^0.34.1",
     "@vuex-orm/plugin-axios": "^0.9.4",
     "@vuex-orm/plugin-change-flags": "^1.2.3",
-    "aws-sdk": "^2.1343.0",
     "axios": "^0.19.2",
     "babel-polyfill": "^6.26.0",
     "country-list": "^2.3.0",
@@ -35,8 +36,6 @@
     "email-validator": "^2.0.4",
     "linkifyjs": "^2.1.9",
     "moment-timezone": "^0.5.42",
-    "moment-timezone-data-webpack-plugin": "^1.5.1",
-    "mongoose": "^5.13.16",
     "nuxt": "^2.16.3",
     "nuxtjs-mdi-font": "^1.0.2",
     "simple-media-element": "^1.1.0",
@@ -50,15 +49,16 @@
     "vue-no-ssr": "^1.1.1",
     "vue-router": "^3.6.5",
     "vue-screen-size": "^1.0.1",
-    "vue-server-renderer": "^2.7.14",
     "vuetify": "^2.6.14",
     "vuetify-confirm": "^2.0.6",
     "vuetify-dialog": "^2.0.17",
     "vuetify-loader": "^1.9.2",
-    "vuex": "^2.5.0",
-    "@nuxtjs/vuetify": "^1.12.3"
+    "vuex": "^2.5.0"
   },
   "devDependencies": {
+    "aws-sdk": "^2.1343.0",
+    "vue-server-renderer": "^2.7.14",
+    "@nuxtjs/vuetify": "^1.12.3",
     "consola": "^2.15.3",
     "core-js": "^2.6.12",
     "cors": "^2.8.5",
@@ -66,6 +66,7 @@
     "defu": "^6.1.2",
     "express": "^4.18.2",
     "jquery": "^3.6.4",
+    "mongoose": "^5.13.16",
     "node-fetch-native": "^1.0.2",
     "nodemon": "^2.0.22",
     "prettier": "^2.8.7",
@@ -73,29 +74,7 @@
     "react-dom": "^16.14.0",
     "ufo": "^1.1.1",
     "vue-template-compiler": "^2.7.14",
-    "webpack": "^4.46.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {
-      "no-console": "off",
-      "no-unused-vars": "off",
-      "vue/return-in-computed-property": "off",
-      "no-unreachable": "off",
-      "vue/no-unused-components": "off",
-      "space-before-function-paren": "off",
-      "vue/html-indent": "off",
-      "vue/multiline-html-element-content-newline": "off"
-    },
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
+    "webpack": "^4.46.0",
+    "moment-timezone-data-webpack-plugin": "^1.5.1"
   }
 }
