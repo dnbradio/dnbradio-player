@@ -4,38 +4,57 @@ Live example:
 
 > A production instance of `dnbradio-player` can be found here: https://dnbradio.com/player
 
+Screenshot:
+
 <img src="https://github.com/dnbradio/dnbradio-player/raw/main/static/dnbradio-screenshot.png" width="300" />
 
-This project can be run with minimal setup.
+## Environment
 
-> See env.example for environment variables to get you started.
+See env.example for environment variables to get you started.
 
-## Build Setup
-
-```bash
-# install dependencies
-$ pnpm run install
+```
+# .env
+NODE_PORT=9000
+NODE_HOST=0.0.0.0
+NODE_ENV=development
 ```
 
-## Local
+## Install dependencies
 
 ```bash
-# serve with hot reload at localhost:3000
-$ pnpm run dev
+pnpm run install
 ```
 
-## Production - SSR
+## Local Development
+
+Serve the app with hot reload on your localhost
 
 ```bash
-# build for production and launch server
-$ pnpm run build
-$ pnpm run start
+pnpm run dev
 ```
 
-## Production - Static
+## Debugging
+
+This runs `nuxt generate --devtools && nuxt start` which starts a nuxt server for the static content, but with vue-dev-tools enabled.
 
 ```bash
-# generate static project
-This is what is currently deployed to the dnbradio.com website.
-$ pnpm run generate
+pnpm run debug
+```
+
+## Development - Deploy a branch
+
+Generates and deploys static site to `dnbradio.com/player-${branch_name}`. Based on the current branch you have checked out.
+
+```bash
+pnpm run branch-generate
+pnpm run branch-upload
+```
+
+## Production - Deploy main branch
+
+Generates and deploys static site to `dnbradio.com/player`
+
+```bash
+pnpm run generate
+pnpm run upload
 ```
