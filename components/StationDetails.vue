@@ -17,7 +17,7 @@
       color="transparent"
       dark
       flat
-      style="margin:auto; opacity: 1; position:relative; z-index:1000;"
+      style="margin: auto; opacity: 1; position: relative; z-index: 1000"
     >
       <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
       <!-- <v-btn icon class="ml-2">
@@ -27,13 +27,13 @@
       <v-btn
         v-if="currentVis"
         icon
-        style="opacity: 1;"
+        style="opacity: 1"
         @click="switchVis"
         value="vis"
       >
         <v-icon medium dark>brightness_2</v-icon>
       </v-btn>
-      <v-btn v-else icon style="opacity: 0.3;" @click="switchVis" value="vis">
+      <v-btn v-else icon style="opacity: 0.3" @click="switchVis" value="vis">
         <v-icon medium dark>brightness_2</v-icon>
       </v-btn>
 
@@ -42,7 +42,7 @@
       <v-btn
         icon
         @click="showStationDetails = !showStationDetails"
-        style="opacity: 0.3;"
+        style="opacity: 0.3"
       >
         <v-icon medium dark>mdi-information-outline</v-icon>
       </v-btn>
@@ -51,14 +51,14 @@
         icon
         @click="launchPopup"
         v-if="$device.isDesktop"
-        style="opacity: 0.3;"
+        style="opacity: 0.3"
       >
         <v-icon medium dark>mdi-open-in-new</v-icon>
       </v-btn>
     </v-toolbar>
     <v-card
       class="transparent"
-      style="margin:auto; margin-top:-50px;  position:relative; z-index:1;"
+      style="margin: auto; margin-top: -50px; position: relative; z-index: 1"
       flat
       :width="windowWidth"
       min-width="300"
@@ -66,12 +66,11 @@
         left: () => swipe('Left'),
         right: () => swipe('Right'),
         up: () => swipe('Up'),
-        down: () => swipe('Down')
+        down: () => swipe('Down'),
       }"
     >
       <v-card
-        style="margin:auto; margin-top:-10px;
-      text-align: center;"
+        style="margin: auto; margin-top: -10px; text-align: center"
         flat
         class="categoryCont transparent"
         v-if="station"
@@ -79,7 +78,7 @@
         <small><small>STATION</small></small>
         <h2 class="categoryTitle">{{ station.title }}</h2>
 
-        <h4 class="categorySubtitle" style="text-transform: uppercase;">
+        <h4 class="categorySubtitle" style="text-transform: uppercase">
           <small>{{ station.subtitle }}</small>
         </h4>
         <div class="categoryDescription">
@@ -98,54 +97,54 @@
         <div>
           <div
             v-if="windowHeight <= 680"
-            style="text-align:center; height: 165px;"
+            style="text-align: center; height: 165px"
           >
             <v-img
               :max-width="180"
               :src="cover"
               aspect-ratio="1"
-              style="margin:auto; background-color: transparent;"
+              style="margin: auto; background-color: transparent"
               :class="isLoading || isPlaying ? 'pulse' : 'faded'"
               @click="playIfStopped()"
             ></v-img>
           </div>
           <div
             v-if="windowHeight > 681 && windowHeight < 799"
-            style="text-align:center; height: 265px;"
+            style="text-align: center; height: 265px"
           >
             <v-img
               :max-width="210"
               :src="cover"
               aspect-ratio="1"
-              style="margin:auto; background-color: transparent;"
+              style="margin: auto; background-color: transparent"
               :class="isLoading || isPlaying ? 'pulse' : 'faded'"
               @click="playIfStopped()"
             ></v-img>
           </div>
           <div
             v-if="windowHeight >= 850"
-            style="text-align:center; height: 265px;"
+            style="text-align: center; height: 265px"
           >
             <v-img
               :max-width="250"
               :src="cover"
               aspect-ratio="1"
-              style="margin:auto; background-color: transparent;"
+              style="margin: auto; background-color: transparent"
               :class="isLoading || isPlaying ? 'pulse' : 'faded'"
               @click="playIfStopped()"
             ></v-img>
           </div>
         </div>
       </v-card>
-      <v-card-text style="text-align:center; min-height: 100px;" p0>
+      <v-card-text style="text-align: center; min-height: 100px" p0>
         <small>
-          <span v-if="isOffline" style="color:red;"
+          <span v-if="isOffline" style="color: red"
             ><strong>DEVICE OFFLINE!</strong><br /><br
           /></span>
-          <span v-else-if="isLoading" style="color:yellow;"
+          <span v-else-if="isLoading" style="color: yellow"
             >please wait...<br
           /></span>
-          <span v-else-if="isStalled" style="color:red;"
+          <span v-else-if="isStalled" style="color: red"
             ><strong>{{ stalledMessage }}1</strong><br /><br
           /></span>
           <span v-else-if="!isPlaying">STOPPED</span>
@@ -174,11 +173,11 @@
           <v-btn
             icon
             @click="loadPrev(false)"
-            style="margin-top:15px; color: #a0a0a0;"
+            style="margin-top: 15px; color: #a0a0a0"
           >
             <v-icon medium dark>skip_previous</v-icon>
           </v-btn>
-          <v-btn icon @click="volDown" style="margin-top:15px; color: #a0a0a0;">
+          <v-btn icon @click="volDown" style="margin-top: 15px; color: #a0a0a0">
             <v-icon medium dark>mdi-volume-minus</v-icon>
           </v-btn>
           <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play"
@@ -187,13 +186,13 @@
           <v-icon size="50" v-if="isPlaying" @click="pause"
             >pause_circle_filled</v-icon
           >
-          <v-btn icon @click="volUp" style="margin-top:15px; color: #a0a0a0;">
+          <v-btn icon @click="volUp" style="margin-top: 15px; color: #a0a0a0">
             <v-icon medium dark>mdi-volume-plus</v-icon>
           </v-btn>
           <v-btn
             icon
             @click="loadNext(false)"
-            style="margin-top:15px; color: #a0a0a0;"
+            style="margin-top: 15px; color: #a0a0a0"
           >
             <v-icon medium dark>skip_next</v-icon>
           </v-btn>
@@ -205,7 +204,7 @@
         class="flat stationNav"
         grow
         background-color="transparent"
-        style="border: 0px; margin:auto; box-shadow: none;"
+        style="border: 0px; margin: auto; box-shadow: none"
       >
         <!-- <v-btn icon :class="(!shuffleOn) ? 'iconoff' : 'iconon'"
           @click="shuffleOn=!shuffleOn"
@@ -215,7 +214,7 @@
 
         <v-btn
           icon
-          style="opacity: 1; padding:0px;"
+          style="opacity: 1; padding: 0px"
           :disabled="!station || !station.podcast"
           @click="$router.push('/stations/' + currIndex + '/podcast')"
           value="podcast"
@@ -227,7 +226,7 @@
 
         <v-btn
           icon
-          style="opacity: 1;"
+          style="opacity: 1"
           :disabled="!station"
           @click="$router.push('/stations/' + currIndex + '/schedule')"
           value="calendar"
@@ -249,7 +248,7 @@
 
         <v-btn
           icon
-          style="opacity: 0.8;"
+          style="opacity: 0.8"
           :disabled="!station"
           @click="launchLink('https://shop.dnbradio.com')"
           value="shop"
@@ -261,7 +260,7 @@
 
         <v-btn
           icon
-          style="opacity: 0.8;"
+          style="opacity: 0.8"
           :disabled="!station"
           @click="$router.push('/stations/' + currIndex + '/chat')"
           value="chat"
@@ -286,7 +285,7 @@
       <v-row>
         <v-col
           class="text-center"
-          style="margin-top: 10px;color: rgb(99, 99, 99);"
+          style="margin-top: 10px; color: rgb(99, 99, 99)"
         >
           <v-btn
             small
@@ -303,18 +302,18 @@
             >
           </v-btn>
           <br />
-          <span style="font-size: 9px; opacity: 40%;"
+          <span style="font-size: 9px; opacity: 40%"
             ><a
               href="https://github.com/dnbradio/dnbradio-player"
               title="Contribute to dnbradio-player on GitHub"
               target="_blank"
-              style="text-decoration: none; color: #a0a0a0;"
+              style="text-decoration: none; color: #a0a0a0"
               >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}
               <img
                 src="/player/github-mark-white.svg"
                 height="12"
                 alt="GitHub"
-                style="margin-left: 3px;"
+                style="margin-left: 3px"
               /> </a
           ></span>
         </v-col>
@@ -346,7 +345,7 @@
                 :max-width="150"
                 :src="cover"
                 aspect-ratio="1"
-                style="background-color: transparent;"
+                style="background-color: transparent"
               ></v-img>
             </v-col>
           </v-row>
@@ -427,7 +426,7 @@ export default {
         albumyear: null,
         album: null,
         song_type: null,
-        label: null
+        label: null,
       },
       isPlaying: false,
       isLoading: false,
@@ -435,7 +434,7 @@ export default {
       stalledInterval: null,
       stalledMessage: "",
       stalledRetriesRemaining: 90,
-      stalledRetriesOfflineRemaining: 225
+      stalledRetriesOfflineRemaining: 225,
     };
   },
   methods: {
@@ -446,12 +445,12 @@ export default {
         this.isLoading = false;
         console.log("loaded", this.$sound);
       };
-      this.$sound.addEventListener("progress", event => {
+      this.$sound.addEventListener("progress", (event) => {
         if (this.stalledInterval) {
           clearInterval(this.stalledInterval);
         }
       });
-      this.$sound.addEventListener("playing", event => {
+      this.$sound.addEventListener("playing", (event) => {
         if (this.stalledInterval) {
           clearInterval(this.stalledInterval);
         }
@@ -473,23 +472,23 @@ export default {
           }
         }, 15000);
       };
-      this.$sound.addEventListener("stalled", err => {
+      this.$sound.addEventListener("stalled", (err) => {
         console.log("STALLED CAUGHT", err, this.$sound);
       });
-      this.$sound.addEventListener("abort", err => {
+      this.$sound.addEventListener("abort", (err) => {
         console.log("ABORT CAUGHT", err, this.$sound);
       });
-      this.$sound.addEventListener("emptied", err => {
+      this.$sound.addEventListener("emptied", (err) => {
         console.log("EMPTIED CAUGHT", err, this.$sound);
       });
-      this.$sound.addEventListener("suspend", err => {
+      this.$sound.addEventListener("suspend", (err) => {
         if (this.stalledInterval) {
           clearInterval(this.stalledInterval);
         }
         console.log("SUSPEND CAUGHT", err, this.$sound);
       });
       this.$sound.onerror;
-      this.$sound.addEventListener("error", err => {
+      this.$sound.addEventListener("error", (err) => {
         console.log("ERROR CAUGHT", this.$sound);
         if (!this.$sound) {
           return;
@@ -589,6 +588,7 @@ export default {
           this.$sound.play();
         }
         console.log("stream already loaded");
+        this.isPlaying = true;
         return true;
       }
       const streamUrl = this.station?.streams?.[0]?.url
@@ -620,7 +620,7 @@ export default {
           }
           this.isLoading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     },
@@ -700,10 +700,10 @@ export default {
             link,
           actions: {
             false: "Cancel",
-            true: { text: "YES, LAUNCH THE LINK.", color: "primary" }
-          }
+            true: { text: "YES, LAUNCH THE LINK.", color: "primary" },
+          },
         })
-        .then(res => {
+        .then((res) => {
           if (res) {
             window.open(link, "_blank");
           }
@@ -753,26 +753,19 @@ export default {
       console.log("loadNext");
       clearInterval(this.npInterval);
       if (this.$sound) {
-        this.$sound.pause();
-        this.$sound.src = "";
-        this.$sound = null;
+        this.$sound.src = this.nextStation.streams[0].url;
       }
-      this.$sound = null;
       if (this.shuffleOn) {
         this.loadRandom();
         return;
       }
-      //this.$sound.stop();
       this.$router.push("/stations/" + this.nextIndex);
     },
     loadRandom() {
       if (this.$sound) {
         this.$sound.pause();
-        this.$sound.src = "";
-        this.$sound = null;
+        this.$sound.src = this.previousStation.streams[0].url;
       }
-      this.$sound = null;
-      //this.$sound.stop();
       this.$router.push("/stations/" + this.randomIndex);
     },
     async play() {
@@ -821,7 +814,7 @@ export default {
         ["lt", "<"],
         ["gt", ">"],
         ["nbsp", " "],
-        ["quot", '"']
+        ["quot", '"'],
       ];
 
       for (var i = 0, max = entities.length; i < max; ++i)
@@ -839,7 +832,7 @@ export default {
       //return this.$axios.get('/api/now_playing?url=' + this.station.nowplaying_url.url, { progress: false }).then((res) => {
       return this.$axios
         .get("" + this.station.nowplaying_url.url, { progress: false })
-        .then(res => {
+        .then((res) => {
           switch (this.station.nowplaying_url.type) {
             case "icecast":
               this.nowplaying = res.data?.icestats?.source;
@@ -919,7 +912,7 @@ export default {
                 max: d.maxlisteners,
                 bitrate: d.bitrate,
                 artist: artist,
-                title: title
+                title: title,
               };
               console.log(data);
               this.nowplaying.artist = data.artist;
@@ -978,53 +971,82 @@ export default {
                     "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_96/v1586048258/" +
                     this.pageImage,
                   sizes: "96x96",
-                  type: "image/png"
+                  type: "image/png",
                 },
                 {
                   src:
                     "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_128/v1586048258/" +
                     this.pageImage,
                   sizes: "128x128",
-                  type: "image/png"
+                  type: "image/png",
                 },
                 {
                   src:
                     "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_192/v1586048258/" +
                     this.pageImage,
                   sizes: "192x192",
-                  type: "image/png"
+                  type: "image/png",
                 },
                 {
                   src:
                     "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_256/v1586048258/" +
                     this.pageImage,
                   sizes: "256x256",
-                  type: "image/png"
+                  type: "image/png",
                 },
                 {
                   src:
                     "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_348/v1586048258/" +
                     this.pageImage,
                   sizes: "384x384",
-                  type: "image/png"
+                  type: "image/png",
                 },
                 {
                   src:
                     "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_512/v1586048258/" +
                     this.pageImage,
                   sizes: "512x512",
-                  type: "image/png"
-                }
-              ]
+                  type: "image/png",
+                },
+              ],
             });
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("cannot fetch nowplaying", err.message);
         });
-    }
+    },
   },
   computed: {
+    stations() {
+      return Station.query().get();
+    },
+    nextStationIndex() {
+      let index = this.stations.findIndex(
+        (station) => station.id === this.station.id
+      );
+      if (index === this.stations.length - 1) {
+        return 0;
+      } else {
+        return index + 1;
+      }
+    },
+    nextStation() {
+      return this.stations[this.nextStationIndex];
+    },
+    previousStationIndex() {
+      let index = this.stations.findIndex(
+        (station) => station.id === this.station.id
+      );
+      if (index === 0) {
+        return this.stations.length - 1;
+      } else {
+        return index - 1;
+      }
+    },
+    previousStation() {
+      return this.stations[this.previousStationIndex];
+    },
     APP_BRANCH() {
       return this.$config.APP_BRANCH || "main";
     },
@@ -1063,7 +1085,7 @@ export default {
     },
     randomIndex() {
       let stations = Station.query().get();
-      let currIndex = stations.find(item => item.id == this.station.id).id;
+      let currIndex = stations.find((item) => item.id == this.station.id).id;
       let rand = null;
       while (rand === null || rand === currIndex) {
         rand = Math.round(Math.random() * stations.length);
@@ -1072,7 +1094,8 @@ export default {
     },
     nextIndex() {
       let stations = Station.query().get();
-      let nextIndex = stations.find(item => item.id == this.station.id).id + 1;
+      let nextIndex =
+        stations.find((item) => item.id == this.station.id).id + 1;
       if (nextIndex > stations.length) {
         nextIndex = 1;
       }
@@ -1080,7 +1103,8 @@ export default {
     },
     prevIndex() {
       let stations = Station.query().get();
-      let prevIndex = stations.find(item => item.id == this.station.id).id - 1;
+      let prevIndex =
+        stations.find((item) => item.id == this.station.id).id - 1;
       if (prevIndex < 1) {
         prevIndex = stations.length;
       }
@@ -1109,7 +1133,7 @@ export default {
     },
     streamurl() {
       return this.station?.streams?.[0].url;
-    }
+    },
   },
   created() {
     this.$nextTick(() => {
@@ -1149,8 +1173,8 @@ export default {
     streamurl(val) {
       console.log("streamurl changed", val);
       this.initStream();
-    }
-  }
+    },
+  },
 };
 </script>
 
