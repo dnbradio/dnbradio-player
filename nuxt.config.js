@@ -21,7 +21,7 @@ const features = [
 ].join("%2C");
 
 module.exports = {
-  ssr: true,
+  ssr: false,
   target: "static",
   telemetry: false,
   privateRuntimeConfig: {
@@ -34,7 +34,8 @@ module.exports = {
     MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD
   },
   publicRuntimeConfig: {
-    APP_VERSION: process.env.APP_VERSION || APP_VERSION
+    APP_VERSION: process.env.APP_VERSION || APP_VERSION,
+    APP_BRANCH: process.env.APP_BRANCH || ""
   },
   /*
    ** Headers of the page
@@ -104,7 +105,6 @@ module.exports = {
     ]
   },
   loading: { color: "#fff" },
-  css: [],
   plugins: [
     { ssr: false, src: "~/plugins/vuetify.js" },
     { ssr: false, src: "~plugins/createjs.js" },
@@ -120,11 +120,6 @@ module.exports = {
     "@nuxtjs/pwa",
     "@nuxtjs/device"
   ],
-  pwa: {
-    icon: {
-      /* icon options */
-    }
-  },
   server: {
     port: process.env.NODE_PORT || 8000,
     host: process.env.NODE_HOST || "0.0.0.0"

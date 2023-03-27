@@ -303,14 +303,20 @@
             >
           </v-btn>
           <br />
-          <span style="font-size: 8px;"
+          <span style="font-size: 9px; opacity: 40%;"
             ><a
               href="https://github.com/dnbradio/dnbradio-player"
-              title="dnbradio-player on github"
+              title="Contribute to dnbradio-player on GitHub"
+              target="_blank"
               style="text-decoration: none; color: #a0a0a0;"
-              >v.{{ APP_VERSION }}</a
-            ></span
-          >
+              >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}
+              <img
+                src="/github-mark-white.svg"
+                height="12"
+                alt="github"
+                style="margin-left: 3px;"
+              /> </a
+          ></span>
         </v-col>
       </v-row>
     </v-card>
@@ -1019,6 +1025,9 @@ export default {
     }
   },
   computed: {
+    APP_BRANCH() {
+      return this.$config.APP_BRANCH;
+    },
     APP_VERSION() {
       return this.$config.APP_VERSION;
     },

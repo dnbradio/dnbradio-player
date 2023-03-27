@@ -6,7 +6,7 @@ Vue.config.productionTip = false;
 Vue.prototype.$media = media;
 Vue.prototype.$sound = media.audio(
   {
-    src: "https://dnbradio.nl/dnbradio_main.mp3", // default
+    src: "", // default
     type: "audio/mpeg"
   },
   {
