@@ -48,8 +48,8 @@ pnpm run debug
 Generates and deploys static site to `dnbradio.com/player-${branch_name}`. Based on the current branch you have checked out.
 
 ```bash
-pnpm run branch-generate
-pnpm run branch-upload
+pnpm run generate
+pnpm run upload
 ```
 
 ## Production - Deploy main branch
@@ -57,6 +57,6 @@ pnpm run branch-upload
 Generates and deploys static site to `dnbradio.com/player`
 
 ```bash
-pnpm run generate
-pnpm run upload
+pnpm run generate-prod
+pnpm run upload-prod
 ```
