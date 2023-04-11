@@ -649,8 +649,10 @@ export default {
       }
     },
     toggleStars() {
-      this.visOn = !this.visOn;
-      if (this.visOn) {
+      const currentStar = this.$store.state.player.starOn;
+      this.$store.commit('player/SET_STAR_ON', !currentStar);
+      this.visOn = !currentStar;
+      if (currentStar) {
         this.currentVis = "stars";
         var element = document.getElementById("viscanvas");
         element.style.display = "block";
@@ -1136,11 +1138,22 @@ export default {
     },
   },
   created() {
-    this.$nextTick(() => {
-      this.toggleStars();
-    });
+    // this.$nextTick(() => {
+    //   this.toggleStars();
+    // });
   },
   mounted() {
+      const currentStar = this.$store.state.player.starOn;
+      if (!currentStar) {
+        this.currentVis = "stars";
+        var element = document.getElementById("viscanvas");
+        element.style.display = "block";
+        stars();
+      } else {
+        this.currentVis = "";
+        var element = document.getElementById("viscanvas");
+        element.style.display = "none";
+      }
     console.log("sound readyState", this.$sound.readyState);
     if (
       this.$sound?.readyState > 0 &&
