@@ -158,10 +158,10 @@
         </small>
         <div v-if="artist || title">
           <strong>
-            <span v-html="decodeURIComponent(artist)"></span>
+            <span v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))"></span>
           </strong>
           <br />
-          <span v-html="decodeURIComponent(title)"></span>
+          <span v-html="decodeURIComponent(title.replace(/\\'/g, '\''))"></span>
         </div>
         <div v-else>
           <small>CLICK PLAY TO<br />START YOUR STREAM<br /></small>
