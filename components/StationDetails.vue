@@ -407,6 +407,7 @@ export default {
   props: ["station"],
   data() {
     return {
+      giphyUrl: null,
       pageTitle: null,
       pageDescription: null,
       pageImage: null,
@@ -438,6 +439,75 @@ export default {
     };
   },
   methods: {
+    getNextGifBySearch(search) {
+      this.$axios
+        .get(
+          "https://api.giphy.com/v1/gifs/search?q=" +
+            search +
+            "&api_key=xTiTnCJfJvLLvUrAXu&limit=1"
+        )
+        .then((response) => {
+          this.giphyUrl = response.data.data.images.original.webp.replace(
+            "http://",
+            "https://"
+          );
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    getNextGifByTag(channel, tag) {
+      const channels = {
+        darkstep: [
+          "skull",
+          "skulls",
+          "darth%20vader",
+          "predator%20movie",
+          "michael%20myers",
+          "aliens%20movie",
+          "xenomorph",
+          "fps",
+          "battlefield%20game",
+          "tie%20fighter",
+          "the%20matrix%20movie",
+          "kung%20fu%20movie",
+          "headbanging",
+          "building%20demolition",
+          "skull%20pattern",
+          "poltergeist%20movie",
+          "poltergeist",
+          "volcano",
+          "space%20invaders",
+          "zombies",
+          "fury%20road",
+          "face%20hugger%20alien",
+          "elm%20street",
+          "cinemagraph",
+        ],
+        main: ["vjloop"],
+      };
+
+      let tags = channels[channel];
+      let randomTag = tags[Math.floor(Math.random() * tags.length)];
+      if (tag) {
+        randomTag = tag;
+      }
+      this.$axios(
+        "https://api.giphy.com/v1/gifs/random?tag=" +
+          randomTag +
+          "&api_key=xTiTnCJfJvLLvUrAXu&limit=1"
+      )
+        .then((response) => {
+          this.giphyUrl = response.data.data.images.original.webp.replace(
+            "http://",
+            "https://"
+          );
+          this.toggleGif();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
     attachListeners() {
       console.log("attachListeners", [this.$sound], this.$media);
       clearInterval(this.npInterval);
@@ -647,6 +717,13 @@ export default {
           clearTimeout(window.timeouts[i]);
         }
       }
+    },
+    toggleGif() {
+      var element = document.getElementById("viscanvas");
+      element.style.display = "block";
+      element.style.backgroundImage = `url(${this.giphyUrl})`;
+      element.style.backgroundSize = "cover";
+      element.style.backgroundPosition = "center";
     },
     toggleStars() {
       this.visOn = !this.visOn;
@@ -1142,6 +1219,7 @@ export default {
   },
   mounted() {
     console.log("sound readyState", this.$sound.readyState);
+    this.getNextGifByTag("main", "");
     if (
       this.$sound?.readyState > 0 &&
       this.$sound?.paused == false &&
