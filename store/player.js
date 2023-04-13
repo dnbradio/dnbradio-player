@@ -1,21 +1,23 @@
 export const state = () => ({
-    starOn: true
+    visualsEnabled: false,
+    initialLoad: true,
 })
 
-export const getters = {
-    getStarStatue(state) {
-        return state.starOn
-    }
-}
 
 export const mutations = {
-    SET_STAR_ON: (state, payload) => {
-        state.starOn = payload
-    }
+  TOGGLE_VISUALS: (state, payload) => {
+    state.visualsEnabled = !state.visualsEnabled
+  },
+  SET_INITIAL_LOAD: (state, payload) => {
+    state.initialLoad = payload;
+  }
 }
 
 export const actions = {
-    async setStarState ({commit, state}, payload) {
-        commit('SET_STAR_ON', payload)
+    async TOGGLE_VISUALS ({commit}, payload) {
+        commit('TOGGLE_VISUALS', payload)
+    },
+    SET_INITIAL_LOAD ({commit}, payload) {
+      commit('SET_INITIAL_LOAD', payload);
     }
 }

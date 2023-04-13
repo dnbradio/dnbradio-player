@@ -28,12 +28,12 @@
         v-if="currentVis"
         icon
         style="opacity: 1"
-        @click="switchVis"
+        @click="playerToggleVisuals"
         value="vis"
       >
         <v-icon medium dark>brightness_2</v-icon>
       </v-btn>
-      <v-btn v-else icon style="opacity: 0.3" @click="switchVis" value="vis">
+      <v-btn v-else icon style="opacity: 0.3" @click="playerToggleVisuals" value="vis">
         <v-icon medium dark>brightness_2</v-icon>
       </v-btn>
 
@@ -438,6 +438,9 @@ export default {
     };
   },
   methods: {
+    playerToggleVisuals() {
+      this.$store.commit('player/TOGGLE_VISUALS');
+    },
     attachListeners() {
       console.log("attachListeners", [this.$sound], this.$media);
       clearInterval(this.npInterval);
@@ -583,6 +586,12 @@ export default {
       }
     },
     initStream() {
+      if (this.playerVisualsEnabled) {
+        console.log('restarting stars');
+        this.startStars(); // restart
+      } else {
+        this.stopStars();
+      }
       if (this.$sound?.src == this.station?.streams?.[0]?.url) {
         if (this.$sound?.paused) {
           this.$sound.play();
@@ -624,9 +633,6 @@ export default {
           console.log(err);
         });
     },
-    switchVis() {
-      this.toggleStars();
-    },
     togglePlankton() {
       if (this.visOn == false) {
         this.currentVis = "plankton";
@@ -645,24 +651,6 @@ export default {
         this.visOn = false;
         for (var i = 0; i < window.timeouts.length; i++) {
           clearTimeout(window.timeouts[i]);
-        }
-      }
-    },
-    toggleStars() {
-      const currentStar = this.$store.state.player.starOn;
-      this.$store.commit('player/SET_STAR_ON', !currentStar);
-      this.visOn = !currentStar;
-      if (currentStar) {
-        this.currentVis = "stars";
-        var element = document.getElementById("viscanvas");
-        element.style.display = "block";
-        stars();
-      } else {
-        this.currentVis = "";
-        var element = document.getElementById("viscanvas");
-        element.style.display = "none";
-        if (window.animId) {
-          cancelAnimationFrame(window.animId);
         }
       }
     },
@@ -1014,12 +1002,29 @@ export default {
             });
           }
         })
-        .catch((err) => {
-          console.log("cannot fetch nowplaying", err.message);
-        });
+      .catch((err) => {
+        console.log("cannot fetch nowplaying", err.message);
+      });
     },
+    startStars(){
+      this.currentVis = "stars";
+      var element = document.getElementById("viscanvas");
+      element.style.display = "block";
+      stars();
+    },
+    stopStars() {
+      this.currentVis = "";
+      var element = document.getElementById("viscanvas");
+      element.style.display = "none";
+      if (window.animId) {
+        cancelAnimationFrame(window.animId);
+      }
+    }
   },
   computed: {
+    playerVisualsEnabled() {
+      return this.$store.state.player.visualsEnabled;
+    },
     stations() {
       return Station.query().get();
     },
@@ -1137,23 +1142,15 @@ export default {
       return this.station?.streams?.[0].url;
     },
   },
-  created() {
-    // this.$nextTick(() => {
-    //   this.toggleStars();
-    // });
-  },
   mounted() {
-      const currentStar = this.$store.state.player.starOn;
-      if (!currentStar) {
-        this.currentVis = "stars";
-        var element = document.getElementById("viscanvas");
-        element.style.display = "block";
-        stars();
-      } else {
-        this.currentVis = "";
-        var element = document.getElementById("viscanvas");
-        element.style.display = "none";
-      }
+    // if fresh load then startStars
+    console.log('this.$route?.from?.name', this.$route)
+    if (this.$store.state.player.initialLoad) {
+      setTimeout(()=> {
+        this.playerToggleVisuals();
+      }, 800);
+    }
+    this.$store.dispatch("player/SET_INITIAL_LOAD", false);
     console.log("sound readyState", this.$sound.readyState);
     if (
       this.$sound?.readyState > 0 &&
@@ -1183,6 +1180,13 @@ export default {
     });
   },
   watch: {
+    playerVisualsEnabled(val) {
+      if (val===false) {
+        this.stopStars();
+      } else {
+        this.startStars();
+      }
+    },
     streamurl(val) {
       console.log("streamurl changed", val);
       this.initStream();
