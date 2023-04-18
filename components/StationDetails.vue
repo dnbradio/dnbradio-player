@@ -97,7 +97,7 @@
         <div>
           <div
             v-if="windowHeight <= 680"
-            style="text-align: center; height: 165px"
+            style="text-align: center; height: 165px;display: flex; justify-content: center; align-items: center;"
           >
             <v-img
               :max-width="180"
@@ -110,7 +110,7 @@
           </div>
           <div
             v-if="windowHeight > 681 && windowHeight < 799"
-            style="text-align: center; height: 265px"
+            style="text-align: center; height: 265px; display: flex; justify-content: center; align-items: center;"
           >
             <v-img
               :max-width="210"
@@ -123,7 +123,7 @@
           </div>
           <div
             v-if="windowHeight >= 850"
-            style="text-align: center; height: 265px"
+            style="text-align: center; height: 265px; display: flex; justify-content: center; align-items: center;"
           >
             <v-img
               :max-width="250"
