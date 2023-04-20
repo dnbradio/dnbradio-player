@@ -12,12 +12,16 @@
           type="week"
           dark
           :interval-format="intervalFormat"
-          :event-name="eventName"
           :event-color="getEventColor"
           @click:event="showEvent"
           :event-text-color="getEventTextColor"
           style="background:transparent;"
-        ></v-calendar>
+        >
+        <template v-event-summary>
+          <div v-html="eventName" class="text-center">
+          </div>
+        </template> 
+      </v-calendar>
       </v-sheet>
     </v-col>
   </v-row>
