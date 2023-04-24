@@ -145,7 +145,7 @@
             >please wait...<br
           /></span>
           <span v-else-if="isStalled" style="color: red"
-            ><strong>{{ stalledMessage }}1</strong><br /><br
+            ><strong>{{ stalledMessage || 'Connection error. Please try again later.' }}</strong><br /><br
           /></span>
           <span v-else-if="!isPlaying">STOPPED</span>
           <span v-else>
