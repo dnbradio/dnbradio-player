@@ -30,7 +30,7 @@ export default async function data() {
       },
       streams: [
         {
-          url: "https://dnbradio.nl/dnbradio_main.mp3",
+          url: "https://source.dnbradio.com/stream.mp3",
           format: "mp3",
           mimetype: "audio/mpeg"
         }
