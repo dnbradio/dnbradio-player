@@ -18,7 +18,7 @@
       :bar-width="5"
       :canv-height="50"
       :corsAnonym="true"
-      audio-src="https://dnbradio.hardcoding.nl/dnbradio_main.mp3"></av-bars>
+      audio-src="https://source.dnbradio.com/stream.mp3"></av-bars>
       <div v-if="nowplaying.song_type=='L'">
         <div><small>LIVE DJ</small></div>
         <div class="artist" v-html="artist">
@@ -122,9 +122,9 @@ export default {
             this.nowplaying.album = null
             this.nowplaying.song_type = ''
             this.nowplaying.label = null
-          break; 
+          break;
         }
-        
+
       })
     },
   },
@@ -180,4 +180,3 @@ export default {
   .title { font-size: 1.5em; font-weight: 100; }
   .av-bars { margin-top: 30px;}
 </style>
- 
