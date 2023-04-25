@@ -7,10 +7,10 @@ const MomentTimezoneDataPlugin = require("moment-timezone-data-webpack-plugin");
 const rightNow = new Date();
 const APP_VERSION = rightNow
   .toISOString()
-  .slice(0, 16)
-  .replace(/-/g, "")
+  .slice(2, 16)
+  .replace(/-/g, ".")
   .replace(/:/g, "")
-  .replace(/T/g, "T");
+  .replace(/T/g, ".");
 require("dotenv").config();
 const features = [
   "fetch",

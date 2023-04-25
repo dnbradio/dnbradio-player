@@ -98,27 +98,71 @@
           <div v-else>
             <small>CLICK PLAY TO<br />START YOUR STREAM<br /></small>
           </div>
-          <div v-else><br /><br /></div>
-        </v-card-text>
-        <v-card-actions p0 fluid>
-          <v-row justify="space-around">
-            <v-btn icon @click="loadPrev(false)" style="margin-top: 15px; color: #a0a0a0">
-              <v-icon medium dark>skip_previous</v-icon>
-            </v-btn>
-            <v-btn icon @click="volDown" style="margin-top: 15px; color: #a0a0a0">
-              <v-icon medium dark>mdi-volume-minus</v-icon>
-            </v-btn>
-            <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
-            <v-icon size="50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
-            <v-btn icon @click="volUp" style="margin-top: 15px; color: #a0a0a0">
-              <v-icon medium dark>mdi-volume-plus</v-icon>
-            </v-btn>
-            <v-btn icon @click="loadNext(false)" style="margin-top: 15px; color: #a0a0a0">
-              <v-icon medium dark>skip_next</v-icon>
-            </v-btn>
-            <!-- <v-icon small dark>settings_input_antenna</v-icon> -->
-          </v-row>
-        </v-card-actions>
+        </div>
+      </v-card>
+      <v-card-text style="text-align: center; min-height: 100px" p0>
+        <small>
+          <span v-if="isOffline" style="color: red"
+            ><strong>DEVICE OFFLINE!</strong><br /><br
+          /></span>
+          <span v-else-if="isLoading" style="color: yellow"
+            >please wait...<br
+          /></span>
+          <span v-else-if="isStalled" style="color: red"
+            ><strong>{{ stalledMessage || 'Connection error. Please try again later.' }}</strong><br /><br
+          /></span>
+          <span v-else-if="!isPlaying">STOPPED</span>
+          <span v-else>
+            <span v-if="nowplaying.song_type == 'L'">LIVE BROADCAST</span>
+            <span v-else-if="nowplaying.song_type == 'S'"
+              >PLAYLIST ROTATION</span
+            >
+            <span v-else>NOW PLAYING</span>
+          </span>
+        </small>
+        <div v-if="artist || title">
+          <strong>
+            <span v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))"></span>
+          </strong>
+          <br />
+          <span v-html="decodeURIComponent(title.replace(/\\'/g, '\''))"></span>
+        </div>
+        <div v-else>
+          <small>CLICK PLAY TO<br />START YOUR STREAM<br /></small>
+        </div>
+        <div v-else><br /><br /></div>
+      </v-card-text>
+      <v-card-actions p0 fluid>
+        <v-row justify="space-around">
+          <v-btn
+            icon
+            @click="loadPrev(false)"
+            style="margin-top: 15px; color: #a0a0a0"
+          >
+            <v-icon medium dark>skip_previous</v-icon>
+          </v-btn>
+          <v-btn icon @click="volDown" style="margin-top: 15px; color: #a0a0a0">
+            <v-icon medium dark>mdi-volume-minus</v-icon>
+          </v-btn>
+          <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play"
+            >play_circle_filled</v-icon
+          >
+          <v-icon size="50" v-if="isPlaying" @click="pause"
+            >pause_circle_filled</v-icon
+          >
+          <v-btn icon @click="volUp" style="margin-top: 15px; color: #a0a0a0">
+            <v-icon medium dark>mdi-volume-plus</v-icon>
+          </v-btn>
+          <v-btn
+            icon
+            @click="loadNext(false)"
+            style="margin-top: 15px; color: #a0a0a0"
+          >
+            <v-icon medium dark>skip_next</v-icon>
+          </v-btn>
+          <!-- <v-icon small dark>settings_input_antenna</v-icon> -->
+        </v-row>
+      </v-card-actions>
 
         <v-bottom-navigation class="flat stationNav" grow background-color="transparent"
           style="border: 0px; margin: auto; box-shadow: none">
