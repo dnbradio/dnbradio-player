@@ -1,330 +1,192 @@
 <template>
   <div v-show="loaded">
-    <vue-headful
-      :title="pageTitle"
-      :description="pageDescription"
-      :keywords="pageKeywords"
-      :image="pageImage"
-      lang="en"
-      ref="headful"
-    />
+    <vue-headful :title="pageTitle" :description="pageDescription" :keywords="pageKeywords" :image="pageImage" lang="en"
+      ref="headful" />
     <div class="viscanvas-container" id="viscanvas-container">
       <canvas id="viscanvas"></canvas>
     </div>
-    <v-toolbar
-      :width="windowWidth"
-      min-width="300"
-      color="transparent"
-      dark
-      flat
-      style="margin: auto; opacity: 1; position: relative; z-index: 1000"
-    >
-      <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
-      <!-- <v-btn icon class="ml-2">
-        <v-icon medium dark>view_headline</v-icon>
-      </v-btn> -->
-
-      <v-btn
-        v-if="currentVis"
-        icon
-        style="opacity: 1"
-        @click="playerToggleVisuals"
-        value="vis"
-      >
-        <v-icon medium dark>brightness_2</v-icon>
-      </v-btn>
-      <v-btn v-else icon style="opacity: 0.3" @click="playerToggleVisuals" value="vis">
-        <v-icon medium dark>brightness_2</v-icon>
-      </v-btn>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        icon
-        @click="showStationDetails = !showStationDetails"
-        style="opacity: 0.3"
-      >
-        <v-icon medium dark>mdi-information-outline</v-icon>
-      </v-btn>
-
-      <v-btn
-        icon
-        @click="launchPopup"
-        v-if="$device.isDesktop"
-        style="opacity: 0.3"
-      >
-        <v-icon medium dark>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-toolbar>
-    <v-card
-      class="transparent"
-      style="margin: auto; margin-top: -50px; position: relative; z-index: 1"
-      flat
-      :width="windowWidth"
-      min-width="300"
-      v-touch="{
-        left: () => swipe('Left'),
-        right: () => swipe('Right'),
-        up: () => swipe('Up'),
-        down: () => swipe('Down'),
-      }"
-    >
-      <v-card
-        style="margin: auto; margin-top: -10px; text-align: center"
-        flat
-        class="categoryCont transparent"
-        v-if="station"
-      >
-        <small><small>STATION</small></small>
-        <h2 class="categoryTitle">{{ station.title }}</h2>
-
-        <h4 class="categorySubtitle" style="text-transform: uppercase">
-          <small>{{ station.subtitle }}</small>
-        </h4>
-        <div class="categoryDescription">
-          <small>
-            {{ station.description }}
-          </small>
-        </div>
-        <div class="faded">
-          <div v-if="nowplaying && nowplaying.listeners">
-            <small>{{ nowplaying.listeners }} listeners</small>
-          </div>
-          <div v-else>
-            <br />
-          </div>
-        </div>
-        <div>
-          <div
-            v-if="windowHeight <= 680"
-            style="text-align: center; height: 165px;display: flex; justify-content: center; align-items: center;"
-          >
-            <v-img
-              :max-width="180"
-              :src="cover"
-              aspect-ratio="1"
-              style="margin: auto; background-color: transparent"
-              :class="isLoading || isPlaying ? 'pulse' : 'faded'"
-              @click="playIfStopped()"
-            ></v-img>
-          </div>
-          <div
-            v-if="windowHeight > 681 && windowHeight < 799"
-            style="text-align: center; height: 265px; display: flex; justify-content: center; align-items: center;"
-          >
-            <v-img
-              :max-width="210"
-              :src="cover"
-              aspect-ratio="1"
-              style="margin: auto; background-color: transparent"
-              :class="isLoading || isPlaying ? 'pulse' : 'faded'"
-              @click="playIfStopped()"
-            ></v-img>
-          </div>
-          <div
-            v-if="windowHeight >= 850"
-            style="text-align: center; height: 265px; display: flex; justify-content: center; align-items: center;"
-          >
-            <v-img
-              :max-width="250"
-              :src="cover"
-              aspect-ratio="1"
-              style="margin: auto; background-color: transparent"
-              :class="isLoading || isPlaying ? 'pulse' : 'faded'"
-              @click="playIfStopped()"
-            ></v-img>
-          </div>
-        </div>
-      </v-card>
-      <v-card-text style="text-align: center; min-height: 100px" p0>
-        <small>
-          <span v-if="isOffline" style="color: red"
-            ><strong>DEVICE OFFLINE!</strong><br /><br
-          /></span>
-          <span v-else-if="isLoading" style="color: yellow"
-            >please wait...<br
-          /></span>
-          <span v-else-if="isStalled" style="color: red"
-            ><strong>{{ stalledMessage }}1</strong><br /><br
-          /></span>
-          <span v-else-if="!isPlaying">STOPPED</span>
-          <span v-else>
-            <span v-if="nowplaying.song_type == 'L'">LIVE BROADCAST</span>
-            <span v-else-if="nowplaying.song_type == 'S'"
-              >PLAYLIST ROTATION</span
-            >
-            <span v-else>NOW PLAYING</span>
-          </span>
-        </small>
-        <div v-if="artist || title">
-          <strong>
-            <span v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))"></span>
-          </strong>
-          <br />
-          <span v-html="decodeURIComponent(title.replace(/\\'/g, '\''))"></span>
-        </div>
-        <div v-else>
-          <small>CLICK PLAY TO<br />START YOUR STREAM<br /></small>
-        </div>
-        <div v-else><br /><br /></div>
-      </v-card-text>
-      <v-card-actions p0 fluid>
-        <v-row justify="space-around">
-          <v-btn
-            icon
-            @click="loadPrev(false)"
-            style="margin-top: 15px; color: #a0a0a0"
-          >
-            <v-icon medium dark>skip_previous</v-icon>
-          </v-btn>
-          <v-btn icon @click="volDown" style="margin-top: 15px; color: #a0a0a0">
-            <v-icon medium dark>mdi-volume-minus</v-icon>
-          </v-btn>
-          <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play"
-            >play_circle_filled</v-icon
-          >
-          <v-icon size="50" v-if="isPlaying" @click="pause"
-            >pause_circle_filled</v-icon
-          >
-          <v-btn icon @click="volUp" style="margin-top: 15px; color: #a0a0a0">
-            <v-icon medium dark>mdi-volume-plus</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            @click="loadNext(false)"
-            style="margin-top: 15px; color: #a0a0a0"
-          >
-            <v-icon medium dark>skip_next</v-icon>
-          </v-btn>
-          <!-- <v-icon small dark>settings_input_antenna</v-icon> -->
-        </v-row>
-      </v-card-actions>
-
-      <v-bottom-navigation
-        class="flat stationNav"
-        grow
-        background-color="transparent"
-        style="border: 0px; margin: auto; box-shadow: none"
-      >
-        <!-- <v-btn icon :class="(!shuffleOn) ? 'iconoff' : 'iconon'"
-          @click="shuffleOn=!shuffleOn"
-          value="shuffle">
-            <v-icon medium dark>shuffle</v-icon>
+    <div class="animate-border">
+      <v-toolbar :width="windowWidth" min-width="300" color="transparent" dark flat
+        style="margin: auto; opacity: 1; position: relative; z-index: 1000">
+        <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
+        <!-- <v-btn icon class="ml-2">
+          <v-icon medium dark>view_headline</v-icon>
         </v-btn> -->
 
-        <v-btn
-          icon
-          style="opacity: 1; padding: 0px"
-          :disabled="!station || !station.podcast"
-          @click="$router.push('/stations/' + currIndex + '/podcast')"
-          value="podcast"
-          small
-        >
-          <span><small>podcast</small></span>
-          <v-icon dark>voicemail</v-icon>
+        <v-btn v-if="currentVis" icon style="opacity: 1" @click="playerToggleVisuals" value="vis">
+          <v-icon medium dark>brightness_2</v-icon>
+        </v-btn>
+        <v-btn v-else icon style="opacity: 0.3" @click="playerToggleVisuals" value="vis">
+          <v-icon medium dark>brightness_2</v-icon>
         </v-btn>
 
-        <v-btn
-          icon
-          style="opacity: 1"
-          :disabled="!station"
-          @click="$router.push('/stations/' + currIndex + '/schedule')"
-          value="calendar"
-          small
-        >
-          <span><small>schedule</small></span>
-          <v-icon dark>mdi-calendar-month</v-icon>
+        <v-spacer></v-spacer>
+
+        <v-btn icon @click="showStationDetails = !showStationDetails" style="opacity: 0.3">
+          <v-icon medium dark>mdi-information-outline</v-icon>
         </v-btn>
 
-        <v-btn
-          icon
-          @click="$router.push('/stations/' + currIndex + '/donate')"
-          value="favorite"
-          small
-        >
-          <span><small>donate</small></span>
-          <v-icon dark color="red">favorite</v-icon>
+        <v-btn icon @click="launchPopup" v-if="$device.isDesktop" style="opacity: 0.3">
+          <v-icon medium dark>mdi-open-in-new</v-icon>
         </v-btn>
+      </v-toolbar>
+      <v-card class="transparent" style="margin: auto; margin-top: -50px; position: relative; z-index: 1" flat
+        :width="windowWidth" min-width="300" v-touch="{
+            left: () => swipe('Left'),
+            right: () => swipe('Right'),
+            up: () => swipe('Up'),
+            down: () => swipe('Down'),
+          }">
+        <v-card style="margin: auto; margin-top: -10px; text-align: center" flat class="categoryCont transparent"
+          v-if="station">
+          <small><small>STATION</small></small>
+          <h2 class="categoryTitle">{{ station.title }}</h2>
 
-        <v-btn
-          icon
-          style="opacity: 0.8"
-          :disabled="!station"
-          @click="launchLink('https://shop.dnbradio.com')"
-          value="shop"
-          small
-        >
-          <span><small>merch</small></span>
-          <v-icon dark>mdi-tshirt-crew</v-icon>
-        </v-btn>
+          <h4 class="categorySubtitle" style="text-transform: uppercase">
+            <small>{{ station.subtitle }}</small>
+          </h4>
+          <div class="categoryDescription">
+            <small>
+              {{ station.description }}
+            </small>
+          </div>
+          <div class="faded">
+            <div v-if="nowplaying && nowplaying.listeners">
+              <small>{{ nowplaying.listeners }} listeners</small>
+            </div>
+            <div v-else>
+              <br />
+            </div>
+          </div>
+          <div>
+            <div v-if="windowHeight <= 680"
+              style="text-align: center; height: 165px;display: flex; justify-content: center; align-items: center;">
+              <v-img :max-width="180" :src="cover" aspect-ratio="1" style="margin: auto; background-color: transparent"
+                :class="isLoading || isPlaying ? 'pulse' : 'faded'" @click="playIfStopped()"></v-img>
+            </div>
+            <div v-if="windowHeight > 681 && windowHeight < 799"
+              style="text-align: center; height: 265px; display: flex; justify-content: center; align-items: center;">
+              <v-img :max-width="210" :src="cover" aspect-ratio="1" style="margin: auto; background-color: transparent"
+                :class="isLoading || isPlaying ? 'pulse' : 'faded'" @click="playIfStopped()"></v-img>
+            </div>
+            <div v-if="windowHeight >= 850"
+              style="text-align: center; height: 265px; display: flex; justify-content: center; align-items: center;">
+              <v-img :max-width="250" :src="cover" aspect-ratio="1" style="margin: auto; background-color: transparent"
+                :class="isLoading || isPlaying ? 'pulse' : 'faded'" @click="playIfStopped()"></v-img>
+            </div>
+          </div>
+        </v-card>
+        <v-card-text style="text-align: center; min-height: 100px" p0>
+          <small>
+            <span v-if="isOffline" style="color: red"><strong>DEVICE OFFLINE!</strong><br /><br /></span>
+            <span v-else-if="isLoading" style="color: yellow">please wait...<br /></span>
+            <span v-else-if="isStalled" style="color: red"><strong>{{ stalledMessage }}1</strong><br /><br /></span>
+            <span v-else-if="!isPlaying">STOPPED</span>
+            <span v-else>
+              <span v-if="nowplaying.song_type == 'L'">LIVE BROADCAST</span>
+              <span v-else-if="nowplaying.song_type == 'S'">PLAYLIST ROTATION</span>
+              <span v-else>NOW PLAYING</span>
+            </span>
+          </small>
+          <div v-if="artist || title">
+            <strong>
+              <span v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))"></span>
+            </strong>
+            <br />
+            <span v-html="decodeURIComponent(title.replace(/\\'/g, '\''))"></span>
+          </div>
+          <div v-else>
+            <small>CLICK PLAY TO<br />START YOUR STREAM<br /></small>
+          </div>
+          <div v-else><br /><br /></div>
+        </v-card-text>
+        <v-card-actions p0 fluid>
+          <v-row justify="space-around">
+            <v-btn icon @click="loadPrev(false)" style="margin-top: 15px; color: #a0a0a0">
+              <v-icon medium dark>skip_previous</v-icon>
+            </v-btn>
+            <v-btn icon @click="volDown" style="margin-top: 15px; color: #a0a0a0">
+              <v-icon medium dark>mdi-volume-minus</v-icon>
+            </v-btn>
+            <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
+            <v-icon size="50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
+            <v-btn icon @click="volUp" style="margin-top: 15px; color: #a0a0a0">
+              <v-icon medium dark>mdi-volume-plus</v-icon>
+            </v-btn>
+            <v-btn icon @click="loadNext(false)" style="margin-top: 15px; color: #a0a0a0">
+              <v-icon medium dark>skip_next</v-icon>
+            </v-btn>
+            <!-- <v-icon small dark>settings_input_antenna</v-icon> -->
+          </v-row>
+        </v-card-actions>
 
-        <v-btn
-          icon
-          style="opacity: 0.8"
-          :disabled="!station"
-          @click="$router.push('/stations/' + currIndex + '/chat')"
-          value="chat"
-          small
-        >
-          <span>chat</span>
-          <v-icon dark>mdi-forum-outline</v-icon>
-        </v-btn>
-        <!-- <v-btn icon :class="(!likedOn) ? 'iconoff' : 'iconon'"
-        v-if="!likedOn"
-        @click="likedOn=!likedOn"
-        value="favorite">
-          <v-icon medium dark>favorite_border</v-icon>
-      </v-btn>
-      <v-btn icon :class="(!likedOn) ? 'iconoff' : 'iconon'"
-        v-else
-        @click="likedOn=!likedOn"
-        value="favorite">
-          <v-icon medium dark>favorite</v-icon>
-      </v-btn> -->
-      </v-bottom-navigation>
-      <v-row>
-        <v-col
-          class="text-center"
-          style="margin-top: 10px; color: rgb(99, 99, 99)"
-        >
-          <v-btn
-            small
-            type="text"
-            rounded
-            color="transparent"
-            @click="$router.push('/stations/' + currIndex + '/donate')"
-          >
-            <small class="hidden-sm-and-up"
-              ><small>Keepin' the beats rollin' on dnbradio!</small></small
-            >
-            <small class="hidden-xs-only"
-              >Keepin' the beats rollin' on dnbradio!</small
-            >
+        <v-bottom-navigation class="flat stationNav" grow background-color="transparent"
+          style="border: 0px; margin: auto; box-shadow: none">
+          <!-- <v-btn icon :class="(!shuffleOn) ? 'iconoff' : 'iconon'"
+            @click="shuffleOn=!shuffleOn"
+            value="shuffle">
+              <v-icon medium dark>shuffle</v-icon>
+          </v-btn> -->
+
+          <v-btn icon style="opacity: 1; padding: 0px" :disabled="!station || !station.podcast"
+            @click="$router.push('/stations/' + currIndex + '/podcast')" value="podcast" small>
+            <span><small>podcast</small></span>
+            <v-icon dark>voicemail</v-icon>
           </v-btn>
-          <br />
-          <span style="font-size: 9px; opacity: 40%"
-            ><a
-              href="https://github.com/dnbradio/dnbradio-player"
-              title="Contribute to dnbradio-player on GitHub"
-              target="_blank"
-              style="text-decoration: none; color: #a0a0a0"
-              >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}
-              <img
-                src="/player/github-mark-white.svg"
-                height="12"
-                alt="GitHub"
-                style="margin-left: 3px"
-              /> </a
-          ></span>
-        </v-col>
-      </v-row>
-    </v-card>
 
-    <v-dialog
-      v-model="showStationDetails"
-      fullscreen
-      transition="dialog-top-transition"
-    >
+          <v-btn icon style="opacity: 1" :disabled="!station"
+            @click="$router.push('/stations/' + currIndex + '/schedule')" value="calendar" small>
+            <span><small>schedule</small></span>
+            <v-icon dark>mdi-calendar-month</v-icon>
+          </v-btn>
+
+          <v-btn icon @click="$router.push('/stations/' + currIndex + '/donate')" value="favorite" small>
+            <span><small>donate</small></span>
+            <v-icon dark color="red">favorite</v-icon>
+          </v-btn>
+
+          <v-btn icon style="opacity: 0.8" :disabled="!station" @click="launchLink('https://shop.dnbradio.com')"
+            value="shop" small>
+            <span><small>merch</small></span>
+            <v-icon dark>mdi-tshirt-crew</v-icon>
+          </v-btn>
+
+          <v-btn icon style="opacity: 0.8" :disabled="!station" @click="$router.push('/stations/' + currIndex + '/chat')"
+            value="chat" small>
+            <span>chat</span>
+            <v-icon dark>mdi-forum-outline</v-icon>
+          </v-btn>
+          <!-- <v-btn icon :class="(!likedOn) ? 'iconoff' : 'iconon'"
+          v-if="!likedOn"
+          @click="likedOn=!likedOn"
+          value="favorite">
+            <v-icon medium dark>favorite_border</v-icon>
+        </v-btn>
+        <v-btn icon :class="(!likedOn) ? 'iconoff' : 'iconon'"
+          v-else
+          @click="likedOn=!likedOn"
+          value="favorite">
+            <v-icon medium dark>favorite</v-icon>
+        </v-btn> -->
+        </v-bottom-navigation>
+        <v-row>
+          <v-col class="text-center" style="margin-top: 10px; color: rgb(99, 99, 99)">
+            <v-btn small type="text" rounded color="transparent"
+              @click="$router.push('/stations/' + currIndex + '/donate')">
+              <small class="hidden-sm-and-up"><small>Keepin' the beats rollin' on dnbradio!</small></small>
+              <small class="hidden-xs-only">Keepin' the beats rollin' on dnbradio!</small>
+            </v-btn>
+            <br />
+            <span style="font-size: 9px; opacity: 40%"><a href="https://github.com/dnbradio/dnbradio-player"
+                title="Contribute to dnbradio-player on GitHub" target="_blank"
+                style="text-decoration: none; color: #a0a0a0">dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}
+                <img src="/player/github-mark-white.svg" height="12" alt="GitHub" style="margin-left: 3px" /> </a></span>
+          </v-col>
+        </v-row>
+      </v-card>
+    </div>
+
+    <v-dialog v-model="showStationDetails" fullscreen transition="dialog-top-transition">
       <v-card v-if="station">
         <v-toolbar dark>
           <v-btn icon dark @click="showStationDetails = false">
@@ -341,12 +203,7 @@
               <br />{{ station.description }}
             </v-col>
             <v-col class="flex-shrink-0">
-              <v-img
-                :max-width="150"
-                :src="cover"
-                aspect-ratio="1"
-                style="background-color: transparent"
-              ></v-img>
+              <v-img :max-width="150" :src="cover" aspect-ratio="1" style="background-color: transparent"></v-img>
             </v-col>
           </v-row>
         </v-card-subtitle>
@@ -356,35 +213,23 @@
             <v-btn><v-icon left>share</v-icon>Share</v-btn>
           </div> -->
           <div class="pb-2" v-if="station.website">
-            <v-btn rounded @click="launchLink(station.website)"
-              ><v-icon left>mdi-web</v-icon>Website</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.website)"><v-icon left>mdi-web</v-icon>Website</v-btn>
           </div>
           <div class="pb-6" v-if="station.podcast && station.podcast.website">
-            <v-btn rounded @click="launchLink(station.podcast.website)"
-              ><v-icon left>voicemail</v-icon> Podcast</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.podcast.website)"><v-icon left>voicemail</v-icon> Podcast</v-btn>
           </div>
 
           <div class="pb-2" v-if="station.facebook">
-            <v-btn rounded @click="launchLink(station.facebook)"
-              ><v-icon left>mdi-facebook</v-icon> Facebook</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.facebook)"><v-icon left>mdi-facebook</v-icon> Facebook</v-btn>
           </div>
           <div class="pb-2" v-if="station.twitter">
-            <v-btn rounded @click="launchLink(station.twitter)"
-              ><v-icon left>mdi-twitter</v-icon> Twitter</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.twitter)"><v-icon left>mdi-twitter</v-icon> Twitter</v-btn>
           </div>
           <div class="pb-2" v-if="station.instagram">
-            <v-btn rounded @click="launchLink(station.instagram)"
-              ><v-icon left>mdi-instagram</v-icon> Instagram</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.instagram)"><v-icon left>mdi-instagram</v-icon> Instagram</v-btn>
           </div>
           <div class="pb-2" v-if="station.soundcloud">
-            <v-btn rounded @click="launchLink(station.soundcloud)"
-              ><v-icon left>mdi-soundcloud</v-icon> Soundcloud</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.soundcloud)"><v-icon left>mdi-soundcloud</v-icon> Soundcloud</v-btn>
           </div>
         </v-card-text>
       </v-card>
@@ -1002,11 +847,11 @@ export default {
             });
           }
         })
-      .catch((err) => {
-        console.log("cannot fetch nowplaying", err.message);
-      });
+        .catch((err) => {
+          console.log("cannot fetch nowplaying", err.message);
+        });
     },
-    startStars(){
+    startStars() {
       this.currentVis = "stars";
       var element = document.getElementById("viscanvas");
       element.style.display = "block";
@@ -1146,7 +991,7 @@ export default {
     // if fresh load then startStars
     console.log('this.$route?.from?.name', this.$route)
     if (this.$store.state.player.initialLoad) {
-      setTimeout(()=> {
+      setTimeout(() => {
         this.playerToggleVisuals();
       }, 800);
     }
@@ -1181,7 +1026,7 @@ export default {
   },
   watch: {
     playerVisualsEnabled(val) {
-      if (val===false) {
+      if (val === false) {
         this.stopStars();
       } else {
         this.startStars();
@@ -1201,9 +1046,11 @@ export default {
   /* animation: pulse 2s infinite; */
   animation: pulse 2s 3;
 }
+
 .faded {
   opacity: 0.4;
 }
+
 @keyframes pulse {
   0% {
     transform: scale(0.95);
@@ -1217,21 +1064,27 @@ export default {
     transform: scale(0.95);
   }
 }
+
 .iconoff {
   opacity: 0.6;
 }
+
 .iconon {
   opacity: 1;
 }
+
 .iconon.theme--dark.v-btn.v-btn--icon {
   color: #fb1313;
 }
+
 html {
   overflow-y: auto;
 }
+
 .v-application--wrap {
   z-index: 100;
 }
+
 .viscanvas-container {
   width: 100%;
   height: 100%;
@@ -1240,6 +1093,7 @@ html {
   top: 0px;
   left: 0px;
 }
+
 #viscanvas {
   top: 0px;
   left: 0px;
@@ -1249,8 +1103,33 @@ html {
   position: fixed;
   z-index: 0;
 }
+
 .stationNav {
   top: 10px;
   max-width: 450px;
+}
+</style>
+<style scoped>
+.animate-border {
+  --angle: 0deg;
+  border: 3px solid;
+  border-image: linear-gradient(var(--angle), white, black, white) 1;
+  position: relative;
+  animation: 10s rotate linear infinite;
+  padding: 10px;
+  padding-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 </style>
