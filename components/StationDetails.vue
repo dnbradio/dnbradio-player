@@ -1268,6 +1268,7 @@ html {
   padding: 10px;
   padding-bottom: 20px;
   backdrop-filter: blur(10px);
+  background: linear-gradient(45deg, rgb(0,10,0,0.3), transparent);
 }
 
 @keyframes rotate {
