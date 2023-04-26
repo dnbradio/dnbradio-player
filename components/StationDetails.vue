@@ -662,8 +662,8 @@ export default {
         wind.focus();
         return true;
       } else {
-        let width = 430;
-        let height = 580;
+        let width = 422;
+        let height = 600;
         if (
           (window.innerHeight == height || window.outerHeight == height) &&
           (window.innerWidth == width || window.outerWidth == width)
@@ -1261,10 +1261,10 @@ html {
 }
 .animate-border {
   --angle: 0deg;
-  border: 3px solid;
-  border-image: linear-gradient(var(--angle), white, black, white) 1;
+  border: 1px solid;
+  border-image: linear-gradient(var(--angle), #090909, #929292, #000000) 1;
   position: relative;
-  animation: 10s rotate linear infinite;
+  animation: 20s rotate linear infinite;
   padding: 10px;
   padding-bottom: 20px;
   backdrop-filter: blur(10px);
