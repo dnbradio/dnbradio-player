@@ -1146,9 +1146,9 @@ export default {
     // if fresh load then startStars
     console.log('this.$route?.from?.name', this.$route)
     if (this.$store.state.player.initialLoad) {
-      setTimeout(()=> {
-        this.playerToggleVisuals();
-      }, 800);
+      // setTimeout(()=> {
+      //   this.playerToggleVisuals();
+      // }, 800);
     }
     this.$store.dispatch("player/SET_INITIAL_LOAD", false);
     console.log("sound readyState", this.$sound.readyState);
