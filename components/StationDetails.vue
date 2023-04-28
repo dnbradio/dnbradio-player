@@ -1,5 +1,5 @@
 <template>
-  <div v-show="loaded">
+  <div v-show="loaded" class="overlap-screen">
     <vue-headful
       :title="pageTitle"
       :description="pageDescription"
@@ -662,8 +662,8 @@ export default {
         wind.focus();
         return true;
       } else {
-        let width = 430;
-        let height = 580;
+        let width = 422;
+        let height = 600;
         if (
           (window.innerHeight == height || window.outerHeight == height) &&
           (window.innerWidth == width || window.outerWidth == width)
@@ -1261,13 +1261,20 @@ html {
 }
 .animate-border {
   --angle: 0deg;
-  border: 3px solid;
-  border-image: linear-gradient(var(--angle), white, black, white) 1;
+  border: 1px solid;
+  border-image: linear-gradient(var(--angle), #090909, #929292, #000000) 1;
   position: relative;
-  animation: 10s rotate linear infinite;
+  animation: 20s rotate linear infinite;
   padding: 10px;
   padding-bottom: 20px;
   backdrop-filter: blur(10px);
+  background: linear-gradient(45deg, rgb(0,10,0,0.3), transparent);
+  position: absolute;
+  top:50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 300px;
+  max-width: 500px;
 }
 
 @keyframes rotate {
@@ -1280,5 +1287,15 @@ html {
   syntax: '<angle>';
   initial-value: 0deg;
   inherits: false;
+}
+</style>
+<style scoped>
+.overlap-screen{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 0;
+  top: 0px;
+  left: 0px;
 }
 </style>
