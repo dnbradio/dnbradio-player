@@ -11,7 +11,7 @@
     <div class="viscanvas-container" id="viscanvas-container">
       <canvas id="viscanvas"></canvas>
     </div>
-    <div class="animate-border">
+    <div :class="(windowWidth>=500) ? 'animate-border' : 'animate-border animation-none'">
       <v-toolbar
         :width="windowWidth"
         min-width="300"
@@ -1275,6 +1275,9 @@ html {
   transform: translate(-50%, -50%);
   min-width: 300px;
   max-width: 500px;
+}
+.animation-none {
+  animation: none;
 }
 
 @keyframes rotate {
