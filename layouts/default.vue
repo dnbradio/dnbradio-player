@@ -79,5 +79,7 @@ export default {
 .module-inside {
   /* This will make it stack on top of the ::before */
   position: relative;
+  padding:  2px;
 }
+
 </style>

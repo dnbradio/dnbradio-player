@@ -13,7 +13,7 @@
     "generate-prod": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt generate",
     "upload-prod": "tar czf - dist/ | ssh dnbradio 'rm -rf .dnbradio-deploy-tmp; mkdir -p ./.dnbradio-deploy-tmp; cd ./.dnbradio-deploy-tmp && tar xvzf - && rm -rf /var/www/dnbradio_site/html/player && mv dist /var/www/dnbradio_site/html/player';  echo \"\n\nDeployed to -> https://dnbradio.com/player/\"",
     "start": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt start",
-    "build": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt build",
+    "build": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=\"/player-$APP_BRANCH/\" nuxt build",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
   },
   "dependencies": {

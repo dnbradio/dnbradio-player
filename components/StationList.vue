@@ -1,12 +1,5 @@
 <template>
-  <v-card
-    flat
-    :max-width="500"
-    :width="windowWidth"
-    min-width="300"
-    :height="windowHeight"
-    style="background: transparent; overflow: hidden; margin:auto;"
-  >
+  <v-card flat :width="windowWidth" :height="windowHeight" class="main-player-content">
     <StationDetails :station="station" />
   </v-card>
 </template>
@@ -73,9 +66,16 @@ export default {
 </script>
 
 <style scoped>
+.main-player-content {
+  background: transparent;
+  overflow: hidden;
+  margin: auto;
+}
+
 h2.categoryTitle {
   font-size: 3.2em;
 }
+
 p.categoryDescription {
   color: #6b6666;
 }
