@@ -101,6 +101,11 @@ module.exports = {
       {
         src: `https://polyfill.io/v3/polyfill.min.js?features=${features}`,
         body: true
+      },
+      {
+        "src": "https://plausible.io/js/script.js",
+        "defer": true,
+        "data-domain": "dnbradio.com"
       }
     ]
   },
