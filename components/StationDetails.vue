@@ -1,5 +1,5 @@
 <template>
-  <div v-show="loaded">
+  <div v-show="loaded" class="overlap-screen">
     <vue-headful
       :title="pageTitle"
       :description="pageDescription"
@@ -1263,11 +1263,16 @@ html {
   --angle: 0deg;
   border: 3px solid;
   border-image: linear-gradient(var(--angle), white, black, white) 1;
-  position: relative;
   animation: 10s rotate linear infinite;
   padding: 10px;
   padding-bottom: 20px;
   backdrop-filter: blur(10px);
+  min-width: 300px;
+  max-width: 500px;
+  position: absolute;
+  top:50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 @keyframes rotate {
@@ -1280,5 +1285,15 @@ html {
   syntax: '<angle>';
   initial-value: 0deg;
   inherits: false;
+}
+</style>
+<style scoped>
+.overlap-screen{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 0;
+  top: 0px;
+  left: 0px;
 }
 </style>
