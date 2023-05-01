@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 var schema = new mongoose.Schema({
   name: String,
   tags: Array
 });
-module.exports = mongoose.model('Autocomplete', schema);
+export default mongoose.model('Autocomplete', schema);

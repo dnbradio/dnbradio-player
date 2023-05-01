@@ -1,4 +1,4 @@
-const express = require('express')
+import express from 'express';
 import RecordingController from "../controllers/RecordingController.js"
 import StatusController from "../controllers/StatusController.js"
 import EventController from "../controllers/EventController.js"

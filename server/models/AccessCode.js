@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 var schema = new mongoose.Schema({
   token: String,
   email: String,
@@ -6,4 +6,4 @@ var schema = new mongoose.Schema({
   verified: Boolean,
   expires: { type: Date, default: () => new Date(+new Date() + 3*60*60*1000) },
 });
-module.exports = mongoose.model('AccessCode', schema);
+export default mongoose.model('AccessCode', schema);
