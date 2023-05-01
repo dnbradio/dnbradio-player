@@ -239,7 +239,6 @@
 <script>
 import Station from "@/models/Station";
 import stations from "@/data/stations";
-import { EventBus } from "@/components/eventbus.js";
 
 export default {
   async fetch() {
