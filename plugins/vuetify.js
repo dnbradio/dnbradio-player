@@ -100,7 +100,6 @@ export default ctx => {
       scrollBarWidth: 24
     },
     theme: {
-      dark: true,
       themes: {
         dark: {
           primary: "#3c3c3c",

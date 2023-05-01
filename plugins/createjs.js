@@ -1,6 +1,6 @@
 import Vue from "vue";
 //import createjs from 'createjs'
-const media = require("simple-media-element");
+import media from "simple-media-element";
 
 Vue.config.productionTip = false;
 Vue.prototype.$media = media;

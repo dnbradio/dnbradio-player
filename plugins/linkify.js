@@ -1,2 +1,2 @@
-const linkify = require('linkifyjs');
-const linkifyHtml = require('linkify-html');
+import linkify from 'linkifyjs';
+import linkifyHtml from 'linkify-html';
