@@ -10,77 +10,78 @@
       </v-card-text>
     </v-card>
     <v-form v-if="activeView=='form'" ref="form" v-model="valid" lazy-validation>
-      <v-card dark class="transparent">
+      <v-card class="transparent" flat>
         <v-card-text>
           <h1>Start Streaming</h1>
           <p>On the final step, select your relay and configure your encoder on your local machine.</p>
 
-          <h2 class="mt-12">Artist name(s)</h2>
+          <h2 class="mt-12">Show Information</h2>
           <v-text-field v-model="form.artist" :counter="50" required
-            :rules="[rules.required, rules.alphanum, rules.counter50]" 
+            :rules="[rules.required, rules.alphanum, rules.counter50]"
             placeholder="DJ / Artist name(s)"
             hint="alpha-numeric only" />
-          <h2>Show title</h2>
-          <v-text-field v-model="form.title" :counter="50" required 
+           <v-text-field v-model="form.title" :counter="50" required
             :rules="[rules.required, rules.alphanum, rules.counter50]"
             placeholder="Show title"
             hint="alpha-numeric only" />
-          <h2 class="mt-12">Show description</h2>
-          <v-textarea v-model="form.description" 
+           <v-textarea v-model="form.description"
             placeholder="Show description"
             persistent-hint
-            hint="Extended show description, links, contact info, booking info." />
-          <h2 class="mt-12">Genre</h2>
-          <v-select v-model="form.genre" 
+            hint="Description, links, contact info, booking info." />
+           <v-select v-model="form.genre"
             :items="genreOptions"
             multiple
             placeholder="Genre(s)"
             hint="Separate by comma; examples: liquid, jungle, oldschool, neuro, various dnb" />
-          <h2>Mood</h2>
-          <v-text-field v-model="form.mood" 
+           <v-text-field v-model="form.mood"
             placeholder="Mood"
             hint="Separate by comma; examples: melodic, uplifting, mellow, dark)" />
-          <h2 class="mt-12">Website</h2>
-          <v-text-field v-model="form.website" 
+           <v-text-field v-model="form.website"
             type="url"
             :rules="[rules.url]"
             placeholder="Website URL" />
         </v-card-text>
       </v-card>
-      <v-card class="mt-6 transparent" dark>
+      <v-card class="mt-6 transparent">
         <v-card-text>
-          <h1>Encoder Settings</h1>
-          <h2>Target Relay</h2>
-          <p class="mt-3">Choose the closest server and add these setting to your encoder.</p>
+          <h2>Encoder Settings</h2>
+           <p class="mt-3">Choose the closest server and add these setting to your encoder.</p>
           <v-select v-model="selectedRelayIndex" required large
             :items="relayOptions">
           </v-select>
-          <div style="text-align: right;"><v-btn  @click="showRelay=1" class="mb-12">View relay connection details</v-btn></div>
-          <h1>Record?</h1>
+          <div style="text-align: right;"><v-btn  @click="showRelay=!showRelay" class="mb-12">View relay connection details</v-btn></div>
+          <div v-if="showRelay" light width="350">
+            <v-card  style="padding: 20px;">
+              <h2>{{ selectedRelay.name }}</h2>
+              <div>
+                host: {{ selectedRelay.host }}<br />
+                port: {{ selectedRelay.port }}<br />
+                <span v-if="selectedRelay.username">
+                  username: {{ selectedRelay.username }}<br />
+                </span>
+                password: {{ selectedRelay.password }}<br />
+                mountpoint: {{ selectedRelay.mountpoint || 'leave blank' }}<br />
+              </div>
+            </v-card>
+          </div>
+
+
+          <h3>Record?</h3>
           <v-checkbox v-model="form.archive" label="Record this show to the archives?" style="width:290px;" />
 
           <div class="pt-6 pb-6">
-            <h1>Notice</h1>
-            <h2>Check your connection</h2>
+            <h3>Notice</h3>
+            <p>Check your connection</p>
             <p class="mt-3 pb-12">Ensure your encoder (BUTT, Nicecast, ShoutCAST, or other) are configured properly before continuing.</p>
 
-            <h1 class="mt-12">Start Streaming</h1>
-            <h2>Is your encoder connected and sending data?</h2>
-            <p>A countdown timer will appear on the next page.</p>
-            <v-btn class="mt-3" light @click="submit" color="yellow">YES, START STREAMING</v-btn>
+            <h3 class="mt-12">Start Streaming</h3>
+            <p>Before you start, make sure your encoder connected and sending data. A countdown timer will appear on the next page.</p>
+            <br /> <v-btn class="mt-5" light @click="submit" color="yellow">START STREAMING</v-btn>
           </div>
         </v-card-text>
       </v-card>
     </v-form>
 
-    <v-dialog v-model="showRelay" light>
-      <v-card dark>
-        <h2>{{ selectedRelay.name }}</h2>
-        <div>
-          <vue-json-pretty :data="selectedRelay"> </vue-json-pretty>
-        </div>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -225,7 +226,7 @@ export default {
     selectedRelayUrl() {
       if (!this.selectedRelay) {
         return ''
-      } 
+      }
       return 'http://' + this.selectedRelay.host + ':' + this.selectedRelay.port;
     },
     genreOptions() {
@@ -248,6 +249,7 @@ export default {
 </script>
 
 <style scoped>
-.theme--dark.v-card > .v-card__text h1 { margin-top: 40px; }
-.theme--dark.v-card > .v-card__text h2 { margin-top: 20px; }
+.theme--light.v-card > .v-card__text h1 { margin-top: 40px; }
+.theme--light.v-card > .v-card__text h2 { margin-top: 20px; }
+.theme--light.v-card > .v-card__text h3 { margin-top: 20px; }
 </style>

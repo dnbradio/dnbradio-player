@@ -3,10 +3,15 @@
     <v-container fluid padless class="main-cont">
       <v-row no-gutters>
         <v-col dark cols="12">
-          <div style="background-color: rgba(0, 0, 0, 0.87);">
+
+          <div style="background-color: #676b6f; border-radius: 10px;">
             <top-menu />
+          </div>
+
+          <div style="margin-top: 5px; background-color: #fff; border-radius: 10px;">
             <main-carousel />
           </div>
+
         </v-col>
         <v-col light cols="6">
           <div id="fb-root"></div>

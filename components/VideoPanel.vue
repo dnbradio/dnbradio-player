@@ -31,7 +31,7 @@
   <div style="min-height:1000px;">
   <div class="video-slide">
     <v-sheet
-      style="background-color: transparent !important; opacity: 1;"
+      style="background-color: transparent !important; opacity: 1; border-radius:10px;"
       height="100%"
       width="100%"
       tile
@@ -80,7 +80,7 @@
                 <v-toolbar dense flat style="background:transparent;" rounded dark>
                   <v-toolbar-items>
                     <!-- PLAY -->
-                    <v-btn small text v-if="playback!='Playing'" key="mdi-play" @click="play"><v-icon>mdi-play</v-icon></v-btn>
+                    <v-btn small text v-if="playback!='Playing'" key="mdi-play" @click="play(true)"><v-icon>mdi-play</v-icon></v-btn>
                     <v-btn small text v-if="playback=='Playing'" key="mdi-stop" @click="stop"><v-icon>mdi-stop</v-icon></v-btn>
 
                     <!-- VOL -->
@@ -168,7 +168,7 @@
                           <v-row>
                             <v-col :cols="12" style="line-height: 22px;">
                               <div style="color: white; font-size: 1.5em;">
-                                {{listenerCount}} TUNED IN
+                                TUNED IN: {{ listenerCount }}
                               </div>
                             </v-col>
                           </v-row>
@@ -512,11 +512,19 @@ export default {
         return true;
       }
     },
-    play() {
+    play(forcePreview=false) {
       if (this.playback=='Playing') {
         return;
       }
+
+      if (forcePreview && this.selectedChannel?.channelId == 'main' && this.selectedContext=='preview' && !this.initiatedFirstPlay) {
+        this.playPreviewAudio();
+        this.playback = 'Playing'
+        return;
+      }
+
       this.player.play()
+
       if (this.initiatedFirstPlay && this.$sound && this.selectedContext == 'preview') {
         this.$sound.play()
       }
@@ -616,7 +624,7 @@ export default {
       this.selectedContext = 'preview'
       setTimeout(()=> {
         this.playVideo();
-      }, 1200);
+      }, 800);
       this.playback = 'Idle';
     })
   }
@@ -626,8 +634,9 @@ export default {
 <style>
   #videoDiv iframe { pointer-events: none; }
   .video-panel {
-    height: 460px;
+    height: 455px;
     margin: auto;
+    border-radius: 10px;
   }
   .video-bottom-bar {
     opacity: 0;
@@ -652,11 +661,13 @@ export default {
     margin-top: 15px;
   }
   .video-overlay-inner {
+    text-align:left;
     padding-bottom: 15px;
     padding-left: 10px;
     max-width: 250px;
     opacity: 0.9;  transition-delay: 250ms; transition-property:  opacity;
-    color: #fff; background-color: rgba(0,0,0,0.4); z-index: 5;
+    color: #fff; background-color: rgba(0,0,0,0.8); z-index: 5;
+    border-radius: 10px;
   }
   .widenOverlay .video-overlay-inner {
     max-width: 300px;
@@ -670,18 +681,18 @@ export default {
     opacity: 1;
     transition-delay: 0ms; transition-property:  opacity;
   }
-  #videojs-player { width: 100%; height: 100%; }
+  #videojs-player { width: 100%; height: 100%; background: #fff; }
   .video-panel .muteButtonOverlay { opacity: 0; }
   .video-panel:hover .muteButtonOverlay { opacity: 1; }
   .v-carousel__controls { bottom: 0px !important; }
-
-.blink_me {
-  animation: blinker 1s linear infinite;
-}
-
-@keyframes blinker {
-  50% {
-    opacity: 0;
+  .video-js .vjs-tech { border-radius: 10px; }
+  .blink_me {
+    animation: blinker 1s linear infinite;
   }
-}
+
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
 </style>

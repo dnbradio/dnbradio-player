@@ -1,10 +1,10 @@
 <template>
 <span class="donators">
   <v-row style="line-height:normal;" no-gutters>
-    <v-col class="text-center" :cols="12">
+    <v-col   :cols="12">
       SUPPORTERS:<br /><br />
     </v-col>
-    <v-col class="text-center" :cols="12" v-for="(item,index) in filteredData" :key="index"
+    <v-col  :cols="12" v-for="(item,index) in filteredData" :key="index"
     :style="(index<=5) ? 'font-weight: 600; font-size:1em;' : ''">
       <span style="text-overflow: ellipsis; width: 60px; white-space: nowrap; overflow:hidden;">
         ${{ Number.parseInt(item.gross) }} {{ decodeURIComponent(item.name) }}

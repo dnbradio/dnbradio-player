@@ -1,28 +1,30 @@
 <template>
-  <div style="width: 1280px; margin:auto; margin-top: 50px;">
+<v-app>
+  <div style="width: 1280px; margin:auto; background-color: #000;">
     <client-only>
       <v-container fluid>
-        <v-row justify="center" align="center" dense>
+        <v-row>
           <v-col cols="2">
             <v-card flat style="background:none; width: 220px;">
               <div style="min-height: 440px; padding:10px; color:#fff;">
                 <img
                   src="https://res.cloudinary.com/labelgrid/image/upload/c_scale,w_269/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png"
-                  width="180"
+                  width="150"
                 />
-                <h1 class="homeTitle" style="text-align:left;">
-                  dnbradio
-                </h1>
-                <p style="font-size: 12px;">Serving all flavors of drum &amp; bass, jungle, high-paced broken beat music, dnbradio is one of the longest-running internet stations for drum &amp; bass!</p>
-                <div
-                  style="line-height: 2.5em;  margin: auto; text-align:left;color:#fff;"
-                >
+                <h1 class="homeTitle" style="text-align:left;">dnbradio</h1>
+                <p style="font-size: 12px;">
+                  Serving all flavors of drum &amp; bass, jungle, high-paced broken beat music, dnbradio is one of the longest-running internet stations for drum &amp; bass!
+                </p>
+                <div style="line-height: 2.5em;  margin: auto; text-align:left;color:#fff;">
                   <v-divider />
-                  <br />
+
                   <p>Welcome, guest.</p>
+
                   <v-btn small>login</v-btn>
                   <v-btn small>signup</v-btn>
+
                   <br /><small>Select bitrate to begin:</small> <br /><v-btn fab>192k</v-btn>
+
                   <v-btn fab>96k</v-btn>
                   <v-btn small>HELP</v-btn>
                 </div>
@@ -30,7 +32,7 @@
             </v-card>
           </v-col>
           <v-col cols="8">
-            <v-card width="925" style="padding: 10px;">
+            <v-card width="925" style="padding: 10px; margin-top: 30px;">
               <nuxt />
             </v-card>
           </v-col>
@@ -72,6 +74,7 @@
       </v-container>
     </client-only>
   </div>
+  </v-app>
 </template>
 <script>
 export default {
