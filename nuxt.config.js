@@ -11,7 +11,7 @@ const APP_VERSION = rightNow
   .replace(/-/g, ".")
   .replace(/:/g, "")
   .replace(/T/g, ".");
-require("dotenv").config();
+
 const features = [
   "fetch",
   "Object.entries",
@@ -20,10 +20,11 @@ const features = [
   "Array.from"
 ].join("%2C");
 
-module.exports = {
+export default {
   ssr: true,
   //target: "static",
   telemetry: false,
+  components: true,
   privateRuntimeConfig: {
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY,
@@ -259,4 +260,4 @@ module.exports = {
       "/stations/4/widget-socials"
     ]
   }
-};
+}
