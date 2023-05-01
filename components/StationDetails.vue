@@ -395,14 +395,9 @@
 
 <script>
 import Station from "@/models/Station";
-import { EventBus } from "@/components/eventbus.js";
 
 import plankton from "@/vis/plankton";
 import stars from "@/vis/stars";
-
-// if (process.BROWSER_BUILD && window) {
-//   plankton = require('@/components/plankton.js');
-// }
 
 export default {
   props: ["station"],
@@ -760,7 +755,6 @@ export default {
       this.$router.push("/stations/" + this.randomIndex);
     },
     async play() {
-      //EventBus.$emit('stop-howler');
       this.isPlaying = true;
       if (this.$sound) {
         this.$sound.play();
