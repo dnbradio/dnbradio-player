@@ -28,13 +28,6 @@ axiosDefaults.baseURL = '/';
 const app = express()
 app.use(cors())
 
-// var bodyParser = require('body-parser');
-// // configure the app to use bodyParser()
-// app.use(bodyParser.urlencoded({
-//     extended: true
-// }));
-// app.use(bodyParser.json());
-
 app.use(express.json({ extended: true }))
 
 // Import and Set Nuxt.js options
