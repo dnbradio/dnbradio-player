@@ -1,12 +1,12 @@
 import moment from "moment";
 import db from "../models/db.js";
 const PaypalTransaction = db.PaypalTransaction;
-const { Op } = require("sequelize");
+import { Op } from "sequelize";
 export default {
   index: (req, res) => {
-    PaypalTransaction.findAll({ 
+    PaypalTransaction.findAll({
       limit: 50,
-      where: { date: { [Op.gt]: moment().subtract(35, 'day').toISOString().substring(0,10) } }, 
+      where: { date: { [Op.gt]: moment().subtract(35, 'day').toISOString().substring(0,10) } },
       order: [['gross', 'DESC']] })
     .then(data => {
       res.send(data);
