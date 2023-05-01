@@ -2,31 +2,27 @@
   <div style="width: 1280px; margin:auto; margin-top: 50px;">
     <client-only>
       <v-container fluid>
-        <v-row justify="“center”" align="“center”" dense>
+        <v-row justify="center" align="center" dense>
           <v-col cols="2">
             <v-card flat style="background:none; width: 220px;">
-              <div style="min-height: 440px; padding:10px;">
+              <div style="min-height: 440px; padding:10px; color:#fff;">
                 <img
                   src="https://res.cloudinary.com/labelgrid/image/upload/c_scale,w_269/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png"
-                  width="203"
-                  height="212"
+                  width="180"
                 />
-                <h1 class="homeTitle" style="text-align:center;">
-                  DNBRADIO: 24/7 Drum and Bass, Darkstep, Liquid DNB, Jungle
+                <h1 class="homeTitle" style="text-align:left;">
+                  dnbradio
                 </h1>
+                <p style="font-size: 12px;">Serving all flavors of drum &amp; bass, jungle, high-paced broken beat music, dnbradio is one of the longest-running internet stations for drum &amp; bass!</p>
                 <div
-                  style="line-height: 2.5em; width: 120px; margin: auto; text-align:center;color:#fff;"
+                  style="line-height: 2.5em;  margin: auto; text-align:left;color:#fff;"
                 >
-                  <p>
-                    <v-icon size="70" style="color: #fff;"
-                      >play_circle_filled</v-icon
-                    >
-                  </p>
+                  <v-divider />
+                  <br />
                   <p>Welcome, guest.</p>
                   <v-btn small>login</v-btn>
-                  <br />
-                  <v-btn smal>signup</v-btn>
-                  <br /><br />Switch bitrate: <br /><v-btn fab>192k</v-btn>
+                  <v-btn small>signup</v-btn>
+                  <br /><small>Select bitrate to begin:</small> <br /><v-btn fab>192k</v-btn>
                   <v-btn fab>96k</v-btn>
                   <v-btn small>HELP</v-btn>
                 </div>
@@ -39,7 +35,7 @@
             </v-card>
           </v-col>
           <v-col cols="2">
-            <v-card flat style="background:none;">
+            <!-- <v-card flat style="background:none;">
               <div
                 style=" height: 440px; padding: 0px; font-size: 13px; color: #fff;"
               >
@@ -57,7 +53,7 @@
                   {{ person.amount }} {{ person.name }}
                 </div>
               </div>
-            </v-card>
+            </v-card> -->
           </v-col>
           <v-col cols="12">
             <v-card
@@ -105,7 +101,7 @@ body {
   background-image: url(/player/bg_gradient.jpg);
   background-repeat: repeat-x;
   margin: 0px;
-  font-family: Tahoma, Helvetica, Verdana;
+  font-family: 'Roboto', sans-serif;
   font-size: 1em;
   margin-top: 0px;
   padding: 0px;

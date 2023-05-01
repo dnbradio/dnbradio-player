@@ -18,15 +18,15 @@ export default async function data() {
       soundcloud: "https://soundcloud.com/dnbradio",
       description: "All flavors of dnb from dj's across the globe!",
       schedule: {
-        url: "https://api.dnbradio.nl/schedule"
+        url: "/api/schedule"
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
+        url: "/api/podcast",
         website: "https://dnbradio.com/podcast"
       },
       nowplaying_url: {
         type: "sam",
-        url: "https://api.dnbradio.nl/now_playing"
+        url: "/api/now_playing"
       },
       streams: [
         {
@@ -35,6 +35,7 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
+      defaultPlayer: 'custom',
       position: 1
     },
     {
@@ -70,6 +71,7 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
+      defaultPlayer: 'webaudio',
       position: 2
     },
     {
@@ -103,6 +105,7 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
+      defaultPlayer: 'webaudio',
       position: 3
     },
     {
@@ -137,6 +140,7 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
+      defaultPlayer: 'youtube',
       position: 4
     },
     {
@@ -171,6 +175,7 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
+      defaultPlayer: 'youtube',
       position: 5
     }
   ];

@@ -21,6 +21,7 @@ export default class Station extends Model {
       twitterId: this.attr(''),
       instagram: this.attr(''),
       soundcloud: this.attr(''),
+      defaultPlayer: this.attr(''),
       tags: this.attr(''),
     }
   }

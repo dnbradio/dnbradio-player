@@ -7,7 +7,7 @@
           <v-card flat style="text-align:center; max-width: 750px; margin: auto;">
             <h1>DnBRadio Live Show Archive</h1>
             <h2>World's longest running drum and bass archive</h2>
-            <v-text-field v-model="form.search"  placeholder="Search by artist, track, etc" type="text" />  
+            <v-text-field v-model="form.search"  placeholder="Search by artist, track, etc" type="text" />
             <h3>Subscribe and take us mobile:</h3>
             <p>
               <br  />
@@ -82,7 +82,7 @@ export default {
 <br />Karma - The Searching
 <br />rtificial Intelligence - Definition
 <br />Dave Shichman - 5th Sentence (Random Movement remix)
-<br />Optiv &amp; CZA - Cant You See 
+<br />Optiv &amp; CZA - Cant You See
 <br />Phase - Albatross (feat. Viv May)
 <br />Utah Jazz - Hold On
 <br />FinnaDrift - International A License`

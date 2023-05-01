@@ -21,8 +21,8 @@ const features = [
 ].join("%2C");
 
 module.exports = {
-  ssr: false,
-  target: "static",
+  ssr: true,
+  //target: "static",
   telemetry: false,
   privateRuntimeConfig: {
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
@@ -37,9 +37,9 @@ module.exports = {
     APP_VERSION: process.env.APP_VERSION || APP_VERSION,
     APP_BRANCH: process.env.APP_BRANCH || ""
   },
-  /*
-   ** Headers of the page
-   */
+  serverMiddleware: {
+    '/api': '~/server/routes/api'
+  },
   head: {
     titleTemplate: "%s - dnbradio.com",
     title:
@@ -93,7 +93,10 @@ module.exports = {
         type: "image/png",
         sizes: "16x16",
         href: "https://dnbradio.com/img/logotags.png"
-      }
+      },
+      { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/brands.min.css', rel: "stylesheet"},
+      { rel: 'stylesheet', href: '//vjs.zencdn.net/7.10.2/video-js.min.css', rel: "stylesheet" },
+      { rel: 'preload', href: '/bgs/camo_pixelated_wallpaper4.png' }
     ],
     script: [
       { src: "https://code.createjs.com/1.0.0/soundjs.min.js", mode: "client" },
@@ -111,20 +114,40 @@ module.exports = {
   },
   loading: { color: "#fff" },
   plugins: [
+    { ssr: false, src: '~plugins/av.js' },
     { ssr: false, src: "~/plugins/vuetify.js" },
     { ssr: false, src: "~plugins/createjs.js" },
-    { ssr: false, src: "~plugins/headful.js" }
+    { ssr: false, src: "~plugins/headful.js" },
+    { ssr: false, src: '~plugins/readmore.js' },
+    { ssr: false, src: '~plugins/eventbus.js' },
+    { ssr: false, src: '~plugins/linkify.js' },
   ],
   //buildModules: ["@nuxtjs/vuetify"],
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
+    '@nuxtjs/gtm',
     "@nuxtjs/axios",
+    '@nuxtjs/auth',
     "@nuxtjs/proxy",
+    'vuetify-dialog/nuxt',
     "nuxtjs-mdi-font",
     "vuetify-dialog/nuxt",
     "@nuxtjs/pwa",
     "@nuxtjs/device"
   ],
+  auth: {
+    redirect: {
+      login: '/', // redirect user when not connected
+      callback: '/auth/signed-in'
+    },
+    strategies: {
+      local: false,
+      auth0: {
+        domain: 'dev-70h9jj-e.us.auth0.com',
+        client_id: 'zkDwTexHdXrs1w8sCkO3KEHRBI0P4FP4',
+      }
+    }
+  },
   server: {
     port: process.env.NODE_PORT || 8000,
     host: process.env.NODE_HOST || "0.0.0.0"
@@ -159,6 +182,21 @@ module.exports = {
       ? "/"
       : "/",
     extendRoutes(routes, resolve) {
+      routes.push({
+        name: 'player1',
+        path: '/player',
+        component: resolve(__dirname, 'pages/stations/_stationId/index.vue')
+      });
+      routes.push({
+        name: 'station1',
+        path: '/stations',
+        component: resolve(__dirname, 'pages/stations/_stationId/index.vue')
+      });
+      routes.push({
+        name: 'darkst',
+        path: '/darkstep',
+        component: resolve(__dirname, 'pages/stations/_stationId/index.vue')
+      });
       routes.push({
         name: "station1",
         path: "/",

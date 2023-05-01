@@ -6,7 +6,7 @@
           <TopMenu />
         </v-col>
         <v-col cols="12" style="width: 650px; background: #000;">
-            <div id="twitchDiv"></div>
+<iframe id="player" frameborder="0" src="https://dnbradio.com/embed/live?bg=&amp;ref=http://dnbradio.com" width="780" height="310" style="border: 0px solid #d1d1d1; background-color: #efefef;"></iframe>
         </v-col>
         <v-col cols="8" style="background: #fff; font-size: 12px; color: #000;">
           <v-card flat>
@@ -45,17 +45,14 @@
           </v-card>
 
           <v-card flat style="margin-top: 15px; text-align:center;">
-            <img src="https://dnbradio.com/img/mediakit_ildnb_small.jpg" />
           </v-card>
         </v-col>
         <v-col cols="12" style="text-align:center;">
-          <a href="/archive">
-            <img src="https://feeds.feedburner.com/dnbradioarchive.gif?w=2&c=1&bb=3lhq" style="margin: auto;" width="468" height="60" />
-          </a>
+
         </v-col>
       </v-row>
     </v-container>
-     
+
   </div>
 </template>
 
@@ -66,32 +63,31 @@ export default {
   components: { TopMenu },
   methods: {
     launchPlay() {
-      
+
     }
   },
   mounted() {
-    var options = {
-      width: '100%',
-      height: '330',
-      branding: false,
-      showInfo: false,
-      channel: "dnbradioofficial",
-      autoplay: false,
-      muted: false,
-      // only needed if your site is also embedded on embed.example.com and othersite.example.com 
-      parent: ["www.dnbradio.com", "dnbradio.com", "192.168.50.213:9000"],
-    };
-    var player = new Twitch.Player("twitchDiv", options);
-    player.setVolume(1);
+    // var options = {
+    //   width: '100%',
+    //   height: '330',
+    //   branding: false,
+    //   showInfo: false,
+    //   channel: "dnbradioofficial",
+    //   autoplay: false,
+    //   muted: false,
+    //   // only needed if your site is also embedded on embed.example.com and othersite.example.com
+    //   parent: ["www.dnbradio.com", "dnbradio.com", "192.168.50.213:9000"],
+    // };
+    // var player = new Twitch.Player("twitchDiv", options);
+    // player.setVolume(1);
   }
 }
 
- 
+
 </script>
 <style>
 .playerNavBar {  margin-top: 12px; text-align: right; font-size: 16px; margin-bottom: 10px;}
-.playerNavBar a { color: white !important; text-decoration: none; padding: 5px; 
+.playerNavBar a { color: white !important; text-decoration: none; padding: 5px;
   background-color: #837D7D; }
 .playerNavBar a:hover { background-color: #3D3838 !important; }
-</style>	
- 
+</style>
