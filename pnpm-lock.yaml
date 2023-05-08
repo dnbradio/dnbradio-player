@@ -52,6 +52,9 @@ dependencies:
   email-validator:
     specifier: ^2.0.4
     version: 2.0.4
+  fs:
+    specifier: 0.0.1-security
+    version: registry.npmjs.org/fs@0.0.1-security
   linkifyjs:
     specifier: ^2.1.9
     version: 2.1.9(jquery@3.6.4)(react-dom@16.14.0)(react@16.14.0)
@@ -2548,7 +2551,7 @@ packages:
       source-map: 0.6.1
       vue-template-es2015-compiler: 1.9.1
     optionalDependencies:
-      prettier: 2.8.7
+      prettier: registry.npmjs.org/prettier@2.8.7
     transitivePeerDependencies:
       - arc-templates
       - atpl
@@ -3478,27 +3481,6 @@ packages:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
     dev: false
 
-  /chokidar@2.1.8:
-    resolution: {integrity: sha512-ZmZUazfOzf0Nve7duiCKD23PFSCs4JPoYyccjUFF3aQkQadqBhfzhjkwBH2mNOG9cTBwhamM37EIsIkZw3nRgg==}
-    deprecated: Chokidar 2 does not receive security updates since 2019. Upgrade to chokidar 3 with 15x fewer dependencies
-    dependencies:
-      anymatch: 2.0.0
-      async-each: 1.0.6
-      braces: 2.3.2
-      glob-parent: 3.1.0
-      inherits: 2.0.4
-      is-binary-path: 1.0.1
-      is-glob: 4.0.3
-      normalize-path: 3.0.0
-      path-is-absolute: 1.0.1
-      readdirp: 2.2.1
-      upath: 1.2.0
-    optionalDependencies:
-      fsevents: 1.2.13
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   /chokidar@3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
     engines: {node: '>= 8.10.0'}
@@ -3511,7 +3493,7 @@ packages:
       normalize-path: 3.0.0
       readdirp: 3.6.0
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: registry.npmjs.org/fsevents@2.3.2
 
   /chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
@@ -4967,7 +4949,7 @@ packages:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.0
     dev: false
@@ -4976,7 +4958,7 @@ packages:
     resolution: {integrity: sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==}
     engines: {node: '>=6 <7 || >=8'}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       jsonfile: 4.0.0
       universalify: 0.1.2
     dev: false
@@ -5009,31 +4991,13 @@ packages:
   /fs-write-stream-atomic@1.0.10:
     resolution: {integrity: sha512-gehEzmPn2nAwr39eay+x3X34Ra+M2QlVUTLhkXPjWdeO8RF9kszk116avgBJM3ZyNHgHXBNx+VmPaFC36k0PzA==}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       iferr: 0.1.5
       imurmurhash: 0.1.4
       readable-stream: 2.3.8
 
   /fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
-
-  /fsevents@1.2.13:
-    resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
-    engines: {node: '>= 4.0'}
-    os: [darwin]
-    deprecated: fsevents 1 will break on node v14+ and could be using insecure binaries. Upgrade to fsevents 2.
-    requiresBuild: true
-    dependencies:
-      bindings: 1.5.0
-      nan: 2.17.0
-    optional: true
-
-  /fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
-    requiresBuild: true
-    optional: true
 
   /function-bind@1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
@@ -5194,7 +5158,7 @@ packages:
     dependencies:
       chalk: 2.4.2
       find-cache-dir: 2.1.0
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       lodash: 4.17.21
       mkdirp: 0.5.6
       node-object-hash: 1.4.2
@@ -5881,7 +5845,7 @@ packages:
   /jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
     optionalDependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
     dev: false
 
   /jsonfile@6.1.0:
@@ -5889,7 +5853,7 @@ packages:
     dependencies:
       universalify: 2.0.0
     optionalDependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
     dev: false
 
   /kareem@2.3.2:
@@ -6382,7 +6346,7 @@ packages:
       optional-require: 1.1.8
       safe-buffer: 5.2.1
     optionalDependencies:
-      saslprep: 1.0.3
+      saslprep: registry.npmjs.org/saslprep@1.0.3
     dev: true
 
   /mongoose-legacy-pluralize@1.0.2(mongoose@5.13.16):
@@ -7853,6 +7817,7 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
     requiresBuild: true
+    dev: true
 
   /pretty-bytes@5.6.0:
     resolution: {integrity: sha512-FFw039TmrBqFK8ma/7OL3sDz/VytdtJr044/QUJtH0wK9lb9jLq9tJyIxUwtQJHwar2BqtiA4iCWSwo9JLkzFg==}
@@ -7898,7 +7863,7 @@ packages:
   /proper-lockfile@4.1.2:
     resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       retry: 0.12.0
       signal-exit: 3.0.7
     dev: false
@@ -8077,7 +8042,7 @@ packages:
     resolution: {integrity: sha512-1JU/8q+VgFZyxwrJ+SVIOsh+KywWGpds3NTqikiKpDMZWScmAYyKIgqkO+ARvNWJfXeXR1zxz7aHF4u4CyH6vQ==}
     engines: {node: '>=0.10'}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       micromatch: 3.1.10
       readable-stream: 2.3.8
     transitivePeerDependencies:
@@ -8301,15 +8266,6 @@ packages:
 
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
-
-  /saslprep@1.0.3:
-    resolution: {integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      sparse-bitfield: 3.0.3
-    dev: true
-    optional: true
 
   /sass-loader@10.4.1(sass@1.32.13)(webpack@4.46.0):
     resolution: {integrity: sha512-aX/iJZTTpNUNx/OSYzo2KsjIUQHqvWsAhhUijFjAPdZTEhstjZI9zTNvkTTwsx+uNUJqUwOw5gacxQMx4hJxGQ==}
@@ -9551,23 +9507,14 @@ packages:
       vue: 2.7.14
     dev: false
 
-  /watchpack-chokidar2@2.0.1:
-    resolution: {integrity: sha512-nCFfBIPKr5Sh61s4LPpy1Wtfi0HE8isJ3d2Yb5/Ppw2P2B/3eVSEBjKfN0fmHJSK14+31KwMKmcrzs2GM4P0Ww==}
-    requiresBuild: true
-    dependencies:
-      chokidar: 2.1.8
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
   /watchpack@1.7.5:
     resolution: {integrity: sha512-9P3MWk6SrKjHsGkLT2KHXdQ/9SNkyoJbabxnKOoJepsvJjJG8uYTR3yTPxPQvNDI3w4Nz1xnE0TLHK4RIVe/MQ==}
     dependencies:
       graceful-fs: 4.2.11
       neo-async: 2.6.2
     optionalDependencies:
-      chokidar: 3.5.3
-      watchpack-chokidar2: 2.0.1
+      chokidar: registry.npmjs.org/chokidar@3.5.3
+      watchpack-chokidar2: registry.npmjs.org/watchpack-chokidar2@2.0.1
     transitivePeerDependencies:
       - supports-color
 
@@ -9576,7 +9523,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
     dev: false
 
   /webidl-conversions@3.0.1:
@@ -9762,7 +9709,7 @@ packages:
   /write-file-atomic@2.4.3:
     resolution: {integrity: sha512-GaETH5wwsX+GcnzhPgKcKjJ6M2Cq3/iZp1WyY/X1CSqrW+jVNM9Y7D8EC2sM4ZG/V8wZlSniJnCKWPmBYAucRQ==}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
     dev: false
@@ -9772,7 +9719,7 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       detect-indent: 5.0.0
-      graceful-fs: 4.2.11
+      graceful-fs: registry.npmjs.org/graceful-fs@4.2.11
       make-dir: 1.3.0
       pify: 3.0.0
       sort-keys: 2.0.0
@@ -9836,3 +9783,109 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: false
+
+  registry.npmjs.org/chokidar@2.1.8:
+    resolution: {integrity: sha512-ZmZUazfOzf0Nve7duiCKD23PFSCs4JPoYyccjUFF3aQkQadqBhfzhjkwBH2mNOG9cTBwhamM37EIsIkZw3nRgg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/chokidar/-/chokidar-2.1.8.tgz}
+    name: chokidar
+    version: 2.1.8
+    deprecated: Chokidar 2 does not receive security updates since 2019. Upgrade to chokidar 3 with 15x fewer dependencies
+    dependencies:
+      anymatch: 2.0.0
+      async-each: 1.0.6
+      braces: 2.3.2
+      glob-parent: 3.1.0
+      inherits: 2.0.4
+      is-binary-path: 1.0.1
+      is-glob: 4.0.3
+      normalize-path: 3.0.0
+      path-is-absolute: 1.0.1
+      readdirp: 2.2.1
+      upath: 1.2.0
+    optionalDependencies:
+      fsevents: registry.npmjs.org/fsevents@1.2.13
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
+  registry.npmjs.org/chokidar@3.5.3:
+    resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/chokidar/-/chokidar-3.5.3.tgz}
+    name: chokidar
+    version: 3.5.3
+    engines: {node: '>= 8.10.0'}
+    requiresBuild: true
+    dependencies:
+      anymatch: 3.1.3
+      braces: 3.0.2
+      glob-parent: 5.1.2
+      is-binary-path: 2.1.0
+      is-glob: 4.0.3
+      normalize-path: 3.0.0
+      readdirp: 3.6.0
+    optionalDependencies:
+      fsevents: registry.npmjs.org/fsevents@2.3.2
+    optional: true
+
+  registry.npmjs.org/fs@0.0.1-security:
+    resolution: {integrity: sha512-3XY9e1pP0CVEUCdj5BmfIZxRBTSDycnbqhIOGec9QYtmVH2fbLpj86CFWkrNOkt/Fvty4KZG5lTglL9j/gJ87w==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/fs/-/fs-0.0.1-security.tgz}
+    name: fs
+    version: 0.0.1-security
+    dev: false
+
+  registry.npmjs.org/fsevents@1.2.13:
+    resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/fsevents/-/fsevents-1.2.13.tgz}
+    name: fsevents
+    version: 1.2.13
+    engines: {node: '>= 4.0'}
+    os: [darwin]
+    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
+    requiresBuild: true
+    dependencies:
+      bindings: 1.5.0
+      nan: 2.17.0
+    optional: true
+
+  registry.npmjs.org/fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz}
+    name: fsevents
+    version: 2.3.2
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+    requiresBuild: true
+    optional: true
+
+  registry.npmjs.org/graceful-fs@4.2.11:
+    resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.11.tgz}
+    name: graceful-fs
+    version: 4.2.11
+
+  registry.npmjs.org/prettier@2.8.7:
+    resolution: {integrity: sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/prettier/-/prettier-2.8.7.tgz}
+    name: prettier
+    version: 2.8.7
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  registry.npmjs.org/saslprep@1.0.3:
+    resolution: {integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/saslprep/-/saslprep-1.0.3.tgz}
+    name: saslprep
+    version: 1.0.3
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dependencies:
+      sparse-bitfield: 3.0.3
+    dev: true
+    optional: true
+
+  registry.npmjs.org/watchpack-chokidar2@2.0.1:
+    resolution: {integrity: sha512-nCFfBIPKr5Sh61s4LPpy1Wtfi0HE8isJ3d2Yb5/Ppw2P2B/3eVSEBjKfN0fmHJSK14+31KwMKmcrzs2GM4P0Ww==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/watchpack-chokidar2/-/watchpack-chokidar2-2.0.1.tgz}
+    name: watchpack-chokidar2
+    version: 2.0.1
+    requiresBuild: true
+    dependencies:
+      chokidar: registry.npmjs.org/chokidar@2.1.8
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
