@@ -37,25 +37,6 @@
             </v-card>
           </v-col>
           <v-col cols="2">
-            <!-- <v-card flat style="background:none;">
-              <div
-                style=" height: 440px; padding: 0px; font-size: 13px; color: #fff;"
-              >
-                <br />
-                <v-btn>Donate</v-btn>
-                <br /><br />Donations help pay licensing, hosting, and
-                development.<br /><br />
-
-                <strong>Latest Contributions</strong>
-                <div
-                  v-for="person in persons"
-                  :key="person.name"
-                  style="font-size: 1.1em;"
-                >
-                  {{ person.amount }} {{ person.name }}
-                </div>
-              </div>
-            </v-card> -->
           </v-col>
           <v-col cols="12">
             <v-card
