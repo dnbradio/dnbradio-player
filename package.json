@@ -6,11 +6,11 @@
   "private": true,
   "scripts": {
     "dev": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt",
-    "generate": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=\"/player-dev/\" nuxt generate --devtools; echo $APP_BRANCH",
-    "upload": "export APP_BRANCH=$(git symbolic-ref --short HEAD); tar czf - dist/ | ssh dnbradio \"rm -rf \".dnbradio-deploy-$APP_BRANCH\"; mkdir -p \"./.dnbradio-deploy-$APP_BRANCH\"; cd \"./.dnbradio-deploy-$APP_BRANCH\" && tar xvzf - && rm -rf \"/var/www/dnbradio_site/html/player-$APP_BRANCH\" && mv dist \"/var/www/dnbradio_site/html/player-$APP_BRANCH\"\"; echo \"\n\nDeployed to -> https://dnbradio.com/player-$APP_BRANCH/\"",
+    "generate": "export APP_BRANCH=dev; ROUTER_BASE=\"/player-dev/\" nuxt generate --devtools; echo $APP_BRANCH",
+    "upload": "export APP_BRANCH=$(git symbolic-ref --short HEAD); tar czf - dist/ | ssh dnbradio \"rm -rf \".dnbradio-deploy-$APP_BRANCH\"; mkdir -p \"./.dnbradio-deploy-$APP_BRANCH\"; cd \"./.dnbradio-deploy-$APP_BRANCH\" && tar xvzf - && rm -rf \"/root/apps/www/html/player-$APP_BRANCH\" && mv dist \"/root/apps/www/html/player-$APP_BRANCH\"\"; echo \"\n\nDeployed to -> https://dnbradio.com/player-$APP_BRANCH/\"",
     "debug": "export APP_BRANCH=$(git symbolic-ref --short HEAD); nuxt generate --devtools && nuxt start",
     "generate-prod": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt generate",
-    "upload-prod": "tar czf - dist/ | ssh dnbradio 'rm -rf .dnbradio-deploy-tmp; mkdir -p ./.dnbradio-deploy-tmp; cd ./.dnbradio-deploy-tmp && tar xvzf - && rm -rf /var/www/dnbradio_site/html/player && mv dist /var/www/dnbradio_site/html/player';  echo \"\n\nDeployed to -> https://dnbradio.com/player/\"",
+    "upload-prod": "tar czf - dist/ | ssh dnbradio 'rm -rf .dnbradio-deploy-tmp; mkdir -p ./.dnbradio-deploy-tmp; cd ./.dnbradio-deploy-tmp && tar xvzf - && rm -rf /root/apps/www/html/player && mv dist /root/apps/www/html/player';  echo \"\n\nDeployed to -> https://dnbradio.com/player/\"",
     "start": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt start",
     "build": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=\"/player-$APP_BRANCH/\" nuxt build",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
