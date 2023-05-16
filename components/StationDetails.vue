@@ -309,7 +309,7 @@
                 title="Contribute to dnbradio-player on GitHub"
                 target="_blank"
                 style="text-decoration: none; color: #a0a0a0"
-                >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}
+                >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}/{{userAgent}}
                 <img
                   src="/player/github-mark-white.svg"
                   height="12"
@@ -1023,6 +1023,11 @@ export default {
     }
   },
   computed: {
+    userAgent() {
+      if (!navigator) return "";
+      if (!process.client) return "";
+      return navigator.userAgent;
+    },
     playerVisualsEnabled() {
       return this.$store.state.player.visualsEnabled;
     },
@@ -1260,15 +1265,15 @@ html {
   min-width: auto;
 }
 .animate-border {
-  --angle: 0deg;
+  --angle: 45deg;
   border: 1px solid;
   border-image: linear-gradient(var(--angle), #090909, #929292, #000000) 1;
   position: relative;
-  animation: 20s rotate linear infinite;
+  /** animation: 20s rotate linear infinite; **/
   padding: 10px;
   padding-bottom: 20px;
   backdrop-filter: blur(10px);
-  background: linear-gradient(45deg, rgb(0,10,0,0.3), transparent);
+  background: linear-gradient(90deg, rgb(0,10,0,0.3), transparent);
   position: absolute;
   top:50%;
   left: 50%;
