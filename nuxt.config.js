@@ -36,7 +36,7 @@ module.exports = {
   publicRuntimeConfig: {
     APP_VERSION: process.env.APP_VERSION || APP_VERSION,
     APP_BRANCH: process.env.APP_BRANCH || "",
-    APP_BASE_URL: process.env.ROUTER_BASE || "",
+    APP_BASE_URL: process.env.ROUTER_BASE || "/",
   },
   /*
    ** Headers of the page

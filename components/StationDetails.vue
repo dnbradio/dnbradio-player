@@ -194,7 +194,7 @@
                   class="user-footer-link"
                   >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}/{{userAgent}}
                   <img
-                    :src="`${this.APP_BASE_URL}/github-mark-white.svg`"
+                    :src="`${this.APP_BASE_URL}github-mark-white.svg`"
                     height="12"
                     alt="GitHub"
                     style="margin-left: 3px"
