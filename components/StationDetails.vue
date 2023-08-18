@@ -1166,8 +1166,16 @@ html {
   left: 50%;
   transform: translate(-50%, -50%);
   min-width: 300px;
-  height: 100%;
-  max-width: calc(100% - 4rem);
+  height: calc(100% - 20px);
+  max-width: 500px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .animate-border {
+    border: none;
+  }
+  
 }
 .animation-none {
   animation: none;
@@ -1284,7 +1292,7 @@ html {
   border: 0px;
   margin: auto;
   box-shadow: none;
-  background-color: transparent;
+  background-color: transparent!important;
 }
 .bottom-indicator{
   margin-top: 10px; color: rgb(99, 99, 99);
@@ -1314,6 +1322,17 @@ html {
   max-width: 500px;
   margin: auto;
   width: 100%;
+}
+@media screen and (max-width: 500px) {
+  .animate-border {
+    max-width: calc(100% - 2rem);
+    padding:0px;
+  }
+  .user-image-mark{
+    width: 75%;
+    max-width: 270px;
+  }
+  
 }
 </style>
 <style scoped>
