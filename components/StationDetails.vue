@@ -908,7 +908,8 @@ export default {
   },
   computed: {
     basePath() {
-      return process.env?.ROUTER_BASE ?? '/';
+      // from router
+      return this.$router.options.base;
     },
     userAgent() {
       if (!navigator) return "";
@@ -1175,7 +1176,7 @@ html {
   .animate-border {
     border: none;
   }
-  
+
 }
 .animation-none {
   animation: none;
@@ -1332,7 +1333,7 @@ html {
     width: 75%;
     max-width: 270px;
   }
-  
+
 }
 </style>
 <style scoped>
