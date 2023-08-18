@@ -1327,6 +1327,7 @@ html {
   }
   .user-image-mark{
     width: 75%;
+    max-width: 270px;
   }
   
 }
