@@ -1289,7 +1289,7 @@ html {
   border: 0px;
   margin: auto;
   box-shadow: none;
-  background-color: transparent;
+  background-color: transparent!important;
 }
 .bottom-indicator{
   margin-top: 10px; color: rgb(99, 99, 99);
@@ -1326,7 +1326,7 @@ html {
     padding:0px;
   }
   .user-image-mark{
-    width: 80%;
+    width: 75%;
   }
   
 }
