@@ -5,10 +5,9 @@
   "author": "keybrdistt",
   "private": true,
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "dev": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt",
-    "generate": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=\"/player-$APP_BRANCH/\" nuxt generate --devtools; echo $APP_BRANCH",
-    "upload": "export APP_BRANCH=$(git symbolic-ref --short HEAD); tar czf - dist/ | ssh dnbradio \"rm -rf \".dnbradio-deploy-$APP_BRANCH\"; mkdir -p \"./.dnbradio-deploy-$APP_BRANCH\"; cd \"./.dnbradio-deploy-$APP_BRANCH\" && tar xvzf - && rm -rf \"/var/www/dnbradio_site/html/player-$APP_BRANCH\" && mv dist \"/var/www/dnbradio_site/html/player-$APP_BRANCH\"\"; echo \"\n\nDeployed to -> https://dnbradio.com/player-$APP_BRANCH/\"",
+    "generate": "export APP_BRANCH=dev; ROUTER_BASE=\"/player-dev/\" nuxt generate --devtools; echo $APP_BRANCH",
+    "upload": "export APP_BRANCH=$(git symbolic-ref --short HEAD); tar czf - dist/ | ssh dnbradio \"rm -rf \".dnbradio-deploy-$APP_BRANCH\"; mkdir -p \"./.dnbradio-deploy-$APP_BRANCH\"; cd \"./.dnbradio-deploy-$APP_BRANCH\" && tar xvzf - && rm -rf \"/root/apps/www/html/player-$APP_BRANCH\" && mv dist \"/root/apps/www/html/player-$APP_BRANCH\"\"; echo \"\n\nDeployed to -> https://dnbradio.com/player-$APP_BRANCH/\"",
     "debug": "export APP_BRANCH=$(git symbolic-ref --short HEAD); nuxt generate --devtools && nuxt start",
     "generate-prod": "export APP_BRANCH=$GITHUB_REF_NAME; ROUTER_BASE=/player/ nuxt generate",
     "upload-prod": "tar czf - dist/ | ssh dnbradio 'rm -rf .dnbradio-deploy-tmp; mkdir -p ./.dnbradio-deploy-tmp; cd ./.dnbradio-deploy-tmp && tar xvzf - && rm -rf /var/www/dnbradio_site/html/player && mv dist /var/www/dnbradio_site/html/player';  echo \"\n\nDeployed to -> https://dnbradio.com/player/\"",
@@ -34,6 +33,7 @@
     "crypto-random-string": "^3.3.1",
     "debounce": "^1.2.1",
     "email-validator": "^2.0.4",
+    "fs": "0.0.1-security",
     "linkifyjs": "^2.1.9",
     "moment-timezone": "^0.5.42",
     "nuxt": "^2.16.3",
@@ -56,9 +56,8 @@
     "vuex": "^2.5.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.1343.0",
-    "vue-server-renderer": "^2.7.14",
     "@nuxtjs/vuetify": "^1.12.3",
+    "aws-sdk": "^2.1343.0",
     "consola": "^2.15.3",
     "core-js": "^2.6.12",
     "cors": "^2.8.5",
@@ -66,6 +65,7 @@
     "defu": "^6.1.2",
     "express": "^4.18.2",
     "jquery": "^3.6.4",
+    "moment-timezone-data-webpack-plugin": "^1.5.1",
     "mongoose": "^5.13.16",
     "node-fetch-native": "^1.0.2",
     "nodemon": "^2.0.22",
@@ -73,8 +73,8 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "ufo": "^1.1.1",
+    "vue-server-renderer": "^2.7.14",
     "vue-template-compiler": "^2.7.14",
-    "webpack": "^4.46.0",
-    "moment-timezone-data-webpack-plugin": "^1.5.1"
+    "webpack": "^4.46.0"
   }
 }
