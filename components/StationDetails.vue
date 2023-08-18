@@ -71,7 +71,7 @@
             </p>
             <div v-else class="user-blank"/>
           </div>
-          <div 
+          <div
             :style="`background-image: url(${cover})`"
             class="user-image-mark"
             :class="isLoading || isPlaying ? 'pulse' : 'faded'"
@@ -194,11 +194,11 @@
                   class="user-footer-link"
                   >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}/{{userAgent}}
                   <img
-                    src="/player/github-mark-white.svg"
+                    :src="`${this.basePath}/github-mark-white.svg`"
                     height="12"
                     alt="GitHub"
                     style="margin-left: 3px"
-                  /> 
+                  />
               </a>
           </div>
         </div>
@@ -907,6 +907,9 @@ export default {
     }
   },
   computed: {
+    basePath() {
+      return process.env?.ROUTER_BASE ?? '/';
+    },
     userAgent() {
       if (!navigator) return "";
       if (!process.client) return "";
@@ -1181,7 +1184,7 @@ html {
   initial-value: 0deg;
   inherits: false;
 }
-         
+
 .user-v-toolbar{
   margin: auto; opacity: 1; position: relative; z-index: 1000
 }
@@ -1246,7 +1249,7 @@ html {
   margin: 0;
 }
 .user-card-text{
-  text-align: center; 
+  text-align: center;
 }
 .user-artist{
   font-size: 14px;
@@ -1298,7 +1301,7 @@ html {
   line-height: normal;
 }
 .user-footer-link{
-  text-decoration: none; 
+  text-decoration: none;
   color: #a0a0a0;
   font-size: 9px;
   opacity: 0.4;
