@@ -194,7 +194,7 @@
                   class="user-footer-link"
                   >dnbradio-player/{{ APP_BRANCH }}:v{{ APP_VERSION }}/{{userAgent}}
                   <img
-                    :src="`${this.basePath}/github-mark-white.svg`"
+                    :src="`${this.APP_BASE_URL}/github-mark-white.svg`"
                     height="12"
                     alt="GitHub"
                     style="margin-left: 3px"
@@ -907,9 +907,8 @@ export default {
     }
   },
   computed: {
-    basePath() {
-      // from router
-      return this.$router.options.base;
+    APP_BASE_URL() {
+      return this.$config.APP_BASE_URL;
     },
     userAgent() {
       if (!navigator) return "";
