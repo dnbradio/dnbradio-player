@@ -1320,7 +1320,7 @@ html {
   background-repeat: no-repeat;
   background-position: center center;
   flex: 1;
-  max-width: 500px;
+  max-width: 270px;
   margin: auto;
   width: 100%;
 }
