@@ -1145,7 +1145,7 @@ html {
 .animate-border {
   --angle: 45deg;
   border: 1px solid;
-  border-image: linear-gradient(var(--angle), #090909, #929292, #000000) 1;
+  border-image: linear-gradient(var(--angle), #090909, #302f2f, #000000) 1;
   padding: 1rem;
   padding-bottom: 2rem;
   backdrop-filter: blur(10px);
