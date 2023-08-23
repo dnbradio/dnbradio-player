@@ -77,7 +77,7 @@
           <div
             :style="`background-image: url(${cover})`"
             class="user-image-mark"
-            :class="isLoading || isPlaying ? 'pulse' : 'faded'"
+            :class="[isLoading || isPlaying ? 'pulse' : 'faded', (windowHeight > windowWidth) ? 'big-image': '']"
             @click="playIfStopped()"/>
           </div>
         <div style="flex-shrink: 0">
@@ -177,8 +177,12 @@
                 color="transparent"
                 @click="$router.push('/stations/' + currIndex + '/donate')"
               >
-              <p class="hidden-sm-and-up user-keep-up">Keepin' the beats rollin' on dnbradio!</p>
-              <p class="hidden-xs-only user-keep-up-big">Keepin' the beats rollin' on dnbradio!</p>
+              <p class="hidden-sm-and-up user-keep-up" :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'">
+                Keepin' the beats rollin' on dnbradio!
+              </p>
+              <p class="hidden-xs-only user-keep-up-big" :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'">
+                Keepin' the beats rollin' on dnbradio!
+              </p>
               </v-btn>
               <br />
               <a
@@ -1302,11 +1306,13 @@ html {
   font-size: 0.5em;
   font-weight: 500;
   line-height: normal;
+  margin: 0;
 }
 .user-keep-up-big{
   font-size: 0.6em;
   font-weight: 500;
   line-height: normal;
+  margin: 0;
 }
 .user-footer-link{
   text-decoration: none;
@@ -1321,6 +1327,10 @@ html {
   flex: 1;
   max-width: 270px;
   margin: auto;
+  width: 100%;
+}
+.big-image{
+  max-width: 70%;
   width: 100%;
 }
 .big-font{
