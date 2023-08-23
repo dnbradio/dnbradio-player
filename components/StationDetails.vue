@@ -31,10 +31,10 @@
           @click="playerToggleVisuals"
           value="vis"
         >
-          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">brightness_2</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">brightness_2</v-icon>
         </v-btn>
         <v-btn v-else icon style="opacity: 0.3" @click="playerToggleVisuals" value="vis">
-          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">brightness_2</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">brightness_2</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
 
@@ -43,7 +43,7 @@
           @click="showStationDetails = !showStationDetails"
           style="opacity: 0.3"
         >
-          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-information-outline</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-information-outline</v-icon>
         </v-btn>
 
         <v-btn
@@ -52,7 +52,7 @@
           v-if="$device.isDesktop"
           style="opacity: 0.3"
         >
-          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-open-in-new</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-open-in-new</v-icon>
         </v-btn>
       </v-toolbar>
       <div class="transparent user-v-card" :class="(windowHeight > windowWidth) ? 'big-font': 'normal-font'"
@@ -103,18 +103,18 @@
           <v-card-actions p0 fluid>
             <v-row justify="space-around" class="user-button-group">
               <v-btn icon @click="loadPrev(false)">
-                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">skip_previous</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">skip_previous</v-icon>
               </v-btn>
               <v-btn icon @click="volDown">
-                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-volume-minus</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-volume-minus</v-icon>
               </v-btn>
-              <v-icon :size="windowHeight > windowWidth ? 100: 50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
-              <v-icon :size="windowHeight > windowWidth ? 100: 50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
+              <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
+              <v-icon size="50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
               <v-btn icon @click="volUp">
-                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-volume-plus</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-volume-plus</v-icon>
               </v-btn>
               <v-btn icon @click="loadNext(false)">
-                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">skip_next</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">skip_next</v-icon>
               </v-btn>
             </v-row>
           </v-card-actions>
@@ -124,9 +124,8 @@
             :disabled="!station || !station.podcast"
             @click="$router.push('/stations/' + currIndex + '/podcast')"
             class="nav-button"
-            :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <v-icon dark :size="windowHeight > windowWidth ? 74: 24">voicemail</v-icon>
+              <v-icon dark size="24">voicemail</v-icon>
               <p>podcast</p>
             </button>
             <button
@@ -134,18 +133,16 @@
               @click="$router.push('/stations/' + currIndex + '/schedule')"
               value="calendar"
               class="nav-button"
-              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-            <v-icon dark :size="windowHeight > windowWidth ? 74: 24">mdi-calendar-month</v-icon>
+            <v-icon dark size="24">mdi-calendar-month</v-icon>
               <p>schedule</p>
             </button>
             <button
               @click="$router.push('/stations/' + currIndex + '/donate')"
               value="favorite"
               class="nav-button"
-              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-            <v-icon dark color="red" :size="windowHeight > windowWidth ? 74: 24">favorite</v-icon>
+            <v-icon dark color="red" size="24">favorite</v-icon>
               <p>donate</p>
             </button>
             <button
@@ -153,9 +150,8 @@
               @click="launchLink('https://shop.dnbradio.com')"
               value="shop"
               class="nav-button"
-              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <v-icon dark :size="windowHeight > windowWidth ? 74: 24">mdi-tshirt-crew</v-icon>
+              <v-icon dark size="24">mdi-tshirt-crew</v-icon>
               <p>merch</p>
             </button>
             <button
@@ -163,9 +159,8 @@
               @click="$router.push('/stations/' + currIndex + '/chat')"
               value="chat"
               class="nav-button"
-              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <v-icon dark :size="windowHeight > windowWidth ? 74: 24">mdi-forum-outline</v-icon>
+              <v-icon dark size="24">mdi-forum-outline</v-icon>
               <p>chat</p>
             </button>
           </v-bottom-navigation>
@@ -211,7 +206,7 @@
       <v-card v-if="station">
         <v-toolbar dark>
           <v-btn icon dark @click="showStationDetails = false">
-            <v-icon :size="windowHeight > windowWidth ? 74: 24">mdi-close</v-icon>
+            <v-icon :size="windowHeight > windowWidth ? 32: 24">mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title>Station Info</v-toolbar-title>
           <v-spacer></v-spacer>
@@ -237,36 +232,36 @@
         <v-card-text class="text--primary">
           <div class="pb-2" v-if="station.website">
             <v-btn rounded @click="launchLink(station.website)">
-              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-web</v-icon>Website
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-web</v-icon>Website
             </v-btn>
           </div>
           <div class="pb-6" v-if="station.podcast && station.podcast.website">
             <v-btn rounded @click="launchLink(station.podcast.website)">
-              <v-icon left :size="windowHeight > windowWidth ? 74: 24">voicemail</v-icon> Podcast
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">voicemail</v-icon> Podcast
             </v-btn>
           </div>
 
           <div class="pb-2" v-if="station.facebook">
             <v-btn rounded @click="launchLink(station.facebook)">
-              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-facebook</v-icon>
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-facebook</v-icon>
               <p>Facebook</p> 
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.twitter">
             <v-btn rounded @click="launchLink(station.twitter)">
-              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-twitter</v-icon> 
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-twitter</v-icon> 
               <p>Twitter</p>
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.instagram">
             <v-btn rounded @click="launchLink(station.instagram)">
-              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-instagram</v-icon>
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-instagram</v-icon>
               <p>Instagram</p>
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.soundcloud">
             <v-btn rounded @click="launchLink(station.soundcloud)">
-              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-soundcloud</v-icon>
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-soundcloud</v-icon>
               <p>Soundcloud</p>
             </v-btn>
           </div>
@@ -1150,7 +1145,7 @@ html {
 .animate-border {
   --angle: 45deg;
   border: 1px solid;
-  border-image: linear-gradient(var(--angle), #090909, #929292, #000000) 1;
+  border-image: linear-gradient(var(--angle), #090909, #302f2f, #000000) 1;
   padding: 1rem;
   padding-bottom: 2rem;
   backdrop-filter: blur(10px);
@@ -1334,10 +1329,10 @@ html {
   width: 100%;
 }
 .big-font{
-  font-size: 3rem!important;
+  font-size: 1em!important;
 }
 .middle-font{
-  font-size: 2rem!important;
+  font-size: 1em!important;
 }
 .normal-font {
   font-size: 1em;
