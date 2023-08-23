@@ -11,9 +11,13 @@
     <div class="viscanvas-container" id="viscanvas-container">
       <canvas id="viscanvas"></canvas>
     </div>
-    <div :class="(windowWidth>=500) ? 'animate-border' : 'animate-border animation-none'">
+    <div
+      :class="[
+        windowWidth >= 500 ? 'animate-border' : 'animate-border animation-none',
+        windowHeight > windowWidth ? 'full-width' : 'fixed-width'
+      ]"
+    >
       <v-toolbar
-        :width="windowWidth"
         min-width="300"
         color="transparent"
         dark
@@ -27,12 +31,11 @@
           @click="playerToggleVisuals"
           value="vis"
         >
-          <v-icon medium dark>brightness_2</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">brightness_2</v-icon>
         </v-btn>
         <v-btn v-else icon style="opacity: 0.3" @click="playerToggleVisuals" value="vis">
-          <v-icon medium dark>brightness_2</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">brightness_2</v-icon>
         </v-btn>
-
         <v-spacer></v-spacer>
 
         <v-btn
@@ -40,7 +43,7 @@
           @click="showStationDetails = !showStationDetails"
           style="opacity: 0.3"
         >
-          <v-icon medium dark>mdi-information-outline</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-information-outline</v-icon>
         </v-btn>
 
         <v-btn
@@ -49,10 +52,10 @@
           v-if="$device.isDesktop"
           style="opacity: 0.3"
         >
-          <v-icon medium dark>mdi-open-in-new</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-open-in-new</v-icon>
         </v-btn>
       </v-toolbar>
-      <div class="transparent user-v-card"
+      <div class="transparent user-v-card" :class="(windowHeight > windowWidth) ? 'big-font': 'normal-font'"
         v-touch="{
           left: () => swipe('Left'),
           right: () => swipe('Right'),
@@ -78,7 +81,7 @@
             @click="playIfStopped()"/>
           </div>
         <div style="flex-shrink: 0">
-          <v-card-text class="user-card-text" p0>
+          <v-card-text class="user-card-text" p0 :class="(windowHeight > windowWidth) ? 'big-font': 'normal-font'">
             <p v-if="isOffline" class="offline-indicator indicator-text">DEVICE OFFLINE!</p>
             <p v-else-if="isLoading" class="indicator-text wait-indicator">Please Wait...</p>
             <p v-else-if="isStalled" class="offline-indicator indicator-text">{{ stalledMessage || 'Connection error. Please try again later.' }}</p>
@@ -100,80 +103,71 @@
           <v-card-actions p0 fluid>
             <v-row justify="space-around" class="user-button-group">
               <v-btn icon @click="loadPrev(false)">
-                <v-icon medium dark>skip_previous</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">skip_previous</v-icon>
               </v-btn>
               <v-btn icon @click="volDown">
-                <v-icon medium dark>mdi-volume-minus</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-volume-minus</v-icon>
               </v-btn>
-              <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
-              <v-icon size="50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
+              <v-icon :size="windowHeight > windowWidth ? 100: 50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
+              <v-icon :size="windowHeight > windowWidth ? 100: 50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
               <v-btn icon @click="volUp">
-                <v-icon medium dark>mdi-volume-plus</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">mdi-volume-plus</v-icon>
               </v-btn>
               <v-btn icon @click="loadNext(false)">
-                <v-icon medium dark>skip_next</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 74: 24">skip_next</v-icon>
               </v-btn>
             </v-row>
           </v-card-actions>
 
           <v-bottom-navigation class="flat stationNav" grow>
-            <v-btn
-              icon
-              style="opacity: 1; padding: 0px"
-              :disabled="!station || !station.podcast"
-              @click="$router.push('/stations/' + currIndex + '/podcast')"
-              value="podcast"
-              small
+            <button
+            :disabled="!station || !station.podcast"
+            @click="$router.push('/stations/' + currIndex + '/podcast')"
+            class="nav-button"
+            :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <span><small>podcast</small></span>
-              <v-icon dark>voicemail</v-icon>
-            </v-btn>
-
-            <v-btn
-              icon
-              style="opacity: 1"
+              <v-icon dark :size="windowHeight > windowWidth ? 74: 24">voicemail</v-icon>
+              <p>podcast</p>
+            </button>
+            <button
               :disabled="!station"
               @click="$router.push('/stations/' + currIndex + '/schedule')"
               value="calendar"
-              small
+              class="nav-button"
+              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <span><small>schedule</small></span>
-              <v-icon dark>mdi-calendar-month</v-icon>
-            </v-btn>
-
-            <v-btn
-              icon
+            <v-icon dark :size="windowHeight > windowWidth ? 74: 24">mdi-calendar-month</v-icon>
+              <p>schedule</p>
+            </button>
+            <button
               @click="$router.push('/stations/' + currIndex + '/donate')"
               value="favorite"
-              small
+              class="nav-button"
+              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <span><small>donate</small></span>
-              <v-icon dark color="red">favorite</v-icon>
-            </v-btn>
-
-            <v-btn
-              icon
-              style="opacity: 0.8"
+            <v-icon dark color="red" :size="windowHeight > windowWidth ? 74: 24">favorite</v-icon>
+              <p>donate</p>
+            </button>
+            <button
               :disabled="!station"
               @click="launchLink('https://shop.dnbradio.com')"
               value="shop"
-              small
+              class="nav-button"
+              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <span><small>merch</small></span>
-              <v-icon dark>mdi-tshirt-crew</v-icon>
-            </v-btn>
-
-            <v-btn
-              icon
-              style="opacity: 0.8"
+              <v-icon dark :size="windowHeight > windowWidth ? 74: 24">mdi-tshirt-crew</v-icon>
+              <p>merch</p>
+            </button>
+            <button
               :disabled="!station"
               @click="$router.push('/stations/' + currIndex + '/chat')"
               value="chat"
-              small
+              class="nav-button"
+              :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'"
             >
-              <span>chat</span>
-              <v-icon dark>mdi-forum-outline</v-icon>
-            </v-btn>
+              <v-icon dark :size="windowHeight > windowWidth ? 74: 24">mdi-forum-outline</v-icon>
+              <p>chat</p>
+            </button>
           </v-bottom-navigation>
           <div class="bottom-indicator">
               <v-btn
@@ -213,7 +207,7 @@
       <v-card v-if="station">
         <v-toolbar dark>
           <v-btn icon dark @click="showStationDetails = false">
-            <v-icon>mdi-close</v-icon>
+            <v-icon :size="windowHeight > windowWidth ? 74: 24">mdi-close</v-icon>
           </v-btn>
           <v-toolbar-title>Station Info</v-toolbar-title>
           <v-spacer></v-spacer>
@@ -237,39 +231,40 @@
         </v-card-subtitle>
 
         <v-card-text class="text--primary">
-          <!-- <div class="pb-2">
-            <v-btn><v-icon left>share</v-icon>Share</v-btn>
-          </div> -->
           <div class="pb-2" v-if="station.website">
-            <v-btn rounded @click="launchLink(station.website)"
-              ><v-icon left>mdi-web</v-icon>Website</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.website)">
+              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-web</v-icon>Website
+            </v-btn>
           </div>
           <div class="pb-6" v-if="station.podcast && station.podcast.website">
-            <v-btn rounded @click="launchLink(station.podcast.website)"
-              ><v-icon left>voicemail</v-icon> Podcast</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.podcast.website)">
+              <v-icon left :size="windowHeight > windowWidth ? 74: 24">voicemail</v-icon> Podcast
+            </v-btn>
           </div>
 
           <div class="pb-2" v-if="station.facebook">
-            <v-btn rounded @click="launchLink(station.facebook)"
-              ><v-icon left>mdi-facebook</v-icon> Facebook</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.facebook)">
+              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-facebook</v-icon>
+              <p>Facebook</p> 
+            </v-btn>
           </div>
           <div class="pb-2" v-if="station.twitter">
-            <v-btn rounded @click="launchLink(station.twitter)"
-              ><v-icon left>mdi-twitter</v-icon> Twitter</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.twitter)">
+              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-twitter</v-icon> 
+              <p>Twitter</p>
+            </v-btn>
           </div>
           <div class="pb-2" v-if="station.instagram">
-            <v-btn rounded @click="launchLink(station.instagram)"
-              ><v-icon left>mdi-instagram</v-icon> Instagram</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.instagram)">
+              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-instagram</v-icon>
+              <p>Instagram</p>
+            </v-btn>
           </div>
           <div class="pb-2" v-if="station.soundcloud">
-            <v-btn rounded @click="launchLink(station.soundcloud)"
-              ><v-icon left>mdi-soundcloud</v-icon> Soundcloud</v-btn
-            >
+            <v-btn rounded @click="launchLink(station.soundcloud)">
+              <v-icon left :size="windowHeight > windowWidth ? 74: 24">mdi-soundcloud</v-icon>
+              <p>Soundcloud</p>
+            </v-btn>
           </div>
         </v-card-text>
       </v-card>
@@ -279,8 +274,6 @@
 
 <script>
 import Station from "@/models/Station";
-import { EventBus } from "@/components/eventbus.js";
-
 import plankton from "@/vis/plankton";
 import stars from "@/vis/stars";
 
@@ -1144,7 +1137,6 @@ html {
 }
 .stationNav {
   top: 10px;
-  max-width: 450px;
 }
 </style>
 <style scoped>
@@ -1155,10 +1147,8 @@ html {
   --angle: 45deg;
   border: 1px solid;
   border-image: linear-gradient(var(--angle), #090909, #929292, #000000) 1;
-  position: relative;
-  /** animation: 20s rotate linear infinite; **/
-  padding: 10px;
-  padding-bottom: 20px;
+  padding: 1rem;
+  padding-bottom: 2rem;
   backdrop-filter: blur(10px);
   background: linear-gradient(90deg, rgb(0,10,0,0.3), transparent);
   position: absolute;
@@ -1167,6 +1157,11 @@ html {
   transform: translate(-50%, -50%);
   min-width: 300px;
   height: calc(100% - 20px);
+}
+.full-width{
+  width: 100%;
+}
+.fixed-width {
   max-width: 500px;
 }
 
@@ -1194,7 +1189,10 @@ html {
 }
 
 .user-v-toolbar{
-  margin: auto; opacity: 1; position: relative; z-index: 1000
+  margin: auto; 
+  opacity: 1;
+  position: relative;
+  z-index: 1000
 }
 .user-v-card {
   margin-top: -43px;
@@ -1216,22 +1214,22 @@ html {
   margin: 0;
 }
 .category-subtitle {
-  font-size: 10.4px;
-  line-height: 15.2px;
+  font-size: 0.65em;
+  line-height: 0.95em;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
   margin: 5px 0;
 }
 .category-description {
-  font-size: 12.8px;
-  line-height: 19.2px;
+  font-size: 0.8em;
+  line-height: 1.6em;
   margin:5px 0;
 
 }
 .user-listeners{
-  font-size: 12.8px;
-  line-height: 19.2px;
+  font-size: 0.8em;
+  line-height: 1.6em;
   text-align: center;
   opacity: 0.4;
   margin: 5px 0;
@@ -1240,8 +1238,8 @@ html {
   height: 29.2px;
 }
 .indicator-text {
-  font-size: 11.2px;
-  line-height: 22px;
+  font-size: 0.7em;
+  line-height: 1.375em;
   font-weight: 700;
   letter-spacing: 0.1px;
   text-align: center;
@@ -1260,23 +1258,23 @@ html {
   text-align: center;
 }
 .user-artist{
-  font-size: 14px;
-  line-height: 22px;
+  font-size: 0.875em;
+  line-height: 1.375em;
   font-weight: 700;
   text-align: center;
   word-break: normal;
   margin: 0;
 }
 .user-title{
-  font-size: 14px;
-  line-height: 22px;
+  font-size: 0.875em;
+  line-height: 1.375em;
   text-align: center;
   word-break: normal;
   margin: 0;
 }
 .user-play-indicator{
-  font-size: 11.2px;
-  line-height: 22px;
+  font-size: 0.7em;
+  line-height: 1.375em;
   font-weight: 400;
   text-align: center;
   margin-bottom: 0;
@@ -1290,28 +1288,30 @@ html {
 }
 .stationNav{
   border: 0px;
-  margin: auto;
+  height: auto!important;
+  margin: 10px auto 0px;
   box-shadow: none;
   background-color: transparent!important;
+  justify-content: space-around!important;
 }
 .bottom-indicator{
   margin-top: 10px; color: rgb(99, 99, 99);
   text-align: center;
 }
 .user-keep-up{
-  font-size: 7.68px;
+  font-size: 0.5em;
   font-weight: 500;
   line-height: normal;
 }
 .user-keep-up-big{
-  font-size: 9.62px;
+  font-size: 0.6em;
   font-weight: 500;
   line-height: normal;
 }
 .user-footer-link{
   text-decoration: none;
   color: #a0a0a0;
-  font-size: 9px;
+  font-size: 0.5625em;
   opacity: 0.4;
 }
 .user-image-mark {
@@ -1322,6 +1322,65 @@ html {
   max-width: 270px;
   margin: auto;
   width: 100%;
+}
+.big-font{
+  font-size: 3rem!important;
+}
+.middle-font{
+  font-size: 2rem!important;
+}
+.normal-font {
+  font-size: 1em;
+}
+.nav-button {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.7) !important;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  flex: 1;
+  font-size: 0.75rem;
+  height: inherit;
+  max-width: 168px;
+  min-width: 80px;
+  position: relative;
+  text-transform: none;
+  flex-direction: column;
+  align-items: center;
+  display: inline-flex;
+  font-weight: 500;
+  letter-spacing: 0.0892857143em;
+  justify-content: center;
+  outline: 0;
+  text-decoration: none;
+  text-indent: 0.0892857143em;
+  transition-duration: 0.28s;
+  transition-property: box-shadow, transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.nav-button:hover::before{
+  opacity: 0.08;
+}
+.nav-button:before{
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: inherit;
+    bottom: 0;
+    color: inherit;
+    content: "";
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.6, 1);
+}
+.nav-button .v-icon {
+  color:inherit;
 }
 @media screen and (max-width: 500px) {
   .animate-border {
