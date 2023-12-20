@@ -9,7 +9,7 @@ export default async function data() {
       title: "dnbradio.com",
       subtitle: "all flavors",
       cover:
-        "https://res.cloudinary.com/labelgrid/image/upload/c_scale,w_869/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png",
+        "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1703076523/logotags_zoom_1400_dnbr_dnbr-cropped_dujxvo.png",
       website: "https://dnbradio.com/?forceMobile=0",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/dnbradio",
@@ -112,7 +112,7 @@ export default async function data() {
       title: "plushrecs",
       subtitle: "Lush jungle and drum and bass",
       cover:
-        "https://app.labelgrid.com/assets/swframework/plush-final_white-lg-sq.png",
+        "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1703076523/plush-final_white-lg-sqq_vhrsqn.png",
       website: "https://plushrecs.com",
       facebook: "https://facebook.com/plushrecs",
       twitter: "https://twitter.com/plushrecs",
@@ -146,7 +146,7 @@ export default async function data() {
       title: "section8recs",
       subtitle: "Dark heavy drum and bass",
       cover:
-        "https://app.labelgrid.com/assets/swframework/section8-sq-logo2-transparency-700.png",
+        "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1703076523/section8-sq-logo2-transparency_pkt6hw.png",
       website: "https://section8recs.com",
       facebook: "https://facebook.com/section8recs",
       twitter: "https://twitter.com/section8recs",
