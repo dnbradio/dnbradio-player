@@ -123,7 +123,7 @@ module.exports = {
     "@nuxtjs/proxy",
     "nuxtjs-mdi-font",
     "vuetify-dialog/nuxt",
-    "@nuxtjs/pwa",
+    // "@nuxtjs/pwa",
     "@nuxtjs/device"
   ],
   server: {
