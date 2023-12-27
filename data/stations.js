@@ -30,7 +30,7 @@ export default async function data() {
       },
       streams: [
         {
-          url: "https://cast.dnbradio.com:8000/dnbradio_main.mp3",
+          url: "https://cast.dnbradio.com/listen/dnbradio/dnbradio_main.mp3",
           format: "mp3",
           mimetype: "audio/mpeg"
         }
@@ -65,7 +65,7 @@ export default async function data() {
       streams: [
         {
           url:
-            "https://cast.dnbradio.com:8030/radio.mp3",
+            "https://cast.dnbradio.com/listen/darkstep/radio.mp3",
           format: "mp3",
           mimetype: "audio/mpeg"
         }
@@ -132,7 +132,7 @@ export default async function data() {
       },
       streams: [
         {
-          url: "https://cast.dnbradio.com:8010/radio.mp3",
+          url: "https://cast.dnbradio.com/listen/plushrecs/radio.mp3",
           format: "mp3",
           mimetype: "audio/mpeg"
         }
@@ -166,7 +166,7 @@ export default async function data() {
       },
       streams: [
         {
-          url: "https://cast.dnbradio.com:8020/radio.mp3",
+          url: "https://cast.dnbradio.com/listen/section8recs/radio.mp3",
           format: "aac",
           mimetype: "audio/aac"
         }
