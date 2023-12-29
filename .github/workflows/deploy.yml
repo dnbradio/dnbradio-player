@@ -45,7 +45,7 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/scp-action@master
         with:
-          host: trace.dnbradio.com
+          host: samlegacy.dnbradio.com
           username: root
           key: ${{ secrets.SSH2 }}
           port: 22
