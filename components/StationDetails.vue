@@ -92,7 +92,7 @@
               <p v-else class="indicator-text stop-text">NOW PLAYING</p>
             </div>
             <div v-if="artist || title">
-              <p v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))" class="user-artist"></p>
+              <p v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))" class="user-title bold-title-700"></p>
               <p v-html="decodeURIComponent(title.replace(/\\'/g, '\''))" class="user-title"></p>
             </div>
             <p v-else class="user-play-indicator">
@@ -175,7 +175,7 @@
               <p class="hidden-sm-and-up user-keep-up" :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'">
                 Keepin' the beats rollin' on dnbradio!
               </p>
-              <p class="hidden-xs-only user-keep-up-big" :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'">
+              <p class="hidden-xs-only user-keep-up user-keep-up-big" :class="(windowHeight > windowWidth) ? 'middle-font': 'normal-font'">
                 Keepin' the beats rollin' on dnbradio!
               </p>
               </v-btn>
@@ -1113,6 +1113,7 @@ export default {
 }
 html {
   overflow-y: auto;
+  font-size: 16px;
 }
 .v-application--wrap {
   z-index: 100;
@@ -1209,26 +1210,26 @@ html {
   flex-direction: column;
 }
 .station-title{
-  font-size: 64%;
+  font-size: 0.64rem;
   margin: 0;
 }
 .category-subtitle {
-  font-size: 0.65em;
-  line-height: 0.95em;
+  font-size: 0.65rem;
+  line-height: 0.95rem;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
   margin: 5px 0;
 }
 .category-description {
-  font-size: 0.8em;
-  line-height: 1.6em;
+  font-size: 0.8rem;
+  line-height: 1.6rem;
   margin:5px 0;
 
 }
 .user-listeners{
-  font-size: 0.8em;
-  line-height: 1.6em;
+  font-size: 0.8rem;
+  line-height: 1.6rem;
   text-align: center;
   opacity: 0.4;
   margin: 5px 0;
@@ -1237,8 +1238,8 @@ html {
   height: 29.2px;
 }
 .indicator-text {
-  font-size: 0.7em;
-  line-height: 1.375em;
+  font-size: 0.7rem;
+  line-height: 1.375rem;
   font-weight: 700;
   letter-spacing: 0.1px;
   text-align: center;
@@ -1256,24 +1257,20 @@ html {
 .user-card-text{
   text-align: center;
 }
-.user-artist{
-  font-size: 0.875em;
-  line-height: 1.375em;
-  font-weight: 700;
+
+.user-title{
+  font-size: 0.875rem;
+  line-height: 1.375rem;
   text-align: center;
   word-break: normal;
   margin: 0;
 }
-.user-title{
-  font-size: 0.875em;
-  line-height: 1.375em;
-  text-align: center;
-  word-break: normal;
-  margin: 0;
+.bold-title-700 {
+  font-weight: 700;
 }
 .user-play-indicator{
-  font-size: 0.7em;
-  line-height: 1.375em;
+  font-size: 0.7rem;
+  line-height: 1.375rem;
   font-weight: 400;
   text-align: center;
   margin-bottom: 0;
@@ -1298,16 +1295,13 @@ html {
   text-align: center;
 }
 .user-keep-up{
-  font-size: 0.5em;
+  font-size: 0.5rem;
   font-weight: 500;
   line-height: normal;
   margin: 0;
 }
 .user-keep-up-big{
-  font-size: 0.6em;
-  font-weight: 500;
-  line-height: normal;
-  margin: 0;
+  font-size: 0.6rem;
 }
 .user-footer-link{
   text-decoration: none;
@@ -1329,13 +1323,13 @@ html {
   width: 100%;
 }
 .big-font{
-  font-size: 1em!important;
+  font-size: 1rem;
 }
 .middle-font{
-  font-size: 1em!important;
+  font-size: 1rem;
 }
 .normal-font {
-  font-size: 1em;
+  font-size: 1rem;
 }
 .nav-button {
   opacity: 1;
@@ -1354,11 +1348,11 @@ html {
   align-items: center;
   display: inline-flex;
   font-weight: 500;
-  letter-spacing: 0.0892857143em;
+  letter-spacing: 0.0892857143rem;
   justify-content: center;
   outline: 0;
   text-decoration: none;
-  text-indent: 0.0892857143em;
+  text-indent: 0.0892857143rem;
   transition-duration: 0.28s;
   transition-property: box-shadow, transform, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -1408,4 +1402,5 @@ html {
   top: 0px;
   left: 0px;
 }
+
 </style>

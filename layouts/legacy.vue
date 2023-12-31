@@ -106,7 +106,7 @@ body {
   background-repeat: repeat-x;
   margin: 0px;
   font-family: Tahoma, Helvetica, Verdana;
-  font-size: 1em;
+  font-size: 1rem;
   margin-top: 0px;
   padding: 0px;
   margin-bottom: 20px;

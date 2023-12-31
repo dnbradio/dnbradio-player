@@ -5,7 +5,7 @@
   "author": "keybrdistt",
   "private": true,
   "scripts": {
-    "dev": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/player/ nuxt",
+    "dev": "export APP_BRANCH=$(git symbolic-ref --short HEAD); ROUTER_BASE=/ nuxt",
     "generate": "export APP_BRANCH=dev; ROUTER_BASE=\"/player-dev/\" nuxt generate --devtools; echo $APP_BRANCH",
     "upload": "export APP_BRANCH=$(git symbolic-ref --short HEAD); tar czf - dist/ | ssh dnbradio \"rm -rf \".dnbradio-deploy-$APP_BRANCH\"; mkdir -p \"./.dnbradio-deploy-$APP_BRANCH\"; cd \"./.dnbradio-deploy-$APP_BRANCH\" && tar xvzf - && rm -rf \"/root/apps/www/html/player-$APP_BRANCH\" && mv dist \"/root/apps/www/html/player-$APP_BRANCH\"\"; echo \"\n\nDeployed to -> https://dnbradio.com/player-$APP_BRANCH/\"",
     "debug": "export APP_BRANCH=$(git symbolic-ref --short HEAD); nuxt generate --devtools && nuxt start",
