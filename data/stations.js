@@ -25,8 +25,8 @@ export default async function data() {
         website: "https://dnbradio.com/podcast"
       },
       nowplaying_url: {
-        type: "sam",
-        url: "https://api.dnbradio.nl/now_playing"
+        type: "azuracast",
+        url: "https://cast.dnbradio.com/api/nowplaying/dnbradio"
       },
       streams: [
         {
@@ -52,8 +52,8 @@ export default async function data() {
       soundcloud: "https://soundcloud.com/section8recs",
       description: "Unrelenting dark and heavy drum and bass.",
       nowplaying_url: {
-        type: "shoutcast",
-        url: "https://dnbradio.com/tv/now_playing-darkstep.php"
+        type: "azuracast",
+        url: "https://cast.dnbradio.com/api/nowplaying/darkstep"
       },
       schedule: {
         url: "https://api.dnbradio.nl/schedule"
@@ -127,8 +127,8 @@ export default async function data() {
       },
       description: "Feel good music from Plush Recordings",
       nowplaying_url: {
-        type: "icecast",
-        url: "https://plushrecs247.dnbradio.com/status-json.xsl"
+        type: "azuracast",
+        url: "https://cast.dnbradio.com/api/nowplaying/plushrecs"
       },
       streams: [
         {
@@ -161,8 +161,8 @@ export default async function data() {
       },
       description: "Heavy dnb from Section 8 Recordings",
       nowplaying_url: {
-        type: "icecast",
-        url: "https://section8recs247.dnbradio.com/status-json.xsl"
+        type: "azuracast",
+        url: "https://cast.dnbradio.com/api/nowplaying/section8recs"
       },
       streams: [
         {

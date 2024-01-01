@@ -244,12 +244,12 @@
           <div class="pb-2" v-if="station.facebook">
             <v-btn rounded @click="launchLink(station.facebook)">
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-facebook</v-icon>
-              <p>Facebook</p> 
+              <p>Facebook</p>
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.twitter">
             <v-btn rounded @click="launchLink(station.twitter)">
-              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-twitter</v-icon> 
+              <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-twitter</v-icon>
               <p>Twitter</p>
             </v-btn>
           </div>
@@ -701,6 +701,18 @@ export default {
         .get("" + this.station.nowplaying_url.url, { progress: false })
         .then((res) => {
           switch (this.station.nowplaying_url.type) {
+            case 'azuracast':
+              const npdata = {
+                artist: res.data.now_playing.streamer_name ?? res.data.now_playing.song.artist,
+                title: res.data.now_playing.song.title,
+                listeners: res.data.listeners.current,
+                albumyear: null,
+                album: res.data.now_playing.song.album,
+                song_type: '',
+                label: null
+              };
+              Object.assign(this.nowplaying, npdata);
+            break;
             case "icecast":
               this.nowplaying = res.data?.icestats?.source;
               this.nowplaying.artist = this.nowplaying.title.split(" - ")[0];
@@ -1188,7 +1200,7 @@ html {
 }
 
 .user-v-toolbar{
-  margin: auto; 
+  margin: auto;
   opacity: 1;
   position: relative;
   z-index: 1000
