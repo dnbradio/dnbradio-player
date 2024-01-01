@@ -55,7 +55,7 @@
         </v-col>
       </v-row>
     </v-container>
-     
+
   </div>
 </template>
 
@@ -66,7 +66,7 @@ export default {
   components: { TopMenu },
   methods: {
     launchPlay() {
-      
+
     }
   },
   mounted() {
@@ -78,20 +78,20 @@ export default {
       channel: "dnbradioofficial",
       autoplay: false,
       muted: false,
-      // only needed if your site is also embedded on embed.example.com and othersite.example.com 
+      // only needed if your site is also embedded on embed.example.com and othersite.example.com
       parent: ["www.dnbradio.com", "dnbradio.com", "192.168.50.213:9000"],
     };
-    var player = new Twitch.Player("twitchDiv", options);
-    player.setVolume(1);
+    // var player = new Twitch.Player("twitchDiv", options);
+    // player.setVolume(1);
+
+    var player = '';
   }
 }
 
- 
+
 </script>
 <style>
 .playerNavBar {  margin-top: 12px; text-align: right; font-size: 16px; margin-bottom: 10px;}
-.playerNavBar a { color: white !important; text-decoration: none; padding: 5px; 
-  background-color: #837D7D; }
+.playerNavBar a { color: white !important; text-decoration: none; padding: 5px; background-color: #837D7D; }
 .playerNavBar a:hover { background-color: #3D3838 !important; }
-</style>	
- 
+</style>
