@@ -1331,7 +1331,7 @@ html {
   width: 100%;
 }
 .big-image{
-  max-width: 70%;
+  max-height: 300px;
   width: 100%;
 }
 .big-font{
