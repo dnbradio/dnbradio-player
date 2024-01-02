@@ -103,21 +103,22 @@
           <v-card-actions p0 fluid>
             <v-row justify="space-around" class="user-button-group">
               <v-btn icon @click="loadPrev(false)">
-                <v-icon medium dark size="24">skip_previous</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">skip_previous</v-icon>
               </v-btn>
               <v-btn icon @click="volDown">
-                <v-icon medium dark size="24">mdi-volume-minus</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-volume-minus</v-icon>
               </v-btn>
               <v-icon size="50" v-if="!isPlaying" @disable="isLoading" @click="play">play_circle_filled</v-icon>
               <v-icon size="50" v-if="isPlaying" @click="pause">pause_circle_filled</v-icon>
               <v-btn icon @click="volUp">
-                <v-icon medium dark size="24">mdi-volume-plus</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-volume-plus</v-icon>
               </v-btn>
               <v-btn icon @click="loadNext(false)">
-                <v-icon medium dark size="24">skip_next</v-icon>
+                <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">skip_next</v-icon>
               </v-btn>
             </v-row>
           </v-card-actions>
+
           <v-bottom-navigation class="flat stationNav" grow>
             <button
             :disabled="!station || !station.podcast"
