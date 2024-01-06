@@ -161,14 +161,14 @@ export default async function data() {
       },
       description: "Heavy dnb from Section 8 Recordings",
       nowplaying_url: {
-        type: "azuracast",
-        url: "https://cast.dnbradio.com/api/nowplaying/section8recs"
+        type: "icecast",
+        url: "https://section8recs247.dnbradio.com/status-json.xsl"
       },
       streams: [
         {
-          url: "https://azura.dnbradio.com/listen/section8recs/radio.mp3",
-          format: "aac",
-          mimetype: "audio/aac"
+          url: "https://section8recs247.dnbradio.com/stream.mp3",
+          format: "mp3",
+          mimetype: "audio/mpeg"
         }
       ],
       position: 5
