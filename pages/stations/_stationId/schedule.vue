@@ -21,7 +21,7 @@
         <v-icon>mdi-calendar-week</v-icon>
       </v-btn>
     </v-toolbar>
-    <div class="text-center" v-if="station && view">
+    <div class="text-center" v-if="station && view && !hideTitle">
       <small>UPCOMING SCHEDULE</small>
       <h2 class="categoryTitle">{{ station.title }}</h2>
       <h4 class="categorySubtitle" style="text-transform: uppercase;">
@@ -89,7 +89,8 @@ export default {
   data() {
     return {
       view: "",
-      hideNav: false
+      hideNav: false,
+      hideTitle: false
     };
   },
   async mounted() {
@@ -98,9 +99,8 @@ export default {
     } else {
       this.view = "schedule";
     }
-    if (this.$route.query.hideNav) {
-      this.hideNav = true;
-    }
+    this.hideNav = this.$route.query?.hideNav || false;
+    this.hideTitle = this.$route.query?.hideTitle || false;
     const stationsInitData = await stations();
     Station.create({ data: stationsInitData });
   },
