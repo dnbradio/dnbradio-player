@@ -131,9 +131,7 @@ export default {
 };
 </script>
 <style>
-.invertTrue {
-  filter: invert(1);
-}
+
 .invertTrue img {
   filter: invert(1);
 }
