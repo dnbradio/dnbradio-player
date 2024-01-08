@@ -6,6 +6,7 @@
       flat
       :max-width="560"
       style="margin:auto;"
+      v-if="hideNav==false"
     >
       <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
       <v-btn icon class="ml-2" @click="$router.go(-1)">
@@ -87,7 +88,8 @@ export default {
   },
   data() {
     return {
-      view: ""
+      view: "",
+      hideNav: false
     };
   },
   async mounted() {
@@ -95,6 +97,9 @@ export default {
       this.view = "calendar";
     } else {
       this.view = "schedule";
+    }
+    if (this.$route.query.hideNav) {
+      this.hideNav = true;
     }
     const stationsInitData = await stations();
     Station.create({ data: stationsInitData });
