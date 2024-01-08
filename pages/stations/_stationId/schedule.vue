@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="themeClass">
     <v-toolbar
       color="transparent"
       dark
@@ -90,7 +90,8 @@ export default {
     return {
       view: "",
       hideNav: false,
-      hideTitle: false
+      hideTitle: false,
+      themeClass: "",
     };
   },
   async mounted() {
@@ -101,6 +102,7 @@ export default {
     }
     this.hideNav = this.$route.query?.hideNav || false;
     this.hideTitle = this.$route.query?.hideTitle || false;
+    this.themeClass = 'invertTrue' || "";
     const stationsInitData = await stations();
     Station.create({ data: stationsInitData });
   },
@@ -129,6 +131,12 @@ export default {
 };
 </script>
 <style>
+.invertTrue {
+  filter: invert(1);
+}
+.invertTrue img {
+  filter: invert(1);
+}
 .v-autocomplete__content.v-menu__content .v-card {
   color: #fff;
 }
