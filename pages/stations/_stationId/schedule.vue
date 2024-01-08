@@ -1,5 +1,5 @@
 <template>
-  <div :class="themeClass">
+  <div>
     <v-toolbar
       color="transparent"
       dark
@@ -35,7 +35,7 @@
     <div v-if="station && view == 'schedule'">
       <StationSchedule :station="station" />
     </div>
-    <div v-if="station && view == 'calendar'">
+    <div v-if="station && view == 'calendar'"  :class="themeClass">
       <StationCalendar :station="station" />
     </div>
   </div>
