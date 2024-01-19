@@ -45,4 +45,4 @@ jobs:
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
-          target: "/hoome/forge/staging.dnbradio.com/public/"
+          target: "/home/forge/staging.dnbradio.com/public/"
