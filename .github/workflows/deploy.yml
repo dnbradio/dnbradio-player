@@ -22,7 +22,7 @@ jobs:
       - name: pnpm i
         run: pnpm i
       - name: pnpm run generate-prod
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
         run: |
           pnpm run generate-prod
           mv dist player
@@ -30,24 +30,19 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/scp-action@master
         with:
-          host: samlegacy.dnbradio.com
+          host: 3.238.78.182
           username: root
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
-          target: "/root/apps/www/html/"
-      - name: pnpm run generate
-        if: github.ref == 'refs/heads/dev'
-        run: |
-          pnpm run generate
-          mv dist player-dev
+          target: "/hoome/forge/dnbradio.com/public/"
       - name: scp -> dnbradio.com/player-dev
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/scp-action@master
         with:
-          host: samlegacy.dnbradio.com
+          host: 44.193.210.138
           username: root
           key: ${{ secrets.SSH2 }}
           port: 22
-          source: "./player-dev/*"
-          target: "/root/apps/www/html/"
+          source: "./player/*"
+          target: "/hoome/forge/staging.dnbradio.com/public/"
