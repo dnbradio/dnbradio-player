@@ -65,9 +65,9 @@ export default async function data() {
       streams: [
         {
           url:
-            "https://azura.dnbradio.com/listen/darkstep/radio.mp3",
-          format: "mp3",
-          mimetype: "audio/mpeg"
+            "https://fw.dnbradio.com/dnbradio_darkstep.mp3",
+          format: "aac",
+          mimetype: "audio/aacp"
         }
       ],
       position: 2
@@ -132,7 +132,7 @@ export default async function data() {
       },
       streams: [
         {
-          url: "https://azura.dnbradio.com/listen/plushrecs/radio.mp3",
+          url: "https://plushrecs247.dnbradio.com/stream.mp3",
           format: "mp3",
           mimetype: "audio/mpeg"
         }
