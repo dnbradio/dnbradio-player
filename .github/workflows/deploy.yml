@@ -31,7 +31,7 @@ jobs:
         uses: appleboy/scp-action@master
         with:
           host: 49.12.202.218
-          username: forge
+          username: root
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
