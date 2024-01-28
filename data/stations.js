@@ -9,7 +9,7 @@ export default async function data() {
       title: "dnbradio.com",
       subtitle: "all flavors",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1703076523/logotags_zoom_1400_dnbr_dnbr-cropped_dujxvo.png",
+        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/logotags.png",
       website: "https://dnbradio.com/?forceMobile=0",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/dnbradio",
@@ -26,7 +26,7 @@ export default async function data() {
       },
       nowplaying_url: {
         type: "azuracast",
-        url: "https://cast.dnbradio.com/api/nowplaying/dnbradio"
+        url: "https://azura.dnbradio.com/api/nowplaying/dnbradio"
       },
       streams: [
         {
@@ -43,7 +43,7 @@ export default async function data() {
       name: "dark.st",
       title: "dark.st",
       subtitle: "dnbradio's darkstep channel",
-      cover: "https://dnbradio.com/player/darkstlogo.png",
+      cover: "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/darkstep.png",
       website: "http://section8recs.com",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/section8recs",
@@ -53,7 +53,7 @@ export default async function data() {
       description: "Unrelenting dark and heavy drum and bass.",
       nowplaying_url: {
         type: "azuracast",
-        url: "https://cast.dnbradio.com/api/nowplaying/darkstep"
+        url: "https://azura.dnbradio.com/api/nowplaying/darkstep"
       },
       schedule: {
         url: "https://api.dnbradio.nl/schedule"
@@ -65,9 +65,9 @@ export default async function data() {
       streams: [
         {
           url:
-            "https://azura.dnbradio.com/listen/darkstep/radio.mp3",
-          format: "mp3",
-          mimetype: "audio/mpeg"
+            "https://fw.dnbradio.com/dnbradio_darkstep.mp3",
+          format: "aac",
+          mimetype: "audio/aacp"
         }
       ],
       position: 2
@@ -78,7 +78,7 @@ export default async function data() {
       name: "jungletrain.net",
       title: "jungletrain",
       subtitle: "A train in constant motion",
-      cover: "https://dnbradio.com/player/jungletrainlogo.png",
+      cover: "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/jungletrain.png",
       website: "https://jungletrain.net",
       facebook: "https://facebook.com/jungletrain",
       twitter: "https://twitter.com/jungletrain",
@@ -112,7 +112,7 @@ export default async function data() {
       title: "plushrecs",
       subtitle: "Lush jungle and drum and bass",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1703076523/plush-final_white-lg-sqq_vhrsqn.png",
+        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/plushrecs.png",
       website: "https://plushrecs.com",
       facebook: "https://facebook.com/plushrecs",
       twitter: "https://twitter.com/plushrecs",
@@ -128,11 +128,11 @@ export default async function data() {
       description: "Feel good music from Plush Recordings",
       nowplaying_url: {
         type: "azuracast",
-        url: "https://cast.dnbradio.com/api/nowplaying/plushrecs"
+        url: "https://azura.dnbradio.com/api/nowplaying/plushrecs"
       },
       streams: [
         {
-          url: "https://azura.dnbradio.com/listen/plushrecs/radio.mp3",
+          url: "https://plushrecs247.dnbradio.com/stream.mp3",
           format: "mp3",
           mimetype: "audio/mpeg"
         }
@@ -146,7 +146,7 @@ export default async function data() {
       title: "section8recs",
       subtitle: "Dark heavy drum and bass",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1703076523/section8-sq-logo2-transparency_pkt6hw.png",
+        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/section8recs.png",
       website: "https://section8recs.com",
       facebook: "https://facebook.com/section8recs",
       twitter: "https://twitter.com/section8recs",
@@ -161,8 +161,8 @@ export default async function data() {
       },
       description: "Heavy dnb from Section 8 Recordings",
       nowplaying_url: {
-        type: "icecast",
-        url: "https://section8recs247.dnbradio.com/status-json.xsl"
+        type: "azuracast",
+        url: "https://azura.dnbradio.com/api/nowplaying/section8recs"
       },
       streams: [
         {
