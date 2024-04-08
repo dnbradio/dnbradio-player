@@ -708,7 +708,7 @@ export default {
                 listeners: res.data.listeners.current,
                 albumyear: null,
                 album: res.data.now_playing.song.album,
-                song_type: '',
+                song_type: res.data.now_playing.streamer_name ? 'L' : 'S',
                 label: null
               };
               Object.assign(this.nowplaying, npdata);
