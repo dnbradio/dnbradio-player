@@ -70,7 +70,7 @@ export default async function data() {
           mimetype: "audio/aacp"
         }
       ],
-      position: 2
+      position: 4
     },
     {
       id: 3,
@@ -137,7 +137,7 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
-      position: 4
+      position: 2
     },
     {
       id: 5,
