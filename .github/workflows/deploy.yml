@@ -7,7 +7,7 @@ on:
       - dev
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,32 +22,41 @@ jobs:
       - name: pnpm i
         run: pnpm i
       - name: pnpm run generate-prod
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
         run: |
           pnpm run generate-prod
           mv dist player
-      - name: scp -> dnbradio.com/player
+
+      - name: scp -> forge:prod:dnbradio.com/player
         if: github.ref == 'refs/heads/main'
         uses: appleboy/scp-action@master
         with:
-          host: trace.dnbradio.com
+          host: 3.238.78.182
+          username: forge
+          key: ${{ secrets.SSH2 }}
+          port: 22
+          source: "./player/*"
+          target: "/home/forge/dnbradio.com/public/"
+
+      - name: scp -> trace:dnbradio.com
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/scp-action@master
+        with:
+          host: 49.12.202.218
           username: root
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
           target: "/root/apps/www/html/"
-      - name: pnpm run generate
-        if: github.ref == 'refs/heads/dev'
-        run: |
-          pnpm run generate
-          mv dist player-dev
-      - name: scp -> dnbradio.com/player-dev
+
+      - name: scp -> staging.dnbradio.com/player
         if: github.ref == 'refs/heads/dev'
         uses: appleboy/scp-action@master
         with:
-          host: trace.dnbradio.com
-          username: root
+          host: 67.202.42.123
+          username: forge
           key: ${{ secrets.SSH2 }}
           port: 22
-          source: "./player-dev/*"
-          target: "/root/apps/www/html/"
+          source: "./player/*"
+          target: "/home/forge/staging.dnbradio.com/public/"
+

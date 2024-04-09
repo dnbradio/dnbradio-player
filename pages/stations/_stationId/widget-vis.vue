@@ -88,6 +88,17 @@ export default {
       return this.$axios.get(this.station.nowplaying_url.url, { progress: false }).then((res) => {
         switch (this.station.nowplaying_url.type)
         {
+          case 'azuracast':
+            this.nowplaying = {
+              artist: res.data.now_playing.streamer_name ?? res.data.now_playing.song.artist,
+              title: res.data.now_playing.song.title,
+              listeners: res.data.listeners.current,
+              albumyear: null,
+              album: res.data.now_playing.song.album,
+              song_type: res.data.now_playing.streamer_name ? 'L' : 'S',
+              label: null
+            };
+          break;
           case 'sam':
             this.nowplaying = res.data
           break;

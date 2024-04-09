@@ -6,6 +6,7 @@
       flat
       :max-width="560"
       style="margin:auto;"
+      v-if="hideNav==false"
     >
       <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
       <v-btn icon class="ml-2" @click="$router.go(-1)">
@@ -20,7 +21,7 @@
         <v-icon>mdi-calendar-week</v-icon>
       </v-btn>
     </v-toolbar>
-    <div class="text-center" v-if="station && view">
+    <div class="text-center" v-if="station && view && !hideTitle">
       <small>UPCOMING SCHEDULE</small>
       <h2 class="categoryTitle">{{ station.title }}</h2>
       <h4 class="categorySubtitle" style="text-transform: uppercase;">
@@ -34,7 +35,7 @@
     <div v-if="station && view == 'schedule'">
       <StationSchedule :station="station" />
     </div>
-    <div v-if="station && view == 'calendar'">
+    <div v-if="station && view == 'calendar'"  :class="themeClass">
       <StationCalendar :station="station" />
     </div>
   </div>
@@ -87,7 +88,10 @@ export default {
   },
   data() {
     return {
-      view: ""
+      view: "",
+      hideNav: false,
+      hideTitle: false,
+      themeClass: "",
     };
   },
   async mounted() {
@@ -96,6 +100,9 @@ export default {
     } else {
       this.view = "schedule";
     }
+    this.hideNav = this.$route.query?.hideNav || false;
+    this.hideTitle = this.$route.query?.hideTitle || false;
+    this.themeClass = 'invertTrue' || "";
     const stationsInitData = await stations();
     Station.create({ data: stationsInitData });
   },
@@ -124,6 +131,10 @@ export default {
 };
 </script>
 <style>
+
+.invertTrue img {
+  filter: invert(1);
+}
 .v-autocomplete__content.v-menu__content .v-card {
   color: #fff;
 }
