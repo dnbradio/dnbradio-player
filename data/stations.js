@@ -39,22 +39,17 @@ export default async function data() {
     },
     {
       id: 2,
-      pathname: "darkst",
-      name: "dark.st",
-      title: "dark.st",
-      subtitle: "dnbradio's darkstep channel",
-      cover: "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/darkstep.png",
-      website: "http://section8recs.com",
-      facebook: "https://facebook.com/dnbradio",
-      twitter: "https://twitter.com/section8recs",
-      twitterId: "section8recs",
-      instagram: "https://instagram.com/section8recs",
-      soundcloud: "https://soundcloud.com/section8recs",
-      description: "Unrelenting dark and heavy drum and bass.",
-      nowplaying_url: {
-        type: "azuracast",
-        url: "https://azura.dnbradio.com/api/nowplaying/darkstep"
-      },
+      pathname: "plushrecs",
+      name: "plushrecs.com",
+      title: "plushrecs",
+      subtitle: "Lush jungle and drum and bass",
+      cover:
+        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/plushrecs.png",
+      website: "https://plushrecs.com",
+      facebook: "https://facebook.com/plushrecs",
+      twitter: "https://twitter.com/plushrecs",
+      twitterId: "plushrecs",
+      donations: {},
       schedule: {
         url: "https://api.dnbradio.nl/schedule"
       },
@@ -62,15 +57,19 @@ export default async function data() {
         url: "https://api.dnbradio.nl/podcast",
         website: "https://dnbradio.com/podcast"
       },
+      description: "Feel good music from Plush Recordings",
+      nowplaying_url: {
+        type: "azuracast",
+        url: "https://azura.dnbradio.com/api/nowplaying/plushrecs"
+      },
       streams: [
         {
-          url:
-            "https://fw.dnbradio.com/dnbradio_darkstep.mp3",
-          format: "aac",
-          mimetype: "audio/aacp"
+          url: "https://plushrecs247.dnbradio.com/stream.mp3",
+          format: "mp3",
+          mimetype: "audio/mpeg"
         }
       ],
-      position: 4
+      position: 2
     },
     {
       id: 3,
@@ -107,40 +106,6 @@ export default async function data() {
     },
     {
       id: 4,
-      pathname: "plushrecs",
-      name: "plushrecs.com",
-      title: "plushrecs",
-      subtitle: "Lush jungle and drum and bass",
-      cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/plushrecs.png",
-      website: "https://plushrecs.com",
-      facebook: "https://facebook.com/plushrecs",
-      twitter: "https://twitter.com/plushrecs",
-      twitterId: "plushrecs",
-      donations: {},
-      schedule: {
-        url: "https://api.dnbradio.nl/schedule"
-      },
-      podcast: {
-        url: "https://api.dnbradio.nl/podcast",
-        website: "https://dnbradio.com/podcast"
-      },
-      description: "Feel good music from Plush Recordings",
-      nowplaying_url: {
-        type: "azuracast",
-        url: "https://azura.dnbradio.com/api/nowplaying/plushrecs"
-      },
-      streams: [
-        {
-          url: "https://plushrecs247.dnbradio.com/stream.mp3",
-          format: "mp3",
-          mimetype: "audio/mpeg"
-        }
-      ],
-      position: 2
-    },
-    {
-      id: 5,
       pathname: "section8recs",
       name: "section8recs.com",
       title: "section8recs",
@@ -171,7 +136,42 @@ export default async function data() {
           mimetype: "audio/mpeg"
         }
       ],
+      position: 4
+    },
+    {
+      id: 5,
+      pathname: "darkst",
+      name: "dark.st",
+      title: "dark.st",
+      subtitle: "dnbradio's darkstep channel",
+      cover: "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/darkstep.png",
+      website: "http://section8recs.com",
+      facebook: "https://facebook.com/dnbradio",
+      twitter: "https://twitter.com/section8recs",
+      twitterId: "section8recs",
+      instagram: "https://instagram.com/section8recs",
+      soundcloud: "https://soundcloud.com/section8recs",
+      description: "Unrelenting dark and heavy drum and bass.",
+      nowplaying_url: {
+        type: "azuracast",
+        url: "https://azura.dnbradio.com/api/nowplaying/darkstep"
+      },
+      schedule: {
+        url: "https://api.dnbradio.nl/schedule"
+      },
+      podcast: {
+        url: "https://api.dnbradio.nl/podcast",
+        website: "https://dnbradio.com/podcast"
+      },
+      streams: [
+        {
+          url:
+            "https://fw.dnbradio.com/dnbradio_darkstep.mp3",
+          format: "aac",
+          mimetype: "audio/aacp"
+        }
+      ],
       position: 5
-    }
+    },
   ];
 }
