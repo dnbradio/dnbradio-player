@@ -14,7 +14,7 @@ Vue.prototype.$sound = media.audio(
     volume: 1,
     autoplay: true,
     poster:
-      "https://res.cloudinary.com/labelgrid/image/upload/c_scale,w_869/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png",
+      "https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_869/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png",
     preload: "auto"
   }
 );

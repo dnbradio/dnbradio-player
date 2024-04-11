@@ -847,42 +847,42 @@ export default {
               artwork: [
                 {
                   src:
-                    "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_96/v1586048258/" +
+                    "https://res.cloudinary.com/dgp7z9vkg/image/fetch/c_scale,w_96/v1586048258/" +
                     this.pageImage,
                   sizes: "96x96",
                   type: "image/png",
                 },
                 {
                   src:
-                    "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_128/v1586048258/" +
+                    "https://res.cloudinary.com/dgp7z9vkg/image/fetch/c_scale,w_128/v1586048258/" +
                     this.pageImage,
                   sizes: "128x128",
                   type: "image/png",
                 },
                 {
                   src:
-                    "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_192/v1586048258/" +
+                    "https://res.cloudinary.com/dgp7z9vkg/image/fetch/c_scale,w_192/v1586048258/" +
                     this.pageImage,
                   sizes: "192x192",
                   type: "image/png",
                 },
                 {
                   src:
-                    "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_256/v1586048258/" +
+                    "https://res.cloudinary.com/dgp7z9vkg/image/fetch/c_scale,w_256/v1586048258/" +
                     this.pageImage,
                   sizes: "256x256",
                   type: "image/png",
                 },
                 {
                   src:
-                    "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_348/v1586048258/" +
+                    "https://res.cloudinary.com/dgp7z9vkg/image/fetch/c_scale,w_348/v1586048258/" +
                     this.pageImage,
                   sizes: "384x384",
                   type: "image/png",
                 },
                 {
                   src:
-                    "https://res.cloudinary.com/labelgrid/image/fetch/c_scale,w_512/v1586048258/" +
+                    "https://res.cloudinary.com/dgp7z9vkg/image/fetch/c_scale,w_512/v1586048258/" +
                     this.pageImage,
                   sizes: "512x512",
                   type: "image/png",
