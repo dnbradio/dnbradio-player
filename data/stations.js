@@ -18,7 +18,7 @@ export default async function data() {
       soundcloud: "https://soundcloud.com/dnbradio",
       description: "All flavors of dnb from dj's across the globe!",
       schedule: {
-        url: "https://api.dnbradio.nl/schedule"
+        url: "https://dnbradio.com/api/schedule"
       },
       podcast: {
         url: "https://api.dnbradio.nl/podcast",
@@ -51,7 +51,7 @@ export default async function data() {
       twitterId: "plushrecs",
       donations: {},
       schedule: {
-        url: "https://api.dnbradio.nl/schedule"
+        url: "https://dnbradio.com/api/schedule"
       },
       podcast: {
         url: "https://api.dnbradio.nl/podcast",
@@ -84,7 +84,7 @@ export default async function data() {
       twitterId: "jungletrain",
       donations: {},
       schedule: {
-        url: "https://api.dnbradio.nl/schedule"
+        url: "https://dnbradio.com/api/schedule"
       },
       podcast: {
         url: "https://api.dnbradio.nl/podcast",
@@ -118,7 +118,7 @@ export default async function data() {
       twitterId: "section8recs",
       donations: {},
       schedule: {
-        url: "https://api.dnbradio.nl/schedule"
+        url: "https://dnbradio.com/api/schedule"
       },
       podcast: {
         url: "https://api.dnbradio.nl/podcast",
@@ -157,7 +157,7 @@ export default async function data() {
         url: "https://azura.dnbradio.com/api/nowplaying/darkstep"
       },
       schedule: {
-        url: "https://api.dnbradio.nl/schedule"
+        url: "https://dnbradio.com/api/schedule"
       },
       podcast: {
         url: "https://api.dnbradio.nl/podcast",
