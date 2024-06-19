@@ -59,4 +59,15 @@ jobs:
           port: 22
           source: "./player/*"
           target: "/home/forge/staging.dnbradio.com/public/"
-
+          timeout: 60s
+          command_timeout: 20m
+          use_insecure_cipher: false
+          rm: false
+          debug: false
+          strip_components: 0
+          overwrite: false
+          tar_dereference: false
+          tar_exec: tar
+          proxy_port: 22
+          proxy_timeout: 60s
+          proxy_use_insecure_cipher: false
