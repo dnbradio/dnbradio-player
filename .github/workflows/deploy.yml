@@ -50,7 +50,7 @@ jobs:
           target: "/root/apps/www/html/"
 
       - name: scp -> staging.dnbradio.com/player
-        if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/staging'
         uses: appleboy/scp-action@master
         with:
           host: 78.47.85.152
