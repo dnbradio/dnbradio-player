@@ -157,7 +157,7 @@ export default async function data() {
         url: "https://azura.dnbradio.com/api/nowplaying/darkstep"
       },
       schedule: {
-        url: "https://dnbradio.com/api/schedule"
+        url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
         url: "https://api.dnbradio.nl/podcast",
