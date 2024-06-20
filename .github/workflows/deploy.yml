@@ -40,12 +40,10 @@ jobs:
 
       - name: scp -> staging.dnbradio.com/player
         if: github.ref == 'refs/heads/staging'
-        uses: fifsky/ssh-action@master
+        uses: garygrossgarten/github-action-scp@release
         with:
+          local: ./player
+          remote: /home/forge/staging.dnbradio.com/public/
           host: 78.47.85.152
-          user: forge
-          key: ${{ secrets.SSH2 }}
-          port: 22
-          command: |
-            cd /home/forge/staging.dnbradio.com/public/
-            scp -r ../../player/* .
+          username: forge
+          password: ${{secrets.PWD}}
