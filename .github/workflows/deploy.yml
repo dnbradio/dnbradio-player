@@ -38,14 +38,6 @@ jobs:
           source: "./player/*"
           target: "/home/forge/dnbradio.com/public/"
 
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Add server to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H 78.47.85.152 >> ~/.ssh/known_hosts
-
       - name: scp -> staging.dnbradio.com/player
         if: github.ref == 'refs/heads/staging'
         uses: fifsky/ssh-action@master
