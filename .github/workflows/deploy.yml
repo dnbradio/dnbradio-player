@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - dev
+      - staging
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
       - name: pnpm i
         run: pnpm i
       - name: pnpm run generate-prod
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
         run: |
           pnpm run generate-prod
           mv dist player
@@ -31,32 +31,20 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: appleboy/scp-action@master
         with:
-          host: 3.238.78.182
+          host: 78.47.85.152
           username: forge
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
           target: "/home/forge/dnbradio.com/public/"
 
-      - name: scp -> trace:dnbradio.com
-        if: github.ref == 'refs/heads/main'
-        uses: appleboy/scp-action@master
-        with:
-          host: 49.12.202.218
-          username: root
-          key: ${{ secrets.SSH2 }}
-          port: 22
-          source: "./player/*"
-          target: "/root/apps/www/html/"
-
       - name: scp -> staging.dnbradio.com/player
-        if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/staging'
         uses: appleboy/scp-action@master
         with:
-          host: 67.202.42.123
+          host: 78.47.85.152
           username: forge
           key: ${{ secrets.SSH2 }}
           port: 22
           source: "./player/*"
           target: "/home/forge/staging.dnbradio.com/public/"
-
