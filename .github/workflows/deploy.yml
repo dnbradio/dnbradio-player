@@ -46,4 +46,4 @@ jobs:
           remote: /home/forge/staging.dnbradio.com/public/
           host: 78.47.85.152
           username: forge
-          password: ${{secrets.PWD}}
+          privateKey: ${{secrets.SSH2}}
