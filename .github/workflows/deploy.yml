@@ -46,6 +46,6 @@ jobs:
           user: forge
           key: ${{ secrets.SSH2 }}
           port: 22
-          script: |
+          command: |
             cd /home/forge/staging.dnbradio.com/public/
             scp -r ../../player/* .
