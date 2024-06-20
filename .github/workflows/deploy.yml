@@ -43,7 +43,7 @@ jobs:
         uses: fifsky/ssh-action@master
         with:
           host: 78.47.85.152
-          username: forge
+          user: forge
           key: ${{ secrets.SSH2 }}
           port: 22
           script: |
