@@ -7,7 +7,7 @@
             <v-card flat style="background:none; width: 220px;">
               <div style="min-height: 440px; padding:10px;">
                 <img
-                  src="https://res.cloudinary.com/labelgrid/image/upload/c_scale,w_269/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png"
+                  src="https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_269/v1597369102/logotags_zoom_1400_dnbr_dnbr-cropped.png"
                   width="203"
                   height="212"
                 />

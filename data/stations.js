@@ -21,7 +21,7 @@ export default async function data() {
         url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
+        url: "https://dnbradio.com/api/podcast",
         website: "https://dnbradio.com/podcast",
       },
       nowplaying_url: {
@@ -54,7 +54,7 @@ export default async function data() {
         url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
+        url: "https://dnbradio.com/api/podcast",
         website: "https://dnbradio.com/podcast",
       },
       description: "Feel good music from Plush Recordings",
@@ -88,7 +88,7 @@ export default async function data() {
         url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
+        url: "https://dnbradio.com/api/podcast",
         website: "https://dnbradio.com/podcast",
       },
       description: "More than 80 different live shows and events",
@@ -122,7 +122,7 @@ export default async function data() {
         url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
+        url: "https://dnbradio.com/api/podcast",
         website: "https://dnbradio.com/podcast",
       },
       description: "Heavy dnb from Section 8 Recordings",
@@ -162,7 +162,7 @@ export default async function data() {
         url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
+        url: "https://dnbradio.com/api/podcast",
         website: "https://dnbradio.com/podcast",
       },
       streams: [

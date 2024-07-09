@@ -55,8 +55,7 @@ export default {
   color: rgba(255, 255, 255, 0.73);
   background: #040404;
 }
-.v-card.v-sheet.theme--dark {
-}
+
 .module {
   position: relative;
 }
@@ -67,7 +66,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  /* background-image: url('https://res.cloudinary.com/labelgrid/image/upload/c_scale,w_1436/v1585703166/bg.jpg'); */
+  /* background-image: url('https://res.cloudinary.com/dgp7z9vkg/image/upload/c_scale,w_1436/v1585703166/bg.jpg'); */
   filter: grayscale(100%);
   background-size: cover;
   background-position: top;
