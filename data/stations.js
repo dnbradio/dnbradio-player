@@ -18,24 +18,24 @@ export default async function data() {
       soundcloud: "https://soundcloud.com/dnbradio",
       description: "All flavors of dnb from dj's across the globe!",
       schedule: {
-        url: "https://dnbradio.com/api/schedule"
+        url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
-        website: "https://dnbradio.com/podcast"
+        url: "https://dnbradio.com/api/podcast",
+        website: "https://dnbradio.com/podcast",
       },
       nowplaying_url: {
         type: "azuracast",
-        url: "https://azura.dnbradio.com/api/nowplaying/dnbradio"
+        url: "https://azura.drmnbss.org/api/nowplaying/dnbradio",
       },
       streams: [
         {
-          url: "https://fw.dnbradio.com/dnbradio_main.mp3",
+          url: "https://azrelay.drmnbss.org/listen/dnbradio/radio.mp3",
           format: "mp3",
-          mimetype: "audio/mpeg"
-        }
+          mimetype: "audio/mpeg",
+        },
       ],
-      position: 1
+      position: 1,
     },
     {
       id: 2,
@@ -51,25 +51,25 @@ export default async function data() {
       twitterId: "plushrecs",
       donations: {},
       schedule: {
-        url: "https://dnbradio.com/api/schedule"
+        url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
-        website: "https://dnbradio.com/podcast"
+        url: "https://dnbradio.com/api/podcast",
+        website: "https://dnbradio.com/podcast",
       },
       description: "Feel good music from Plush Recordings",
       nowplaying_url: {
         type: "azuracast",
-        url: "https://azura.dnbradio.com/api/nowplaying/plushrecs"
+        url: "https://azura.drmnbss.org/api/nowplaying/plushrecs",
       },
       streams: [
         {
-          url: "https://plushrecs247.dnbradio.com/stream.mp3",
+          url: "https://azrelay.drmnbss.org/listen/plushrecs/radio.mp3",
           format: "mp3",
-          mimetype: "audio/mpeg"
-        }
+          mimetype: "audio/mpeg",
+        },
       ],
-      position: 2
+      position: 2,
     },
     {
       id: 3,
@@ -77,32 +77,33 @@ export default async function data() {
       name: "jungletrain.net",
       title: "jungletrain",
       subtitle: "A train in constant motion",
-      cover: "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/jungletrain.png",
+      cover:
+        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/jungletrain.png",
       website: "https://jungletrain.net",
       facebook: "https://facebook.com/jungletrain",
       twitter: "https://twitter.com/jungletrain",
       twitterId: "jungletrain",
       donations: {},
       schedule: {
-        url: "https://dnbradio.com/api/schedule"
+        url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
-        website: "https://dnbradio.com/podcast"
+        url: "https://dnbradio.com/api/podcast",
+        website: "https://dnbradio.com/podcast",
       },
       description: "More than 80 different live shows and events",
       nowplaying_url: {
         type: "jt",
-        url: "https://dnbradio.com/tv/now_playing-jungletrain.php"
+        url: "https://dnbradio.com/tv/now_playing-jungletrain.php",
       },
       streams: [
         {
           url: "https://chat.jungletrain.net/streamtest/;stream/1",
           format: "mp3",
-          mimetype: "audio/mpeg"
-        }
+          mimetype: "audio/mpeg",
+        },
       ],
-      position: 3
+      position: 3,
     },
     {
       id: 4,
@@ -118,25 +119,25 @@ export default async function data() {
       twitterId: "section8recs",
       donations: {},
       schedule: {
-        url: "https://dnbradio.com/api/schedule"
+        url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
-        website: "https://dnbradio.com/podcast"
+        url: "https://dnbradio.com/api/podcast",
+        website: "https://dnbradio.com/podcast",
       },
       description: "Heavy dnb from Section 8 Recordings",
       nowplaying_url: {
         type: "azuracast",
-        url: "https://azura.dnbradio.com/api/nowplaying/section8recs"
+        url: "https://azura.drmnbss.org/api/nowplaying/section8recs",
       },
       streams: [
         {
-          url: "https://section8recs247.dnbradio.com/stream.mp3",
+          url: "https://azrelay.drmnbss.org/listen/section8recs/radio.mp3",
           format: "mp3",
-          mimetype: "audio/mpeg"
-        }
+          mimetype: "audio/mpeg",
+        },
       ],
-      position: 4
+      position: 4,
     },
     {
       id: 5,
@@ -144,7 +145,8 @@ export default async function data() {
       name: "dark.st",
       title: "dark.st",
       subtitle: "dnbradio's darkstep channel",
-      cover: "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/darkstep.png",
+      cover:
+        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/darkstep.png",
       website: "http://section8recs.com",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/section8recs",
@@ -154,24 +156,23 @@ export default async function data() {
       description: "Unrelenting dark and heavy drum and bass.",
       nowplaying_url: {
         type: "azuracast",
-        url: "https://azura.dnbradio.com/api/nowplaying/darkstep"
+        url: "https://azura.drmnbss.org/api/nowplaying/darkstep",
       },
       schedule: {
-        url: "https://dnbradio.com/api/schedule"
+        url: "https://dnbradio.com/api/schedule",
       },
       podcast: {
-        url: "https://api.dnbradio.nl/podcast",
-        website: "https://dnbradio.com/podcast"
+        url: "https://dnbradio.com/api/podcast",
+        website: "https://dnbradio.com/podcast",
       },
       streams: [
         {
-          url:
-            "https://fw.dnbradio.com/dnbradio_darkstep.mp3",
+          url: "https://azrelay.drmnbss.org/listen/darkstep/radio.mp3",
           format: "aac",
-          mimetype: "audio/aacp"
-        }
+          mimetype: "audio/aacp",
+        },
       ],
-      position: 5
+      position: 5,
     },
   ];
 }
