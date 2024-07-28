@@ -1064,7 +1064,7 @@ export default {
     // navigator
     this.$nextTick(() => {
       this.loaded = true;
-      this.initStream();
+      // this.initStream();
       this.fetchNowplaying();
 
       // try again if empty
