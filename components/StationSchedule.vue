@@ -93,8 +93,7 @@
                 >
                   <small>
                     {{ item.start | localDay }}<br />
-                    <!-- {{ item.start }}<br />
-                  {{ item.original_start }} - {{ item.original_end }}<br /> -->
+                   
                     {{ item.start | localTime }} - {{ item.end | localTime
                     }}<br />
                     <small>{{ item.start | localTZ }}</small>
@@ -271,26 +270,19 @@ export default {
           .utc({ hour: 23, minute: 59, second: 59 })
           .add(6, "days");
         var start = moment.utc({ hour: 0, minute: 0, second: 0 });
-        //let ostart = moment.parseZone(moment(item.start).format('YYYY-MM-DDT' + item.original_start))
+
         let ostart = moment.utc(item.start);
         return (
           ostart > start &&
           ostart < end &&
           ostart.local().day() == this.selectedDay
         );
-        //return new Date(item.start) > date2 && new Date(item.start) < date &&  moment(item.start).day() == this.selectedDay
-        //return  moment(item.start).day() == this.selectedDay
+      }).sort((a, b) => {
+        let a1 = moment.utc(a.start).toISOString();
+        let b1 = moment.utc(b.start).toISOString();
+        console.log('a1', a1, 'b1', b1);
+        return a1.localeCompare(b1);
       });
-      // .sort((a,b) => {
-      //   return (a.start > b.start) ? 1 : -1;
-      // });
-      // .sort((a,b) => {
-      //   let a1 = moment().format('YYYY-MM-DDT' + a.original_start)
-      //   let b1 = moment().format('YYYY-MM-DDT' + b.original_start)
-      //   console.log('a1', a1, 'b1', b1)
-      //   let val = (a1 > b1) ? 1 : -1;
-      //   return val
-      // })
     }
   },
   mounted() {
