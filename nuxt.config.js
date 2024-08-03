@@ -97,11 +97,6 @@ module.exports = {
     ],
     script: [
       { src: "https://code.createjs.com/1.0.0/soundjs.min.js", mode: "client" },
-      // { src: "https://player.twitch.tv/js/embed/v1.js", mode: "client" },
-      {
-        src: `https://polyfill.io/v3/polyfill.min.js?features=${features}`,
-        body: true,
-      },
       {
         src: "https://plausible.io/js/script.js",
         defer: true,
