@@ -1,6 +1,6 @@
 const nodeExternals = require("webpack-node-externals");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
 const IgnorePlugin = require("webpack").IgnorePlugin;
 const MomentTimezoneDataPlugin = require("moment-timezone-data-webpack-plugin");
@@ -17,7 +17,7 @@ const features = [
   "Object.entries",
   "Object.values",
   "IntersectionObserver",
-  "Array.from"
+  "Array.from",
 ].join("%2C");
 
 module.exports = {
@@ -31,7 +31,7 @@ module.exports = {
     MONGO_INITDB_HOST: process.env.MONGO_INITDB_HOST,
     MONGO_INITDB_DATABASE: process.env.MONGO_INITDB_DATABASE,
     MONGO_INITDB_ROOT_USERNAME: process.env.MONGO_INITDB_ROOT_USERNAME,
-    MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD
+    MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD,
   },
   publicRuntimeConfig: {
     APP_VERSION: process.env.APP_VERSION || APP_VERSION,
@@ -52,69 +52,63 @@ module.exports = {
         hid: "description",
         name: "description",
         content:
-          "24/7 drum & bass, jungle, neuro, and drum funk with live dj's streaming worldwide"
-      }
+          "24/7 drum & bass, jungle, neuro, and drum funk with live dj's streaming worldwide",
+      },
     ],
     link: [
       {
         rel: "icon",
         type: "image/png",
-        href: "https://dnbradio.com/img/logotags.png"
+        href: "https://dnbradio.com/img/logotags.png",
       },
       {
         rel: "stylesheet",
-        href:
-          "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
+        href: "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons",
       },
       {
         rel: "image_src",
         type: "image/png",
-        href: "https://dnbradio.com/img/logotags.png"
+        href: "https://dnbradio.com/img/logotags.png",
       },
       {
         rel: "icon",
         type: "image/png",
         sizes: "192x192",
-        href: "https://dnbradio.com/img/logotags.png"
+        href: "https://dnbradio.com/img/logotags.png",
       },
       {
         rel: "icon",
         type: "image/png",
         sizes: "32x32",
-        href: "https://dnbradio.com/img/logotags.png"
+        href: "https://dnbradio.com/img/logotags.png",
       },
       {
         rel: "icon",
         type: "image/png",
         sizes: "96x96",
-        href: "https://dnbradio.com/img/logotags.png"
+        href: "https://dnbradio.com/img/logotags.png",
       },
       {
         rel: "icon",
         type: "image/png",
         sizes: "16x16",
-        href: "https://dnbradio.com/img/logotags.png"
-      }
+        href: "https://dnbradio.com/img/logotags.png",
+      },
     ],
     script: [
       { src: "https://code.createjs.com/1.0.0/soundjs.min.js", mode: "client" },
-      // { src: "https://player.twitch.tv/js/embed/v1.js", mode: "client" },
       {
-        src: `https://polyfill.io/v3/polyfill.min.js?features=${features}`,
-        body: true
+        src: "https://plausible.io/js/script.js",
+        defer: true,
+        "data-domain": "dnbradio.com",
       },
-      {
-        "src": "https://plausible.io/js/script.js",
-        "defer": true,
-        "data-domain": "dnbradio.com"
-      }
-    ]
+    ],
   },
   loading: { color: "#fff" },
   plugins: [
     { ssr: false, src: "~/plugins/vuetify.js" },
     { ssr: false, src: "~plugins/createjs.js" },
-    { ssr: false, src: "~plugins/headful.js" }
+    { ssr: false, src: "~plugins/headful.js" },
   ],
   //buildModules: ["@nuxtjs/vuetify"],
   modules: [
@@ -124,11 +118,11 @@ module.exports = {
     "nuxtjs-mdi-font",
     "vuetify-dialog/nuxt",
     // "@nuxtjs/pwa",
-    "@nuxtjs/device"
+    "@nuxtjs/device",
   ],
   server: {
     port: process.env.NODE_PORT || 8000,
-    host: process.env.NODE_HOST || "0.0.0.0"
+    host: process.env.NODE_HOST || "0.0.0.0",
   },
   build: {
     postcss: null,
@@ -145,12 +139,12 @@ module.exports = {
         const currentYear = new Date().getFullYear();
         const plugin = new MomentTimezoneDataPlugin({
           startYear: currentYear - 2,
-          endYear: currentYear + 10
+          endYear: currentYear + 10,
         });
         config.plugins.push(plugin);
         config.optimization.splitChunks.maxSize = 51200;
       }
-    }
+    },
   },
   router: {
     // middleware: 'user-agent',
@@ -163,14 +157,14 @@ module.exports = {
       routes.push({
         name: "station1",
         path: "/",
-        component: resolve(__dirname, "pages/stations/_stationId/index.vue")
+        component: resolve(__dirname, "pages/stations/_stationId/index.vue"),
       });
       routes.push({
         name: "darkst",
         path: "/darkstep",
-        component: resolve(__dirname, "pages/stations/_stationId/index.vue")
+        component: resolve(__dirname, "pages/stations/_stationId/index.vue"),
       });
-    }
+    },
   },
   generate: {
     devtools: process.env.DEVTOOLS ? process.env.DEVTOOLS : false,
@@ -193,6 +187,8 @@ module.exports = {
       "/stations/2/schedule",
       "/stations/2/chat",
       "/stations/2/podcast",
+      "/stations/2/widget-upnext",
+      "/stations/2/widget-nowplaying",
       "/stations/3",
       "/stations/3/schedule",
       "/stations/3/chat",
@@ -219,7 +215,7 @@ module.exports = {
       "/stations/4/widget-donators",
       "/stations/4/widget-listeners",
       "/stations/4/widget-marquee",
-      "/stations/4/widget-socials"
-    ]
-  }
+      "/stations/4/widget-socials",
+    ],
+  },
 };
