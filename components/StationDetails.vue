@@ -604,17 +604,22 @@ export default {
     loadPrev(auto) {
       clearInterval(this.npInterval);
       if (this.$sound) {
-        this.$sound.pause();
-        this.$sound.src = "";
-        this.$sound = null;
+        // this.$sound.pause();
+        // this.$sound.src = "";
+        // this.$sound = null;
+        //previousStation
+        this.$sound.src = this.previousStation.streams[0].url;
       }
-      this.$sound = null;
+      // this.$sound = null;
       if (this.shuffleOn) {
         this.loadRandom();
         return;
       }
       //this.$sound.stop();
       this.$router.push("/stations/" + this.prevIndex);
+      this.$nextTick(() => {
+        this.pause();
+      });
     },
     loadNext(auto) {
       console.log("loadNext");
@@ -627,6 +632,9 @@ export default {
         return;
       }
       this.$router.push("/stations/" + this.nextIndex);
+      this.$nextTick(() => {
+        this.pause();
+      });
     },
     loadRandom() {
       if (this.$sound) {
@@ -734,7 +742,6 @@ export default {
                 this.station.description + " " + this.station.subtitle;
               this.pageImage = this.station.cover;
               break;
-              break;
             case "sam":
               this.nowplaying = res.data;
               this.nowplaying.title = this.nowplaying.title.replace(
@@ -771,15 +778,6 @@ export default {
               this.pageImage = this.station.cover;
               break;
             case "shoutcast":
-              // let d = res.data.replace(/(<([^>]+)>)/gi, "").split(",");
-              // let rejoin = null;
-              // if (d[8]) {
-              //   rejoin = d[6] + ", " + d[7] + ", " + d[8];
-              // } else if (d[7]) {
-              //   rejoin = d[6] + ", " + d[7];
-              // } else {
-              //   rejoin = d[6];
-              // }
               const d = res.data;
               let parts = d.songtitle.split(" - ");
               let artist = parts[0];
@@ -793,7 +791,7 @@ export default {
                 artist: artist,
                 title: title,
               };
-              console.log(data);
+              
               this.nowplaying.artist = data.artist;
               this.nowplaying.title = data.title.replace(
                 "(Original Title)",
@@ -1064,7 +1062,7 @@ export default {
     // navigator
     this.$nextTick(() => {
       this.loaded = true;
-      this.initStream();
+      // this.initStream();
       this.fetchNowplaying();
 
       // try again if empty
