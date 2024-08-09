@@ -43,7 +43,7 @@
           @click="showStationDetails = !showStationDetails"
           style="opacity: 0.3"
         >
-          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-information-outline</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-home</v-icon>
         </v-btn>
 
         <v-btn
