@@ -891,6 +891,8 @@ export default {
         })
       .catch((err) => {
         console.log("cannot fetch nowplaying", err.message);
+        // this.initStream();
+        this.initPlayer();
       });
     },
     startStars(){
