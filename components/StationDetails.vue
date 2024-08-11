@@ -43,7 +43,7 @@
           @click="showStationDetails = !showStationDetails"
           style="opacity: 0.3"
         >
-          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-information-outline</v-icon>
+          <v-icon medium dark :size="windowHeight > windowWidth ? 32: 24">mdi-home</v-icon>
         </v-btn>
 
         <v-btn
@@ -235,7 +235,7 @@
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-web</v-icon>Website
             </v-btn>
           </div>
-          <div class="pb-6" v-if="station.podcast && station.podcast.website">
+          <div class="pb-2" v-if="station.podcast && station.podcast.website">
             <v-btn rounded @click="launchLink(station.podcast.website)">
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">voicemail</v-icon> Podcast
             </v-btn>
@@ -244,25 +244,25 @@
           <div class="pb-2" v-if="station.facebook">
             <v-btn rounded @click="launchLink(station.facebook)">
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-facebook</v-icon>
-              <p>Facebook</p>
+              Facebook
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.twitter">
             <v-btn rounded @click="launchLink(station.twitter)">
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-twitter</v-icon>
-              <p>Twitter</p>
+              Twitter
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.instagram">
             <v-btn rounded @click="launchLink(station.instagram)">
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-instagram</v-icon>
-              <p>Instagram</p>
+              Instagram
             </v-btn>
           </div>
           <div class="pb-2" v-if="station.soundcloud">
             <v-btn rounded @click="launchLink(station.soundcloud)">
               <v-icon left :size="windowHeight > windowWidth ? 32: 24">mdi-soundcloud</v-icon>
-              <p>Soundcloud</p>
+              Soundcloud
             </v-btn>
           </div>
         </v-card-text>
