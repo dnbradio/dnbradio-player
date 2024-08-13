@@ -312,14 +312,28 @@ export default {
       stalledMessage: "",
       stalledRetriesRemaining: 90,
       stalledRetriesOfflineRemaining: 225,
+      isOnline: navigator.onLine,
     };
   },
+  beforeDestroy() {
+    window.removeEventListener('online', this.catchOnlineStatus);
+    window.removeEventListener('offline', this.updateOnlineStatus);
+  },
   methods: {
+    updateOnlineStatus() {
+      console.log('online or offline?', navigator.onLine);
+      this.isOnline = navigator.onLine;
+    },
+    catchOnlineStatus() {
+      // If the user is online from offline status, play the stream
+      if(this.isOnline === false){
+        this.initStream();
+      }
+    },
     playerToggleVisuals() {
       this.$store.commit('player/TOGGLE_VISUALS');
     },
     attachListeners() {
-      console.log("attachListeners", [this.$sound], this.$media);
       clearInterval(this.npInterval);
       this.$sound.onloaded = () => {
         this.isLoading = false;
@@ -354,6 +368,9 @@ export default {
       };
       this.$sound.addEventListener("stalled", (err) => {
         console.log("STALLED CAUGHT", err, this.$sound);
+        if(this.isOnline){
+          this.initStream();
+        }
       });
       this.$sound.addEventListener("abort", (err) => {
         console.log("ABORT CAUGHT", err, this.$sound);
@@ -891,7 +908,6 @@ export default {
         })
       .catch((err) => {
         console.log("cannot fetch nowplaying", err.message);
-        // this.initStream();
         this.initPlayer();
       });
     },
@@ -1040,6 +1056,8 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener('online', this.catchOnlineStatus);
+    window.addEventListener('offline', this.updateOnlineStatus);
     // if fresh load then startStars
     console.log('this.$route?.from?.name', this.$route)
     if (this.$store.state.player.initialLoad) {
@@ -1064,7 +1082,6 @@ export default {
     // navigator
     this.$nextTick(() => {
       this.loaded = true;
-      // this.initStream();
       this.fetchNowplaying();
 
       // try again if empty
@@ -1085,7 +1102,6 @@ export default {
       }
     },
     streamurl(val) {
-      console.log("streamurl changed", val);
       this.initStream();
     },
   },
