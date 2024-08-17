@@ -478,11 +478,12 @@ export default {
         return true;
       }
       const streamUrl = this.station?.streams?.[0]?.url
-        ? [this.station.streams[0].url]
+        ? this.station.streams[0].url
         : null;
       const streamMimeType = this.station?.streams?.[0]?.mimetype;
       if (streamUrl) {
-        this.$sound.src = streamUrl;
+        const unixtime = new Date().getTime();
+        this.$sound.src = streamUrl + '?' + unixtime.toString();
         this.$sound.type = streamMimeType;
         this.attachListeners();
         return true;
@@ -595,7 +596,7 @@ export default {
       clearInterval(this.npInterval);
       if (this.$sound) {
         this.$sound.pause();
-        this.$sound.src = "";
+        this.$sound.src = null;
       }
       this.$sound = null;
       //this.$dialog.confirm({text: 'This station\'s podcast is available on the station\'s website. We will be adding a podcast listening feature to this app soon, but in the meantime please visit the station\'s website to listen to the podcast there.'})
@@ -608,7 +609,8 @@ export default {
         // this.$sound.src = "";
         // this.$sound = null;
         //previousStation
-        this.$sound.src = this.previousStation.streams[0].url;
+        const unixtime = new Date().getTime();
+        this.$sound.src = this.previousStation.streams[0].url + '?' + unixtime.toString();
       }
       // this.$sound = null;
       if (this.shuffleOn) {
@@ -625,7 +627,8 @@ export default {
       console.log("loadNext");
       clearInterval(this.npInterval);
       if (this.$sound) {
-        this.$sound.src = this.nextStation.streams[0].url;
+        const unixtime = new Date().getTime();
+        this.$sound.src = this.nextStation.streams[0].url + '?' + unixtime.toString();
       }
       if (this.shuffleOn) {
         this.loadRandom();
@@ -639,7 +642,8 @@ export default {
     loadRandom() {
       if (this.$sound) {
         this.$sound.pause();
-        this.$sound.src = this.previousStation.streams[0].url;
+        const unixtime = new Date().getTime();
+        this.$sound.src = this.previousStation.streams[0].url + '?' + unixtime.toString();
       }
       this.$router.push("/stations/" + this.randomIndex);
     },
@@ -791,7 +795,7 @@ export default {
                 artist: artist,
                 title: title,
               };
-              
+
               this.nowplaying.artist = data.artist;
               this.nowplaying.title = data.title.replace(
                 "(Original Title)",
