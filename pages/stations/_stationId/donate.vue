@@ -156,7 +156,7 @@ export default {
             link,
           actions: {
             false: "Cancel",
-            true: { text: "YES, LAUNCH THE LINK.", color: "primary" }
+            true: "YES, LAUNCH THE LINK."
           }
         })
         .then(res => {
