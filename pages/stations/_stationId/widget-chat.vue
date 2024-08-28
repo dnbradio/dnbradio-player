@@ -58,7 +58,7 @@
     },
     methods: {
       fetchData() {
-        this.$axios.get('http://localhost:8000/api/chat_log', {progress: false}).then((res) => {
+        this.$axios.get('http://pr-197.preview.dnbradio.com/api/chat_log', {progress: false}).then((res) => {
           this.data = res.data.chatLog;
           setTimeout(() => {
             document.querySelector('.chatlog').scrollTo(0,document.querySelector(".chatlog").scrollHeight)
