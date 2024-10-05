@@ -40,7 +40,15 @@ export default {
   methods: {
     fetchData() {
       this.$axios.get('https://dnbradio.com/api/donations', {progress: false}).then((res) => {
-        this.data = res.data.filter((item) => moment(item.date) > moment().subtract(90, 'days')).sort((a, b) => b.gross - a.gross);
+        this.data = res.data.filter((item) => moment(item.date) > moment().subtract(90, 'days'))
+        // remove duplicates
+        .filter((item, index, self) => index === self.findIndex((t) => (t.alias === item.alias)))
+        // round to nearest dollar
+        .map((item) => {
+          item.gross = Math.round(item.gross);
+          return item;
+        })
+        .sort((a, b) => b.gross - a.gross);
       })
     },
   },
