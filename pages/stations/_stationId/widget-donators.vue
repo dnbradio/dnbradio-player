@@ -3,7 +3,7 @@
   <small style="color: yellow;">TOP DONATIONS</small>
   <v-divider />
   <div v-for="item in filteredData" :key="item.id" style="text-align:center;">
-    {{ item.nickname }} ${{ item.gross }}
+    {{ item.alias }} ${{ item.gross }}
   </div>
 </div>
 </template>
@@ -19,6 +19,8 @@ import Station from '@/models/Station'
 // comp
 import StationList from '~/components/StationList'
 import Logo from '~/components/Logo.vue'
+
+import moment from 'moment-timezone'
 
 export default {
   layout: 'ls-widget',
@@ -37,9 +39,8 @@ export default {
   },
   methods: {
     fetchData() {
-      this.$axios.get('https://dnbradio.com/swcontrib/SWDnbRadio/assets/inc/paypal-json.php', {progress: false}).then((res) => {
-        console.log(res)
-        this.data = res.data;
+      this.$axios.get('http://localhost/api/donations', {progress: false}).then((res) => {
+        this.data = res.data.filter((item) => moment(item.date) > moment().subtract(90, 'days')).sort((a, b) => b.gross - a.gross);
       })
     },
   },
