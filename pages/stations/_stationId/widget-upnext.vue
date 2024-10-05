@@ -139,11 +139,11 @@ export default {
       if (!this.data || !this.data.filter) {
         return;
       }
-      return this.data
+      return this.data.sort((a, b) => new Date(a.start) - new Date(b.start))
       .filter((item) => {
-        var end = moment.utc({ hour:23, minute:59, second:59 }).add(1, 'days');
-        var start = moment.utc();
-        let ostart = moment.utc(item.start)
+        var end = moment.utc({ hour:23, minute:59, second:59 }).local().add(1, 'days');
+        var start = moment.utc().local();
+        let ostart = moment.utc(item.start).local()
         return ostart > start
       })
       .slice(0,1)[0];
