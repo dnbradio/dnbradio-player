@@ -7,10 +7,10 @@
     transparent>
   <div>
     <v-list  dark style="background:transparent;">
-      <template v-for="(item, index) in filteredData">
+      <div v-for="(item, index) in filteredData" :key="index">
+      <template>
 
         <v-list-item
-          :key="index"
           class="message"
         >
         <v-col class="shrink" style="min-width:80px">
@@ -27,6 +27,7 @@
         </v-col>
         </v-list-item>
       </template>
+      </div>
     </v-list>
     </div>
   </v-card>
