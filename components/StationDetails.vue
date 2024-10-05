@@ -303,6 +303,7 @@ export default {
         album: null,
         song_type: null,
         label: null,
+        streamer: null
       },
       isPlaying: false,
       isLoading: false,

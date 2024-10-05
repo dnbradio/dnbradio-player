@@ -72,7 +72,8 @@ export default {
         albumyear: null,
         album: null,
         song_type: null,
-        label: null
+        label: null,
+        streamer: null
       },
     }
   },
