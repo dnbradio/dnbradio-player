@@ -87,9 +87,8 @@
             <p v-else-if="isStalled" class="offline-indicator indicator-text">{{ stalledMessage || 'Connection error. Please try again later.' }}</p>
             <p v-else-if="!isPlaying" class="indicator-text stop-text">STOPPED</p>
             <div v-else>
-              <p v-if="nowplaying.song_type == 'L'" class="indicator-text stop-text">LIVE BROADCAST</p>
-              <p v-else-if="nowplaying.song_type == 'S'" class="indicator-text stop-text">PLAYLIST ROTATION</p>
-              <p v-else class="indicator-text stop-text">NOW PLAYING</p>
+              <p v-if="nowplaying.streamer" class="indicator-text stop-text">LIVE BROADCAST</p>
+              <p v-else class="indicator-text stop-text">PLAYLIST ROTATION</p>
             </div>
             <div v-if="artist || title">
               <p v-html="decodeURIComponent(artist.replace(/\\'/g, '\''))" class="user-title bold-title-700"></p>

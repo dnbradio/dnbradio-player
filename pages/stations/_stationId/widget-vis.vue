@@ -19,7 +19,7 @@
       :canv-height="50"
       :corsAnonym="true"
       audio-src="https://source.dnbradio.com/stream.mp3"></av-bars>
-      <div v-if="nowplaying.song_type=='L'">
+      <div v-if="nowplaying.streamer">
         <div><small>LIVE DJ</small></div>
         <div class="artist" v-html="artist">
         </div>

@@ -130,9 +130,10 @@ export default {
   },
   computed: {
     isJukebox() {
-      if (this.nowplaying.song_type != 'L') {
-        return true
+      if (this.nowplaying.streamer) {
+        return false
       }
+      return true
     },
     currenStationIndex() {
       return (this.$route.params && this.$route.params.stationId) ? this.$route.params.stationId : 1
