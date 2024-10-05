@@ -1,6 +1,6 @@
 <template>
 <div>
-  <div class="upnext" v-if="isJukebox==true && nowplaying">
+  <div class="upnext" v-if="isJukebox==false && nowplaying">
     <div class="heading">PLAYLIST ROTATION</div>
     <span v-if="data">
       <div>
@@ -9,7 +9,7 @@
       </div>
     </span>
   </div>
-  <div class="upnext" v-else-if="nowplaying.song_type=='L'">
+  <div class="upnext" v-else>
     <div class="heading">LIVE NOW</div>
     <span v-if="data">
       <div>
@@ -85,6 +85,7 @@ export default {
               albumyear: null,
               album: res.data.now_playing.song.album,
               song_type: res.data.now_playing.streamer_name ? 'L' : 'S',
+              streamer: res.data.now_playing.streamer_name,
               label: null
             };
           break;
