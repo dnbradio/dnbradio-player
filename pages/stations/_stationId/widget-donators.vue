@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     fetchData() {
-      this.$axios.get('http://localhost/api/donations', {progress: false}).then((res) => {
+      this.$axios.get('https://dnbradio.com/api/donations', {progress: false}).then((res) => {
         this.data = res.data.filter((item) => moment(item.date) > moment().subtract(90, 'days')).sort((a, b) => b.gross - a.gross);
       })
     },
