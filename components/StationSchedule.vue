@@ -93,7 +93,7 @@
                 >
                   <small>
                     {{ item.start | localDay }}<br />
-                   
+
                     {{ item.start | localTime }} - {{ item.end | localTime
                     }}<br />
                     <small>{{ item.start | localTZ }}</small>
@@ -233,7 +233,7 @@ export default {
           payload.description +
           "</small>" +
           (payload.image
-            ? '<img src="https://dnbradio.com/assets/swframework/' +
+            ? '<img src="' +
               payload.image +
               '" style="max-width: 400px;" />'
             : ""),

@@ -1,6 +1,6 @@
 <template>
   <div>
- 
+
   <v-row>
     <v-col class="transparent">
       <v-sheet v-if="schedule">
@@ -20,7 +20,7 @@
         <template v-event-summary>
           <div v-html="eventName" class="text-center">
           </div>
-        </template> 
+        </template>
       </v-calendar>
       </v-sheet>
     </v-col>
@@ -136,13 +136,13 @@ export default {
           break;
       }
       this.$dialog.confirm({
-        title: payload.event.name, 
-        text: '<strong>' + payload.event.title + '</strong>' + 
+        title: payload.event.name,
+        text: '<strong>' + payload.event.title + '</strong>' +
         '<br />' + payload.event.location +
-        '<br />' + payload.event.start.split(' ')[1] + ' - ' + payload.event.end.split(' ')[1] + 
+        '<br />' + payload.event.start.split(' ')[1] + ' - ' + payload.event.end.split(' ')[1] +
         ((occurs) ? ' (' + occurs + ')' : '') +
         '<br /><br /><small>' + '' + payload.event.description + '</small>' +
-        ((payload.event.image) ? '<img src="' +payload.event.image+ '" style="max-width: 400px;" />' : null), 
+        ((payload.event.image) ? '<img src="' +payload.event.image+ '" style="max-width: 400px;" />' : null),
         fullscreen:false
       })
     },
@@ -159,7 +159,7 @@ export default {
           break;
         case 'right':
           this.loadNext();
-          break; 
+          break;
       }
     }
   },
@@ -172,27 +172,27 @@ export default {
     this.selectedDay = moment().day()
     if (this.station) {
       this.$axios.get(this.station.schedule.url).then((res) => {
-        this.schedule = res.data.map((item) => { 
+        this.schedule = res.data.map((item) => {
           let start, end;
           // if (moment().isDST()) {
           //   start = moment(item.start).subtract(1, 'hours').format('YYYY-MM-DD HH:mm')
-          //   end = moment(item.end).subtract(1, 'hours').format('YYYY-MM-DD HH:mm') 
+          //   end = moment(item.end).subtract(1, 'hours').format('YYYY-MM-DD HH:mm')
           // } else {
           //   start = moment(item.start).format('YYYY-MM-DD HH:mm')
-          //   end = moment(item.end).format('YYYY-MM-DD HH:mm') 
+          //   end = moment(item.end).format('YYYY-MM-DD HH:mm')
           // }
           start = moment(item.start).format('YYYY-MM-DD HH:mm')
           end = moment(item.end).format('YYYY-MM-DD HH:mm')
           return {
-            name: item.host, 
+            name: item.host,
             title: item.title,
             description:item.description,
             location: item.location,
             occurs: item.occurs,
-            image: (item.image) ? 'https://dnbradio.com/assets/swframework/' + item.image : '',
-            start: start, 
+            image: (item.image) ? item.image : '',
+            start: start,
             end: end
-          } 
+          }
         })
       })
     }
