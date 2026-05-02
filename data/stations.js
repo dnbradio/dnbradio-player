@@ -9,7 +9,7 @@ export default async function data() {
       title: "dnbradio.com",
       subtitle: "all flavors",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/logotags.png",
+        "https://dnbradio.com/images/logotags.png",
       website: "https://dnbradio.com/?forceMobile=0",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/dnbradio",
@@ -44,7 +44,7 @@ export default async function data() {
       title: "plushrecs",
       subtitle: "Lush jungle and drum and bass",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/plushrecs.png",
+        "https://dnbradio.com/images/plushrecs.png",
       website: "https://plushrecs.com",
       facebook: "https://facebook.com/plushrecs",
       twitter: "https://twitter.com/plushrecs",
@@ -78,7 +78,7 @@ export default async function data() {
       title: "jungletrain",
       subtitle: "A train in constant motion",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/jungletrain.png",
+        "https://dnbradio.com/images/jungletrain.png",
       website: "https://jungletrain.net",
       facebook: "https://facebook.com/jungletrain",
       twitter: "https://twitter.com/jungletrain",
@@ -112,7 +112,7 @@ export default async function data() {
       title: "section8recs",
       subtitle: "Dark heavy drum and bass",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/section8recs.png",
+        "https://dnbradio.com/images/section8recs.png",
       website: "https://section8recs.com",
       facebook: "https://facebook.com/section8recs",
       twitter: "https://twitter.com/section8recs",
@@ -146,7 +146,7 @@ export default async function data() {
       title: "dark.st",
       subtitle: "dnbradio's darkstep channel",
       cover:
-        "https://res.cloudinary.com/dgp7z9vkg/image/fetch/b_auto,c_pad,w_960/https://staging.dnbradio.com/images/darkstep.png",
+        "https://dnbradio.com/images/darkstep.png",
       website: "http://section8recs.com",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/section8recs",
