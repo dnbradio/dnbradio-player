@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=.constellation/project.schema.json
+config_version: 1
+project:
+  id: dnbradio-player
+  name: DNBRadio Player (Nuxt static)
+  family: dnbradio
+git_host:
+  provider: github
+  slug: dnbradio/dnbradio-player
+tracker:
+  adapter: github
+  project_key: dnbradio/dnbradio-player
+deploy:
+  provider: forge
+  method: scp
+loops: []
+ci:
+  provider: github-actions

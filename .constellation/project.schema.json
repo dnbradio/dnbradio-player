@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-substrate/project.schema.json",
+  "title": "Constellation project manifest (project.yml v1)",
+  "description": "Canonical per-repo manifest for every repo-scoped fact (contracts/project-config.md). Lives at the repo root as project.yml; a vendored copy of this schema lives at .constellation/project.schema.json for editor validation. NO secret values, NO absolute paths — the manifest must be portable across checkouts and sandboxes.",
+  "type": "object",
+  "required": ["config_version", "project", "git_host", "tracker"],
+  "additionalProperties": false,
+  "properties": {
+    "config_version": {
+      "const": 1,
+      "description": "manifest schema version; breaking changes increment (contracts/project-config.md versioning policy)"
+    },
+    "project": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "stable slug; joins the fleet index under this key when centrally registered"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "free-form grouping label; only gains fleet meaning if the operator registers the project centrally (portfolio keeps its own closed enum)"
+        }
+      }
+    },
+    "git_host": {
+      "$ref": "common.defs.json#/$defs/git_host",
+      "required": ["provider", "slug"]
+    },
+    "tracker": {
+      "$ref": "common.defs.json#/$defs/tracker"
+    },
+    "ci": {
+      "type": "object",
+      "required": ["provider"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "$ref": "common.defs.json#/$defs/ci_provider"
+        },
+        "required_context": {
+          "type": "string",
+          "description": "the branch-protection status context that gates merges (e.g. 'CI gate')"
+        }
+      }
+    },
+    "errors": {
+      "$ref": "common.defs.json#/$defs/errors"
+    },
+    "review": {
+      "$ref": "common.defs.json#/$defs/review"
+    },
+    "deploy": {
+      "$ref": "common.defs.json#/$defs/deploy"
+    },
+    "local_dev": {
+      "$ref": "common.defs.json#/$defs/local_dev"
+    },
+    "testing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "type": "string",
+          "description": "repo-root command that runs the suite relevant to a typical change"
+        },
+        "paths": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "diff-path glob -> test command routing for monorepos (e.g. 'api/**': 'cd api && ./vendor/bin/pest')"
+        },
+        "full_suite": {
+          "type": "string",
+          "description": "the full-suite command (often deliberately NOT run by agents; see orchestrator.prompt.full_suite_warning)"
+        }
+      }
+    },
+    "autonomy": {
+      "$ref": "common.defs.json#/$defs/autonomy"
+    },
+    "services": {
+      "$ref": "common.defs.json#/$defs/services"
+    },
+    "loops": {
+      "$ref": "common.defs.json#/$defs/loops"
+    },
+    "agents": {
+      "type": "object",
+      "description": "agent DEFINITIONS only — runtime state (journal/memory/inbox/locks) lives under ~/.agent-substrate/<project-id>/, never in-repo (contracts/project-config.md)",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z0-9][a-z0-9-]*$": {
+          "type": "object",
+          "required": ["skill"],
+          "additionalProperties": false,
+          "properties": {
+            "skill": {
+              "type": "string",
+              "description": "skill that implements this agent (generic parameterized skill preferred; per-project copy during migration)"
+            },
+            "schedule": {
+              "type": "string",
+              "description": "cron expression or human cadence note consumed by scaffold-loop"
+            },
+            "model": {
+              "$ref": "common.defs.json#/$defs/model"
+            },
+            "effort": {
+              "$ref": "common.defs.json#/$defs/effort"
+            },
+            "autonomy_gate": {
+              "type": "string",
+              "description": "gate note (e.g. 'propose-only', 'auto-merge small+green') per contracts/autonomy-policy.md"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "description": "artifact locations skills resolve through; RELATIVE to repo root only",
+      "additionalProperties": false,
+      "properties": {
+        "specs": {
+          "$ref": "#/$defs/relative_path",
+          "default": ".constellation/specs"
+        },
+        "roadmaps": {
+          "$ref": "#/$defs/relative_path",
+          "default": ".constellation/roadmaps"
+        },
+        "scratch": {
+          "$ref": "#/$defs/relative_path",
+          "default": ".constellation/.scratch"
+        },
+        "branding": {
+          "$ref": "#/$defs/relative_path",
+          "default": ".constellation/branding"
+        }
+      }
+    },
+    "products": {
+      "$ref": "common.defs.json#/$defs/products"
+    },
+    "extensions": {
+      "type": "object",
+      "description": "structured repo-scoped facts OUTSIDE the core vocabulary (infra topology, environment/host maps, cloud account refs). Consumers own the semantics of their own extension keys; the schema only requires object shape. Still bound by the global rules: env-var NAMES not values, no secrets. Promotion path: an extension key used by 3+ projects graduates into the core schema.",
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9_-]*$"
+      },
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "orchestrator": {
+      "type": "object",
+      "description": "repo-scoped orchestrator config only; fleet knobs (primaryRank, e2bTemplateId, workspacePath, projects_json_key) stay in the central portfolio (contracts/project-config.md placement table). ${VAR} env NAMES only, never values.",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "prompt": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lint": {
+              "type": "string"
+            },
+            "test": {
+              "type": "string"
+            },
+            "full_suite_warning": {
+              "type": "string"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "branch_pattern": {
+          "type": "string",
+          "description": "e.g. agent/{ticketId}-fix"
+        },
+        "picker_hint": {
+          "type": "string",
+          "description": "repo-selection guidance shown to the ticket router"
+        },
+        "mcp_servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "command"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "command": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              },
+              "environment": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "pattern": "^(?!.*(ghp_|sk-|xox[bap]-|AKIA[0-9A-Z]{16})).*$"
+                },
+                "description": "values must be ${VAR} interpolations or plain config, never literal secrets"
+              },
+              "enabledWhen": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "relative_path": {
+      "type": "string",
+      "pattern": "^(?!.*\\.\\.)[^/~].*$",
+      "description": "repo-relative path; absolute paths, ~, and .. are banned (portability across checkouts/sandboxes)"
+    }
+  }
+}
