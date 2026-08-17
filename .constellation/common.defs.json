@@ -151,12 +151,14 @@
         },
         "worktree_setup": {
           "type": "string",
-          "pattern": "^(?!/)(?!.*\\.\\.).+$",
+          "pattern": "^[^/~].*$",
+          "not": {"pattern": "\\.\\."},
           "description": "repo-relative executable that prepares a fresh linked worktree synchronously"
         },
         "readiness_receipt": {
           "type": "string",
-          "pattern": "^(?!/)(?!.*\\.\\.).+$",
+          "pattern": "^[^/~].*$",
+          "not": {"pattern": "\\.\\."},
           "description": "repo-relative machine-local receipt written by worktree_setup and required before edits"
         }
       }
