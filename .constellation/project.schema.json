@@ -1,19 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "agent-substrate/project.schema.json",
-  "title": "Constellation project manifest (project.yml v1)",
-  "description": "Canonical per-repo manifest for every repo-scoped fact (contracts/project-config.md). Lives at the repo root as project.yml; a vendored copy of this schema lives at .constellation/project.schema.json for editor validation. NO secret values, NO absolute paths — the manifest must be portable across checkouts and sandboxes.",
+  "title": "Constellation project manifest (project.yml v2)",
+  "description": "Canonical per-repo manifest for every repo-scoped fact (contracts/project-config.md). Lives at the repo root as project.yml; a vendored copy of this schema lives at .constellation/project.schema.json for editor validation. NO secret values, NO absolute paths \u2014 the manifest must be portable across checkouts and sandboxes.",
   "type": "object",
-  "required": ["config_version", "project", "git_host", "tracker"],
+  "required": [
+    "config_version",
+    "project",
+    "git_host",
+    "tracker"
+  ],
   "additionalProperties": false,
   "properties": {
     "config_version": {
-      "const": 1,
+      "const": 2,
       "description": "manifest schema version; breaking changes increment (contracts/project-config.md versioning policy)"
     },
     "project": {
       "type": "object",
-      "required": ["id", "name"],
+      "required": [
+        "id",
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -34,14 +42,19 @@
     },
     "git_host": {
       "$ref": "common.defs.json#/$defs/git_host",
-      "required": ["provider", "slug"]
+      "required": [
+        "provider",
+        "slug"
+      ]
     },
     "tracker": {
       "$ref": "common.defs.json#/$defs/tracker"
     },
     "ci": {
       "type": "object",
-      "required": ["provider"],
+      "required": [
+        "provider"
+      ],
       "additionalProperties": false,
       "properties": {
         "provider": {
@@ -86,6 +99,29 @@
         }
       }
     },
+    "qa": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "manual/preview QA conventions read by the herd-qa and pr-preview skills",
+      "properties": {
+        "preferred_smoke_env": {
+          "type": "string",
+          "description": "ordered preference list of smoke environments, e.g. 'preview,local'"
+        },
+        "decision_matrix": {
+          "type": "string",
+          "description": "repo-relative doc that picks a smoke environment per change class"
+        },
+        "preview_url_pattern": {
+          "type": "string",
+          "description": "preview URL template; {PR_ID} is substituted"
+        },
+        "preview_path_pattern": {
+          "type": "string",
+          "description": "on-host preview checkout path template; {PR_ID} is substituted"
+        }
+      }
+    },
     "autonomy": {
       "$ref": "common.defs.json#/$defs/autonomy"
     },
@@ -97,12 +133,14 @@
     },
     "agents": {
       "type": "object",
-      "description": "agent DEFINITIONS only — runtime state (journal/memory/inbox/locks) lives under ~/.agent-substrate/<project-id>/, never in-repo (contracts/project-config.md)",
+      "description": "agent DEFINITIONS only \u2014 runtime state (journal/memory/inbox/locks) lives under ~/.agent-substrate/<project-id>/, never in-repo (contracts/project-config.md)",
       "additionalProperties": false,
       "patternProperties": {
         "^[a-z0-9][a-z0-9-]*$": {
           "type": "object",
-          "required": ["skill"],
+          "required": [
+            "skill"
+          ],
           "additionalProperties": false,
           "properties": {
             "skill": {
@@ -113,11 +151,9 @@
               "type": "string",
               "description": "cron expression or human cadence note consumed by scaffold-loop"
             },
-            "model": {
-              "$ref": "common.defs.json#/$defs/model"
-            },
-            "effort": {
-              "$ref": "common.defs.json#/$defs/effort"
+            "llm": {
+              "$ref": "common.defs.json#/$defs/routing_tuple",
+              "description": "Atomic scheduled model route override. Model reasoning is distinct from the skill-level effort control."
             },
             "autonomy_gate": {
               "type": "string",
@@ -125,8 +161,22 @@
             },
             "notes": {
               "type": "string"
+            },
+            "enabled": {
+              "type": "boolean",
+              "description": "false pauses the loop project-side (generic skill exits idle; contracts/loop-binding.md). Absent = true."
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": { "required": ["llm"] },
+              "then": {
+                "properties": {
+                  "skill": { "$ref": "common.defs.json#/$defs/normalized_model_routing_skill" }
+                }
+              }
+            }
+          ]
         }
       }
     },
@@ -142,6 +192,10 @@
         "roadmaps": {
           "$ref": "#/$defs/relative_path",
           "default": ".constellation/roadmaps"
+        },
+        "reports": {
+          "$ref": "#/$defs/relative_path",
+          "default": ".constellation/reports"
         },
         "scratch": {
           "$ref": "#/$defs/relative_path",
@@ -207,7 +261,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "command"],
+            "required": [
+              "name",
+              "command"
+            ],
             "additionalProperties": false,
             "properties": {
               "name": {
@@ -234,6 +291,33 @@
                   "type": "string"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "uniqueItems": true,
+      "description": "enabled workflow preset slugs (contracts/presets.md); doctor's presets group verifies each preset's requires"
+    },
+    "policies": {
+      "type": "object",
+      "description": "cross-cutting project policy toggles applied by the loops themselves (contracts/*.md). Each policy defaults ON when absent (fail-closed); set enabled:false to opt out.",
+      "additionalProperties": false,
+      "properties": {
+        "yagni": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "present-need gate for new scope on originating loops (source, roadmap); contracts/yagni.md",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "false opts the project out of the YAGNI present-need gate. Absent = true (gate on)."
             }
           }
         }

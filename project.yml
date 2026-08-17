@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=.constellation/project.schema.json
-config_version: 1
+config_version: 2
 project:
   id: dnbradio-player
   name: DNBRadio Player (Nuxt static)
