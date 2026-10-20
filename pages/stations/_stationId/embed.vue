@@ -311,7 +311,7 @@ export default {
             }
             break;
           case "SET_MEDIA":
-            if (!Number.isFinite(action.length)) {
+            if (!Number.isFinite(action.length) || action.length === 0) {
               action = { ...action, length: null };
             }
             break;
