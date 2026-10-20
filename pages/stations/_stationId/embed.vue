@@ -48,6 +48,12 @@ const CLASSIC_PLAYLIST_STYLE = {
   font: "Arial",
 };
 
+function decodeEntities(text) {
+  const element = document.createElement("textarea");
+  element.innerHTML = text || "";
+  return element.value;
+}
+
 function loadWebamp() {
   if (window.Webamp) {
     return Promise.resolve(window.Webamp);
@@ -249,6 +255,8 @@ export default {
             default:
               return;
           }
+          nowplaying.artist = decodeEntities(nowplaying.artist);
+          nowplaying.title = decodeEntities(nowplaying.title);
           this.$set(this.nowplaying, station.id, nowplaying);
           if (nowplaying.artist && nowplaying.title) {
             this.webamp.store.dispatch({
