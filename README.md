@@ -65,9 +65,12 @@ pnpm run upload-prod
 
 Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/darkstep/`) on X renders a playable player inside the post on desktop web. Mobile apps and other clients show the station image and link through to the full player.
 
-- `pages/stations/_stationId/embed.vue` is the framed player, served at `/player/embed/` (station 1) and `/player/stations/<id>/embed/`. Playback starts only from the play button.
-- `nuxt.config.js` writes the `twitter:*` and `og:*` tags into each station page at generate time (`generate:page` hook). The site runs with `ssr: false`, so a page's `head()` never reaches the HTML that X's crawler reads.
-- `static/x-card/station-<id>.png` are the 960×560 card images (same 12:7 ratio as the 480×280 player). Add one when adding a station.
+- `pages/stations/_stationId/embed.vue` is the framed player, served at `/player/embed/` (station 1) and `/player/stations/<id>/embed/`. It runs [Webamp](https://github.com/captbaritone/webamp) (Winamp 2 in the browser, MIT) with the base Winamp skin, the classic skins in `static/skins/` (Options > Skins), the spectrum/oscilloscope visualizer (click it to switch), the equalizer, and the five stations as the playlist. `components/EmbedLibrary.vue` adds the schedule, podcast, and station info tabs in the current skin's playlist colors. Playback starts only from Play, and no stream is opened before that.
+- `nuxt.config.js` writes the `twitter:*` and `og:*` tags into each station page at generate time (`generate:page` hook). The site runs with `ssr: false`, so a page's `head()` never reaches the HTML that X's crawler reads. The card is square (480×480 player) to match the Winamp layout.
+- `static/x-card/winamp-station-<id>.png` are the 1200×1200 card images: screenshots of the embed for each station in a playing state, taken in headless Chrome at 480×480 and 2.5× scale. Retake them when the stations or the layout change.
+- Cloudflare Pages previews point their card tags at the preview itself and add `/x-card-test/square/`, `/x-card-test/portrait/`, and `/x-card-test/landscape/`, so card shapes can be compared on X before deploying.
+
+Webamp reads audio through the Web Audio API, so a stream or podcast file only plays in the embed if its server sends CORS headers (the AzuraCast streams do). The jungletrain SHOUTcast stream and podcast files (via the `archive-proxy.dnbradio.com` redirect) do not yet; those show a message in the marquee and Webamp moves on.
 
 The embed pages must be frameable by X. Forge's default nginx config sends `X-Frame-Options: SAMEORIGIN` for the whole site, so the `dnbradio.com` site config drops it for the embed paths only:
 

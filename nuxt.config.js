@@ -25,9 +25,31 @@ const features = [
 // into each station page by the generate:page hook below. The embed pages must
 // also be frameable by X; see "X player card" in the README for the nginx side.
 const stationsData = require("./data/stations").default;
-const X_CARD_ORIGIN = "https://dnbradio.com";
+const X_CARD_ORIGIN = process.env.CF_PAGES_URL || "https://dnbradio.com";
+const X_CARD_SHAPES = {
+  square: {
+    player: [480, 480],
+    image: [1200, 1200],
+    imagePath: (id) => `x-card/winamp-station-${id}.png`,
+  },
+  portrait: {
+    player: [480, 600],
+    image: [960, 1200],
+    imagePath: () => "x-card/winamp-portrait.png",
+  },
+  landscape: {
+    player: [480, 280],
+    image: [960, 560],
+    imagePath: (id) => `x-card/station-${id}.png`,
+  },
+};
+// Cloudflare Pages previews also get /x-card-test/<shape>, so card layouts
+// can be compared on X without a production deploy.
+const X_CARD_TEST_ROUTES = process.env.CF_PAGES
+  ? Object.keys(X_CARD_SHAPES).map((shape) => `/x-card-test/${shape}`)
+  : [];
 const DARK_LOADING_SCREEN =
-  "<style>body,#nuxt-loading{background:#181818!important}</style>";
+  "<style>body,#nuxt-loading{background:#000!important}</style>";
 const escapeAttr = (value) =>
   String(value)
     .replace(/&/g, "&amp;")
@@ -36,8 +58,11 @@ const escapeAttr = (value) =>
     .replace(/>/g, "&gt;");
 
 async function xPlayerCardTags(route) {
-  const match = route.match(/^\/(?:stations\/(\d+)|(darkstep))?$/);
-  if (!match) {
+  const match = route.match(
+    /^\/(?:stations\/(\d+)|(darkstep)|x-card-test\/(\w+))?$/
+  );
+  const shape = X_CARD_SHAPES[match && match[3] ? match[3] : "square"];
+  if (!match || !shape) {
     return "";
   }
   const station = (await stationsData()).find((item) =>
@@ -51,25 +76,25 @@ async function xPlayerCardTags(route) {
   const pagePath = route.slice(1);
   const embedPath = stationId === 1 ? "embed/" : `stations/${stationId}/embed/`;
   const title = `${station.title} - ${station.subtitle}`;
-  const image = `${base}x-card/station-${stationId}.png`;
+  const image = base + shape.imagePath(stationId);
   const tags = {
     "twitter:card": "player",
     "twitter:site": `@${station.twitterId || "dnbradio"}`,
     "twitter:title": title,
     "twitter:description": station.description,
     "twitter:player": base + embedPath,
-    "twitter:player:width": "480",
-    "twitter:player:height": "280",
+    "twitter:player:width": String(shape.player[0]),
+    "twitter:player:height": String(shape.player[1]),
     "twitter:image": image,
-    "twitter:image:alt": `${station.title} logo`,
+    "twitter:image:alt": `${station.title} player in a classic Winamp skin`,
     "og:type": "music.radio_station",
     "og:site_name": "dnbradio.com",
     "og:title": title,
     "og:description": station.description,
     "og:url": base + (pagePath ? pagePath + "/" : ""),
     "og:image": image,
-    "og:image:width": "960",
-    "og:image:height": "560",
+    "og:image:width": String(shape.image[0]),
+    "og:image:height": String(shape.image[1]),
   };
   return Object.entries(tags)
     .map(
@@ -250,6 +275,7 @@ module.exports = {
       "/stations/3/embed",
       "/stations/4/embed",
       "/stations/5/embed",
+      ...X_CARD_TEST_ROUTES,
       "/stations/1",
       "/stations/1/widget-chat",
       "/stations/1/widget-vis",
