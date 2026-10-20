@@ -257,7 +257,7 @@ module.exports = {
         routes.push({
           name: "x-card-test",
           path: "/x-card-test/:shape",
-          component: resolve(__dirname, "pages/stations/_stationId/index.vue"),
+          component: resolve(__dirname, "pages/stations/_stationId/embed.vue"),
         });
       }
     },
@@ -267,7 +267,13 @@ module.exports = {
       const tags = page.route.endsWith("/embed")
         ? DARK_LOADING_SCREEN
         : await xPlayerCardTags(page.route);
-      page.html = page.html.replace("</head>", () => `${tags}</head>`);
+      const loadingScreen = page.route.startsWith("/x-card-test/")
+        ? DARK_LOADING_SCREEN
+        : "";
+      page.html = page.html.replace(
+        "</head>",
+        () => `${tags}${loadingScreen}</head>`
+      );
     },
   },
   generate: {
