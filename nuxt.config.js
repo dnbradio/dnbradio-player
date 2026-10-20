@@ -20,6 +20,66 @@ const features = [
   "Array.from",
 ].join("%2C");
 
+// X (Twitter) player card. X's crawler does not run JS, and with ssr: false a
+// page's head() never reaches the generated HTML, so the card tags are written
+// into each station page by the generate:page hook below. The embed pages must
+// also be frameable by X; see "X player card" in the README for the nginx side.
+const stationsData = require("./data/stations").default;
+const X_CARD_ORIGIN = "https://dnbradio.com";
+const escapeAttr = (value) =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+async function xPlayerCardTags(route) {
+  const match = route.match(/^\/(?:stations\/(\d+)|(darkstep))?$/);
+  if (!match) {
+    return "";
+  }
+  // /darkstep is the "darkst" route alias, resolved by pathname like index.vue.
+  const station = (await stationsData()).find((item) =>
+    match[2] ? item.pathname === "darkst" : item.id === Number(match[1] || 1)
+  );
+  if (!station) {
+    return "";
+  }
+  const stationId = station.id;
+  const base = X_CARD_ORIGIN + (process.env.ROUTER_BASE || "/");
+  const pagePath = route.slice(1);
+  const embedPath = stationId === 1 ? "embed/" : `stations/${stationId}/embed/`;
+  const title = `${station.title} - ${station.subtitle}`;
+  const image = `${base}x-card/station-${stationId}.png`;
+  const tags = {
+    "twitter:card": "player",
+    "twitter:site": `@${station.twitterId || "dnbradio"}`,
+    "twitter:title": title,
+    "twitter:description": station.description,
+    "twitter:player": base + embedPath,
+    "twitter:player:width": "480",
+    "twitter:player:height": "280",
+    "twitter:image": image,
+    "twitter:image:alt": `${station.title} logo`,
+    "og:type": "music.radio_station",
+    "og:site_name": "dnbradio.com",
+    "og:title": title,
+    "og:description": station.description,
+    "og:url": base + (pagePath ? pagePath + "/" : ""),
+    "og:image": image,
+    "og:image:width": "960",
+    "og:image:height": "560",
+  };
+  return Object.entries(tags)
+    .map(
+      ([key, value]) =>
+        `<meta ${
+          key.startsWith("og:") ? "property" : "name"
+        }="${key}" content="${escapeAttr(value)}">`
+    )
+    .join("");
+}
+
 module.exports = {
   ssr: false,
   target: "static",
@@ -164,12 +224,32 @@ module.exports = {
         path: "/darkstep",
         component: resolve(__dirname, "pages/stations/_stationId/index.vue"),
       });
+      routes.push({
+        name: "embed",
+        path: "/embed",
+        component: resolve(__dirname, "pages/stations/_stationId/embed.vue"),
+      });
+    },
+  },
+  hooks: {
+    async "generate:page"(page) {
+      // Embed pages: keep the iframe dark while the bundle loads.
+      const tags = page.route.endsWith("/embed")
+        ? "<style>body,#nuxt-loading{background:#181818!important}</style>"
+        : await xPlayerCardTags(page.route);
+      page.html = page.html.replace("</head>", () => `${tags}</head>`);
     },
   },
   generate: {
     devtools: process.env.DEVTOOLS ? process.env.DEVTOOLS : false,
     routes: [
       "/",
+      "/embed",
+      "/stations/1/embed",
+      "/stations/2/embed",
+      "/stations/3/embed",
+      "/stations/4/embed",
+      "/stations/5/embed",
       "/stations/1",
       "/stations/1/widget-chat",
       "/stations/1/widget-vis",
