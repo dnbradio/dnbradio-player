@@ -1,16 +1,29 @@
 <template>
   <div class="winamp-embed">
     <div ref="stage" class="winamp-stage" />
-    <div class="winamp-overlay" :style="overlayStyle">
-      <EmbedLibrary
+    <div ref="windows">
+      <ExtraWindows
         v-if="ready && station"
-        :station="station"
-        :nowplaying="nowplaying[station.id] || {}"
+        :windows="extraWindows"
+        :focused="focusedWindow"
+        :bounds="{ width: LAYOUT_WIDTH, height: LAYOUT_HEIGHT }"
         :palette="palette"
-        :tab="tab"
+        :station="station"
+        :nowplaying="nowplaying[station.id]"
         :player-url="playerUrl"
-        @tab="selectTab"
+        :podcasts="podcasts"
+        :suggestions="suggestions"
+        :active-list="activeList"
+        :load-message="loadMessage"
+        @focus="focusWindow"
+        @move="moveWindow"
+        @close="closeWindow"
         @play-podcast="playPodcast"
+        @add-url="addUrl"
+        @add-station="addStation"
+        @load-default="loadDefaultPlaylist"
+        @load-file="loadPlaylistFile"
+        @save="savePlaylistFile"
       />
     </div>
     <p v-if="unsupported" class="winamp-unsupported">
@@ -24,13 +37,19 @@
 import webampScriptUrl from "!!file-loader?name=[name].[contenthash:7].[ext]!webamp/built/webamp.bundle.min.js";
 import stations from "@/data/stations";
 import Station from "@/models/Station";
-import EmbedLibrary from "~/components/EmbedLibrary.vue";
+import ExtraWindows from "~/components/embed/ExtraWindows.vue";
+import { readAudioInfo } from "~/components/embed/audioInfo";
+import { parsePlaylist, toM3u, toPls } from "~/components/embed/playlistFiles";
+import { loadSettings, saveSettings } from "~/components/embed/settings";
 
 const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
 const PLAYLIST_HEIGHT = 145;
-const TABS_HEIGHT = 14;
-const LAYOUT_HEIGHT = MAIN_HEIGHT + PLAYLIST_HEIGHT + TABS_HEIGHT;
+const LAYOUT_HEIGHT = MAIN_HEIGHT + PLAYLIST_HEIGHT;
+const DEFAULT_PODCASTS = 20;
+// Passed as a track duration so Webamp neither probes the URL for its length
+// (which would open every stream on load) nor shows 0:00; rewritten to null.
+const UNKNOWN_DURATION = -1;
 const CLASSIC_SKINS = [
   ["Green-Dimension-V2", "Green Dimension V2"],
   ["Internet-Archive", "Internet Archive"],
@@ -47,6 +66,19 @@ const CLASSIC_PLAYLIST_STYLE = {
   selectedbg: "#0000C6",
   font: "Arial",
 };
+const EXTRA_WINDOWS = {
+  schedule: { x: 0, y: MAIN_HEIGHT },
+  podcasts: { x: 0, y: MAIN_HEIGHT },
+  info: { x: 0, y: MAIN_HEIGHT },
+  addUrl: { x: 0, y: MAIN_HEIGHT },
+  loadList: { x: 0, y: MAIN_HEIGHT + 29 },
+  saveList: { x: 0, y: MAIN_HEIGHT + 29 },
+};
+const MENU_ITEMS = [
+  ["schedule", "DNBRADIO Schedule"],
+  ["podcasts", "DNBRADIO Podcasts"],
+  ["info", "Station Info"],
+];
 
 function decodeEntities(text) {
   const element = document.createElement("textarea");
@@ -67,9 +99,19 @@ function loadWebamp() {
   });
 }
 
+function downloadText(text, filename, type) {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([text], { type }));
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
 export default {
   layout: "ls-widget",
-  components: { EmbedLibrary },
+  components: { ExtraWindows },
   head() {
     return {
       title: this.station ? `${this.station.title} live player` : "live player",
@@ -77,15 +119,24 @@ export default {
     };
   },
   data() {
+    const extraWindows = {};
+    Object.entries(EXTRA_WINDOWS).forEach(([id, position]) => {
+      extraWindows[id] = { open: false, z: 1, ...position };
+    });
     return {
+      LAYOUT_WIDTH,
+      LAYOUT_HEIGHT,
       ready: false,
       unsupported: false,
-      tab: "stations",
       nowplaying: {},
       palette: CLASSIC_PLAYLIST_STYLE,
-      stationTrackIds: {},
+      podcasts: [],
+      activeList: "default",
+      playlistUrls: [],
+      extraWindows,
+      focusedWindow: null,
+      loadMessage: "",
       scale: 1,
-      offset: { left: 0, top: 0 },
       npInterval: null,
       userMessageTimeout: null,
       playTracked: false,
@@ -109,51 +160,206 @@ export default {
         ? base
         : `${base}stations/${this.currenStationIndex}`;
     },
-    overlayStyle() {
-      return {
-        zoom: this.scale,
-        left: `${this.offset.left / this.scale}px`,
-        top: `${this.offset.top / this.scale}px`,
-      };
+    suggestions() {
+      return this.stations.filter(
+        (station) =>
+          this.activeList !== "default" ||
+          !this.playlistUrls.includes(station.streams[0].url)
+      );
+    },
+  },
+  watch: {
+    extraWindows: {
+      deep: true,
+      handler() {
+        this.scheduleSave();
+      },
     },
   },
   methods: {
-    trackFor(station) {
+    stationEntry(station) {
       return {
+        key: `station:${station.id}`,
+        kind: "station",
         url: station.streams[0].url,
-        metaData: { artist: station.title, title: station.subtitle },
-        duration: 0,
+        artist: station.title,
+        title: station.subtitle,
       };
     },
-    // Webamp has no API for these, so they go through its store and private
-    // options: start the embed's station when Play is pressed with nothing
-    // loaded, and show the library tab that matches a toggled window.
+    podcastEntry(episode) {
+      return {
+        key: `podcast:${episode.id}`,
+        kind: "podcast",
+        url: episode.playback_url,
+        infoUrl: /^https?:/.test(episode.download_url)
+          ? episode.download_url
+          : null,
+        artist: episode.artist,
+        title: `${episode.title} (${episode.plays} plays)`,
+      };
+    },
+    urlEntry(url, title) {
+      return { key: `url:${url}`, kind: "url", url, artist: "", title };
+    },
+    defaultBase() {
+      return this.stations
+        .map(this.stationEntry)
+        .concat(
+          this.podcasts.slice(0, DEFAULT_PODCASTS).map(this.podcastEntry)
+        );
+    },
+    defaultEntries() {
+      const removed = new Set(this.playlists.removedDefault);
+      return this.defaultBase()
+        .filter((entry) => !removed.has(entry.key))
+        .concat(this.playlists.addedToDefault);
+    },
+    trackFor(entry) {
+      return {
+        url: entry.url,
+        metaData: { artist: entry.artist, title: entry.title || entry.url },
+        duration: UNKNOWN_DURATION,
+      };
+    },
+    appendEntries(entries) {
+      entries.forEach((entry) => this.entries.set(entry.url, entry));
+      this.webamp.appendTracks(entries.map(this.trackFor));
+    },
+    showPlaylist(entries, list) {
+      this.switchingList = true;
+      this.activeList = list;
+      this.webamp.store.dispatch({ type: "REMOVE_ALL_TRACKS", dnbKeep: true });
+      this.appendEntries(entries);
+      this.switchingList = false;
+      this.rememberPlaylist();
+    },
+    keepDefaultPlaylist() {
+      this.playlists.user = [];
+      this.showPlaylist([], "user");
+      this.showUserMessage("Default playlist kept - use Load list to return");
+    },
+    rememberPlaylist() {
+      if (this.switchingList || !this.ready) {
+        return;
+      }
+      const entries = this.webamp
+        .getPlaylistTracks()
+        .filter((track) => !track.url.startsWith("blob:"))
+        .map(
+          (track) =>
+            this.entries.get(track.url) ||
+            this.urlEntry(track.url, track.title || track.defaultName)
+        );
+      if (this.activeList === "default") {
+        const keys = new Set(entries.map((entry) => entry.key));
+        const base = this.defaultBase();
+        const baseKeys = new Set(base.map((entry) => entry.key));
+        this.playlists.removedDefault = base
+          .filter((entry) => !keys.has(entry.key))
+          .map((entry) => entry.key);
+        this.playlists.addedToDefault = entries.filter(
+          (entry) => !baseKeys.has(entry.key)
+        );
+      } else {
+        this.playlists.user = entries;
+      }
+      this.scheduleSave();
+    },
+    stationTrackId() {
+      const url = this.station.streams[0].url;
+      const tracks = this.webamp.getPlaylistTracks();
+      const track = tracks.find((item) => item.url === url) || tracks[0];
+      return track ? track.id : null;
+    },
+    // Webamp has no API for these, so they go through its store's actions.
     webampMiddleware(store) {
       return (next) => (action) => {
         const { playlist } = store.getState();
-        if (
-          action.type === "PLAY" &&
-          playlist.currentTrack == null &&
-          this.stationTrackIds[this.station.id] != null
-        ) {
-          store.dispatch({
-            type: "PLAY_TRACK",
-            id: this.stationTrackIds[this.station.id],
-          });
-          return;
+        switch (action.type) {
+          case "PLAY":
+            if (playlist.currentTrack == null) {
+              const id = this.stationTrackId();
+              if (id != null) {
+                store.dispatch({ type: "PLAY_TRACK", id });
+                return;
+              }
+            }
+            this.trackFirstPlay();
+            break;
+          case "PLAY_TRACK":
+            this.trackFirstPlay();
+            break;
+          case "REMOVE_ALL_TRACKS":
+            if (!action.dnbKeep && this.activeList === "default") {
+              this.keepDefaultPlaylist();
+              return;
+            }
+            break;
+          case "REMOVE_TRACKS":
+            if (
+              this.activeList === "default" &&
+              action.ids.length >= playlist.trackOrder.length
+            ) {
+              this.keepDefaultPlaylist();
+              return;
+            }
+            break;
+          case "ADD_TRACK_FROM_URL":
+          case "SET_MEDIA_DURATION":
+            if (action.duration === UNKNOWN_DURATION) {
+              action = { ...action, duration: null };
+            }
+            break;
+          case "SET_MEDIA":
+            if (!Number.isFinite(action.length)) {
+              action = { ...action, length: null };
+            }
+            break;
+          case "SET_SKIN_DATA":
+            this.skinUrl = this.requestedSkinUrl || this.skinUrl;
+            break;
+          case "LOAD_DEFAULT_SKIN":
+            this.skinUrl = null;
+            break;
         }
-        if (action.type === "PLAY_TRACK" || action.type === "PLAY") {
-          this.trackFirstPlay();
+        const result = next(action);
+        if (action.type === "SET_MEDIA") {
+          this.showRealAudioInfo(action.id);
         }
-        if (
-          (action.type === "TOGGLE_WINDOW" ||
-            action.type === "SET_WINDOW_VISIBILITY") &&
-          action.windowId !== "main"
-        ) {
-          this.tab = "stations";
-        }
-        return next(action);
+        return result;
       };
+    },
+    // Webamp shows fixed 128 kbps / 44 kHz / stereo for anything it doesn't
+    // tag-scan, so the readouts come from the stream's own frame headers.
+    async showRealAudioInfo(id) {
+      const track = this.webamp.store.getState().tracks[id];
+      if (!track) {
+        return;
+      }
+      const entry = this.entries.get(track.url);
+      const url = (entry && entry.infoUrl) || track.url;
+      if (!/^(https?|blob):/.test(url)) {
+        return;
+      }
+      if (!this.audioInfo.has(url)) {
+        this.audioInfo.set(url, readAudioInfo(url));
+      }
+      const info = await this.audioInfo.get(url);
+      const current = this.webamp.store.getState().tracks[id];
+      if (!info || !current) {
+        return;
+      }
+      this.webamp.store.dispatch({
+        type: "SET_MEDIA_TAGS",
+        id,
+        title: current.title,
+        artist: current.artist,
+        album: current.album,
+        albumArtUrl: current.albumArtUrl,
+        bitrate: info.kbps * 1000,
+        sampleRate: info.sampleRate,
+        numberOfChannels: info.channels,
+      });
     },
     trackFirstPlay() {
       if (this.playTracked || !window.plausible) {
@@ -164,10 +370,40 @@ export default {
         props: { station: this.station.title },
       });
     },
-    lockWindowDragging(event) {
-      if (event.target.classList?.contains("draggable")) {
-        event.stopPropagation();
+    // Webamp moves windows by raw mouse deltas, which the zoom would magnify.
+    onDragStart(event) {
+      const target = event.target;
+      this.dragOrigin =
+        target.closest &&
+        target.closest("#webamp") &&
+        (target.classList.contains("draggable") ||
+          target.closest(".track-cell"))
+          ? { x: event.clientX, y: event.clientY }
+          : null;
+    },
+    onDragMove(event) {
+      if (!this.dragOrigin || this.scaledEvents.has(event)) {
+        return;
       }
+      event.stopImmediatePropagation();
+      const scaled = new MouseEvent("mousemove", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX:
+          this.dragOrigin.x + (event.clientX - this.dragOrigin.x) / this.scale,
+        clientY:
+          this.dragOrigin.y + (event.clientY - this.dragOrigin.y) / this.scale,
+        buttons: event.buttons,
+        shiftKey: event.shiftKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+      });
+      this.scaledEvents.add(scaled);
+      event.target.dispatchEvent(scaled);
+    },
+    onDragEnd() {
+      this.dragOrigin = null;
     },
     fitToFrame() {
       const scale = Math.min(
@@ -175,24 +411,112 @@ export default {
         window.innerHeight / LAYOUT_HEIGHT
       );
       this.scale = scale;
-      this.offset = {
-        left: (window.innerWidth - LAYOUT_WIDTH * scale) / 2,
-        top: (window.innerHeight - LAYOUT_HEIGHT * scale) / 2,
-      };
       const root = document.getElementById("webamp");
       if (root) {
-        Object.assign(root.style, this.overlayStyle, { position: "absolute" });
-      }
-    },
-    selectTab(tab) {
-      this.tab = tab;
-      if (tab === "stations") {
-        this.webamp.store.dispatch({
-          type: "SET_WINDOW_VISIBILITY",
-          windowId: "playlist",
-          hidden: false,
+        Object.assign(root.style, {
+          position: "absolute",
+          zoom: scale,
+          left: `${(window.innerWidth - LAYOUT_WIDTH * scale) / 2 / scale}px`,
+          top: `${(window.innerHeight - LAYOUT_HEIGHT * scale) / 2 / scale}px`,
         });
       }
+    },
+    openWindow(id) {
+      this.extraWindows[id].open = true;
+      this.focusWindow(id);
+    },
+    closeWindow(id) {
+      this.extraWindows[id].open = false;
+      if (id === "loadList") {
+        this.loadMessage = "";
+      }
+    },
+    focusWindow(id) {
+      const top = Math.max(...Object.values(this.extraWindows).map((w) => w.z));
+      if (this.extraWindows[id].z !== top || top === 1) {
+        this.extraWindows[id].z = top + 1;
+      }
+      this.focusedWindow = id;
+    },
+    moveWindow(id, position) {
+      Object.assign(this.extraWindows[id], position);
+    },
+    // Adds the DNBRADIO windows to Winamp's main menu (top-left icon or
+    // right-click), which Webamp renders in a portal it appends on open.
+    extendMainMenu() {
+      const menu = document.querySelector("#webamp-context-menu ul");
+      const skins = menu
+        ? [...menu.children].find(
+            (item) =>
+              item.classList.contains("parent") &&
+              item.lastChild.textContent === "Skins"
+          )
+        : null;
+      if (!skins || menu.querySelector(".dnb-menu-item")) {
+        return;
+      }
+      MENU_ITEMS.forEach(([id, label]) => {
+        const item = document.createElement("li");
+        item.className = "dnb-menu-item";
+        item.textContent = label;
+        item.addEventListener("click", () => this.openWindow(id));
+        menu.insertBefore(item, skins);
+      });
+      const separator = document.createElement("li");
+      separator.className = "hr dnb-menu-item";
+      separator.appendChild(document.createElement("hr"));
+      menu.insertBefore(separator, skins);
+    },
+    addUrl(url) {
+      this.appendEntries([this.urlEntry(url, url)]);
+      this.closeWindow("addUrl");
+    },
+    addStation(station) {
+      this.appendEntries([this.stationEntry(station)]);
+    },
+    playPodcast(episode) {
+      const entry = this.podcastEntry(episode);
+      let track = this.webamp
+        .getPlaylistTracks()
+        .find((item) => item.url === entry.url);
+      if (!track) {
+        this.appendEntries([entry]);
+        const tracks = this.webamp.getPlaylistTracks();
+        track = tracks[tracks.length - 1];
+      }
+      this.webamp.store.dispatch({ type: "PLAY_TRACK", id: track.id });
+    },
+    loadDefaultPlaylist() {
+      this.showPlaylist(this.defaultEntries(), "default");
+      this.closeWindow("loadList");
+    },
+    async loadPlaylistFile(file) {
+      const entries = parsePlaylist(await file.text()).map((item) =>
+        this.urlEntry(item.url, item.title || item.url)
+      );
+      if (!entries.length) {
+        this.loadMessage = `No http(s) URLs found in ${file.name}`;
+        return;
+      }
+      this.showPlaylist(entries, "user");
+      this.closeWindow("loadList");
+    },
+    savePlaylistFile(format) {
+      const entries = this.webamp
+        .getPlaylistTracks()
+        .filter((track) => !track.url.startsWith("blob:"))
+        .map((track) => ({
+          url: track.url,
+          artist: track.artist,
+          title: track.title || track.defaultName,
+          seconds: track.duration ? Math.round(track.duration) : -1,
+        }));
+      if (format === "pls") {
+        downloadText(toPls(entries), "dnbradio.pls", "audio/x-scpls");
+      } else {
+        downloadText(toM3u(entries), "dnbradio.m3u", "audio/x-mpegurl");
+      }
+      this.closeWindow("saveList");
     },
     showUserMessage(message) {
       this.webamp.store.dispatch({ type: "SET_USER_MESSAGE", message });
@@ -202,29 +526,12 @@ export default {
       }, 6000);
     },
     onMediaError(event) {
-      const src = event.target.getAttribute("src") || "";
-      const station = this.stations.find((item) =>
-        src.startsWith(item.streams[0].url)
-      );
+      const entry = this.entries.get(event.target.getAttribute("src") || "");
       this.showUserMessage(
-        station
-          ? `${station.title} can't play here - open the full player from INFO`
-          : "This episode can't play here - open it from PODCAST"
+        entry && entry.kind === "station"
+          ? `${entry.artist} can't play here - open the full player from Station Info`
+          : "This track can't play here - its server blocks web players"
       );
-    },
-    playPodcast(episode) {
-      this.webamp.appendTracks([
-        {
-          url: episode.playback_url,
-          metaData: { artist: episode.artist, title: episode.title },
-        },
-      ]);
-      const { trackOrder } = this.webamp.store.getState().playlist;
-      this.webamp.store.dispatch({
-        type: "PLAY_TRACK",
-        id: trackOrder[trackOrder.length - 1],
-      });
-      this.selectTab("stations");
     },
     fetchNowplaying(station) {
       return this.$axios
@@ -258,10 +565,13 @@ export default {
           nowplaying.artist = decodeEntities(nowplaying.artist);
           nowplaying.title = decodeEntities(nowplaying.title);
           this.$set(this.nowplaying, station.id, nowplaying);
-          if (nowplaying.artist && nowplaying.title) {
+          const track = this.webamp
+            .getPlaylistTracks()
+            .find((item) => item.url === station.streams[0].url);
+          if (track && nowplaying.artist && nowplaying.title) {
             this.webamp.store.dispatch({
               type: "SET_MEDIA_TAGS",
-              id: this.stationTrackIds[station.id],
+              id: track.id,
               artist: station.title,
               title: `${nowplaying.artist} - ${nowplaying.title}`,
             });
@@ -274,59 +584,249 @@ export default {
     fetchAllNowplaying() {
       this.stations.forEach((station) => this.fetchNowplaying(station));
     },
+    async fetchPodcasts() {
+      const pages = Math.ceil(DEFAULT_PODCASTS / 10);
+      const responses = await Promise.all(
+        Array.from({ length: pages }, (_, i) =>
+          this.$axios
+            .get(`${this.station.podcast.url}?page=${i + 1}`, {
+              progress: false,
+            })
+            .then((res) => res.data.data)
+            .catch((err) => {
+              console.log("cannot fetch podcasts", err.message);
+              return [];
+            })
+        )
+      );
+      this.podcasts = responses.flat();
+    },
+    savedLayout() {
+      const saved = this.settings.windows || {};
+      const layout = {
+        main: { position: { top: 0, left: 0 } },
+        equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
+        playlist: {
+          position: { top: MAIN_HEIGHT, left: 0 },
+          size: { extraHeight: 1, extraWidth: 0 },
+        },
+      };
+      Object.keys(layout).forEach((id) => {
+        const win = saved[id];
+        if (!win) {
+          return;
+        }
+        layout[id].position = { top: win.y, left: win.x };
+        layout[id].closed = !win.open;
+        layout[id].shadeMode = win.shade;
+        if (id === "playlist" && win.size) {
+          layout[id].size = {
+            extraWidth: win.size[0],
+            extraHeight: win.size[1],
+          };
+        }
+      });
+      return layout;
+    },
+    restoreSettings() {
+      const { media, equalizer, visualizerStyle, windows } = this.settings;
+      const store = this.webamp.store;
+      if (windows) {
+        const positions = {};
+        Object.entries(windows).forEach(([id, win]) => {
+          positions[id] = { x: win.x, y: win.y };
+        });
+        store.dispatch({
+          type: "UPDATE_WINDOW_POSITIONS",
+          positions,
+          absolute: true,
+        });
+      }
+      if (media) {
+        store.dispatch({ type: "SET_VOLUME", volume: media.volume });
+        store.dispatch({ type: "SET_BALANCE", balance: media.balance });
+        const state = store.getState().media;
+        if (state.shuffle !== media.shuffle) {
+          store.dispatch({ type: "TOGGLE_SHUFFLE" });
+        }
+        if (state.repeat !== media.repeat) {
+          store.dispatch({ type: "TOGGLE_REPEAT" });
+        }
+        if (state.timeMode !== media.timeMode) {
+          store.dispatch({ type: "TOGGLE_TIME_MODE" });
+        }
+      }
+      if (equalizer) {
+        Object.entries(equalizer.sliders).forEach(([band, value]) => {
+          store.dispatch({
+            type: "SET_BAND_VALUE",
+            band: band === "preamp" ? band : Number(band),
+            value,
+          });
+        });
+        store.dispatch({ type: equalizer.on ? "SET_EQ_ON" : "SET_EQ_OFF" });
+        store.dispatch({ type: "SET_EQ_AUTO", value: equalizer.auto });
+      }
+      for (
+        let i = 0;
+        visualizerStyle != null &&
+        i < 4 &&
+        store.getState().display.visualizerStyle !== visualizerStyle;
+        i++
+      ) {
+        store.dispatch({ type: "TOGGLE_VISUALIZER_STYLE" });
+      }
+      Object.entries(this.settings.extraWindows || {}).forEach(([id, win]) => {
+        if (this.extraWindows[id]) {
+          Object.assign(this.extraWindows[id], win);
+        }
+      });
+    },
+    scheduleSave() {
+      if (!this.ready || this.saveTimeout) {
+        return;
+      }
+      this.saveTimeout = setTimeout(() => {
+        this.saveTimeout = null;
+        const state = this.webamp.store.getState();
+        const windows = {};
+        ["main", "equalizer", "playlist"].forEach((id) => {
+          const win = state.windows.genWindows[id];
+          windows[id] = {
+            x: win.position.x,
+            y: win.position.y,
+            open: win.open,
+            shade: !!win.shade,
+            size: win.size,
+          };
+        });
+        saveSettings({
+          skinUrl: this.skinUrl,
+          windows,
+          media: {
+            volume: state.media.volume,
+            balance: state.media.balance,
+            shuffle: state.media.shuffle,
+            repeat: state.media.repeat,
+            timeMode: state.media.timeMode,
+          },
+          equalizer: state.equalizer,
+          visualizerStyle: state.display.visualizerStyle,
+          extraWindows: this.extraWindows,
+          playlists: { ...this.playlists, active: this.activeList },
+        });
+      }, 500);
+    },
+    onStateChange() {
+      const state = this.webamp.store.getState();
+      this.palette = state.display.skinPlaylistStyle || CLASSIC_PLAYLIST_STYLE;
+      const urls = state.playlist.trackOrder.map((id) => state.tracks[id].url);
+      if (urls.join("\n") !== this.playlistUrls.join("\n")) {
+        this.playlistUrls = urls;
+        this.rememberPlaylist();
+      }
+      const persisted = JSON.stringify([
+        state.windows.genWindows,
+        state.media.volume,
+        state.media.balance,
+        state.media.shuffle,
+        state.media.repeat,
+        state.media.timeMode,
+        state.equalizer,
+        state.display.visualizerStyle,
+        this.skinUrl,
+      ]);
+      if (persisted !== this.lastPersisted) {
+        this.lastPersisted = persisted;
+        this.scheduleSave();
+      }
+    },
+    // Webamp's skin menu fetches the .wsz itself and only dispatches the parsed
+    // skin, so the chosen URL is noted here to restore it on the next visit.
+    watchSkinRequests() {
+      const nativeFetch = window.fetch;
+      this.restoreFetch = () => {
+        window.fetch = nativeFetch;
+      };
+      window.fetch = (input, init) => {
+        const url = typeof input === "string" ? input : input.url;
+        if (/\.wsz(\?|$)/i.test(url)) {
+          this.requestedSkinUrl = url;
+        }
+        return nativeFetch(input, init);
+      };
+    },
     async startWebamp() {
-      const Webamp = await loadWebamp();
+      const [Webamp] = await Promise.all([loadWebamp(), this.fetchPodcasts()]);
       if (!Webamp.browserIsSupported()) {
         this.unsupported = true;
         return;
       }
+      this.settings = loadSettings();
+      this.playlists = {
+        removedDefault: [],
+        addedToDefault: [],
+        user: [],
+        ...this.settings.playlists,
+      };
+      this.skinUrl = this.settings.skinUrl || null;
+      this.watchSkinRequests();
       this.webamp = new Webamp({
         initialTracks: [],
+        initialSkin: this.skinUrl ? { url: this.skinUrl } : undefined,
         availableSkins: CLASSIC_SKINS.map(([file, name]) => ({
           url: `${this.$config.APP_BASE_URL}skins/${file}.wsz`,
           name,
         })),
-        windowLayout: {
-          main: { position: { top: 0, left: 0 } },
-          equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
-          playlist: {
-            position: { top: MAIN_HEIGHT, left: 0 },
-            size: { extraHeight: 1, extraWidth: 0 },
-          },
-        },
+        windowLayout: this.savedLayout(),
         enableHotkeys: true,
         enableMediaSession: true,
+        handleAddUrlEvent: () => {
+          this.openWindow("addUrl");
+          return Promise.resolve(null);
+        },
+        handleLoadListEvent: () => {
+          this.openWindow("loadList");
+          return Promise.resolve(null);
+        },
+        handleSaveListEvent: () => {
+          this.openWindow("saveList");
+        },
         __customMiddlewares: [(store) => this.webampMiddleware(store)],
       });
       this.webamp.onWillClose((cancel) => cancel());
-      this.webamp.__onStateChange(() => {
-        this.palette =
-          this.webamp.store.getState().display.skinPlaylistStyle ||
-          CLASSIC_PLAYLIST_STYLE;
-      });
       await this.webamp.renderWhenReady(this.$refs.stage);
+      document.getElementById("webamp").appendChild(this.$refs.windows);
 
       // Webamp buffers the first of its initialTracks on load, which would
       // open a live stream connection on every card view.
-      this.webamp.appendTracks(this.stations.map(this.trackFor));
-      const { trackOrder } = this.webamp.store.getState().playlist;
-      this.stations.forEach((station, index) => {
-        this.stationTrackIds[station.id] = trackOrder[index];
-      });
+      this.activeList = this.playlists.active === "user" ? "user" : "default";
+      this.appendEntries(
+        this.activeList === "user" ? this.playlists.user : this.defaultEntries()
+      );
+      this.restoreSettings();
       this.webamp.media._source._audio.addEventListener(
         "error",
         this.onMediaError
       );
+      this.webamp.__onStateChange(this.onStateChange);
       this.fitToFrame();
       this.ready = true;
+      this.onStateChange();
     },
   },
   async mounted() {
     const stationsInitData = await stations();
     Station.create({ data: stationsInitData });
 
-    window.addEventListener("mousedown", this.lockWindowDragging, true);
-    window.addEventListener("touchstart", this.lockWindowDragging, true);
+    this.entries = new Map();
+    this.audioInfo = new Map();
+    this.scaledEvents = new WeakSet();
+    this.menuObserver = new MutationObserver(this.extendMainMenu);
+    this.menuObserver.observe(document.body, { childList: true });
+    window.addEventListener("mousedown", this.onDragStart, true);
+    window.addEventListener("mousemove", this.onDragMove, true);
+    window.addEventListener("mouseup", this.onDragEnd, true);
     window.addEventListener("resize", this.fitToFrame);
     await this.startWebamp();
     this.fetchAllNowplaying();
@@ -335,8 +835,16 @@ export default {
   beforeDestroy() {
     clearInterval(this.npInterval);
     clearTimeout(this.userMessageTimeout);
-    window.removeEventListener("mousedown", this.lockWindowDragging, true);
-    window.removeEventListener("touchstart", this.lockWindowDragging, true);
+    clearTimeout(this.saveTimeout);
+    if (this.menuObserver) {
+      this.menuObserver.disconnect();
+    }
+    if (this.restoreFetch) {
+      this.restoreFetch();
+    }
+    window.removeEventListener("mousedown", this.onDragStart, true);
+    window.removeEventListener("mousemove", this.onDragMove, true);
+    window.removeEventListener("mouseup", this.onDragEnd, true);
     window.removeEventListener("resize", this.fitToFrame);
     if (this.webamp) {
       this.webamp.dispose();
@@ -369,14 +877,6 @@ html.dnb-embed #webamp {
   left: 0;
   width: 275px;
   height: 261px;
-}
-.winamp-overlay {
-  position: absolute;
-  width: 275px;
-  height: 275px;
-  pointer-events: none;
-  z-index: 10;
-  image-rendering: pixelated;
 }
 .winamp-unsupported {
   color: #0f0;
