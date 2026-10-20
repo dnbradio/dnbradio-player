@@ -95,8 +95,8 @@ export default async function data() {
       },
       description: "More than 80 different live shows and events",
       nowplaying_url: {
-        type: "jt",
-        url: "https://dnbradio.com/tv/now_playing-jungletrain.php",
+        type: "azuracast",
+        url: "https://azura.drmnbss.org/api/nowplaying/jungletrain.net",
       },
       streams: [
         {
