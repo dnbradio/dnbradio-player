@@ -84,14 +84,9 @@
 </template>
 
 <script>
-// init data
 import stations from "@/data/stations";
-
-// models
 import Station from "@/models/Station";
 
-// Minimal, frameable player for the X (Twitter) player card. Playback only
-// starts from the play button, never automatically.
 export default {
   layout: "ls-widget",
   head() {
@@ -190,12 +185,14 @@ export default {
     },
     stop() {
       this.$sound.pause();
-      // Drop the connection so the next play starts from the live edge.
+      this.disconnectStream();
+      this.isPlaying = false;
+      this.isLoading = false;
+    },
+    disconnectStream() {
       this.$sound.removeAttribute("src");
       this.$sound.load();
       this.streamLoaded = false;
-      this.isPlaying = false;
-      this.isLoading = false;
     },
     showStreamError() {
       this.stop();

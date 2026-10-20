@@ -26,6 +26,8 @@ const features = [
 // also be frameable by X; see "X player card" in the README for the nginx side.
 const stationsData = require("./data/stations").default;
 const X_CARD_ORIGIN = "https://dnbradio.com";
+const DARK_LOADING_SCREEN =
+  "<style>body,#nuxt-loading{background:#181818!important}</style>";
 const escapeAttr = (value) =>
   String(value)
     .replace(/&/g, "&amp;")
@@ -38,7 +40,6 @@ async function xPlayerCardTags(route) {
   if (!match) {
     return "";
   }
-  // /darkstep is the "darkst" route alias, resolved by pathname like index.vue.
   const station = (await stationsData()).find((item) =>
     match[2] ? item.pathname === "darkst" : item.id === Number(match[1] || 1)
   );
@@ -233,9 +234,8 @@ module.exports = {
   },
   hooks: {
     async "generate:page"(page) {
-      // Embed pages: keep the iframe dark while the bundle loads.
       const tags = page.route.endsWith("/embed")
-        ? "<style>body,#nuxt-loading{background:#181818!important}</style>"
+        ? DARK_LOADING_SCREEN
         : await xPlayerCardTags(page.route);
       page.html = page.html.replace("</head>", () => `${tags}</head>`);
     },
