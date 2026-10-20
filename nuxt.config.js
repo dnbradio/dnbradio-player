@@ -43,8 +43,6 @@ const X_CARD_SHAPES = {
     imagePath: (id) => `x-card/station-${id}.png`,
   },
 };
-// Cloudflare Pages previews also get /x-card-test/<shape>, so card layouts
-// can be compared on X without a production deploy.
 const X_CARD_TEST_ROUTES = process.env.CF_PAGES
   ? Object.keys(X_CARD_SHAPES).map((shape) => `/x-card-test/${shape}`)
   : [];
