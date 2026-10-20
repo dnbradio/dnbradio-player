@@ -253,6 +253,13 @@ module.exports = {
         path: "/embed",
         component: resolve(__dirname, "pages/stations/_stationId/embed.vue"),
       });
+      if (X_CARD_TEST_ROUTES.length) {
+        routes.push({
+          name: "x-card-test",
+          path: "/x-card-test/:shape",
+          component: resolve(__dirname, "pages/stations/_stationId/index.vue"),
+        });
+      }
     },
   },
   hooks: {
