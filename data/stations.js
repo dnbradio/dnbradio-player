@@ -30,7 +30,9 @@ export default async function data() {
       },
       streams: [
         {
-          url: "https://azrelay.drmnbss.org/listen/dnbradio/radio.mp3",
+          // Per-source attribution mount for the on-site web player (AzuraCast
+          // Local mount /web.mp3). Public PLS/directory links keep /radio.mp3.
+          url: "https://azura.drmnbss.org/listen/dnbradio/web.mp3",
           format: "mp3",
           mimetype: "audio/mpeg",
         },
