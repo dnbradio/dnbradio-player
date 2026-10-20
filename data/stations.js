@@ -80,7 +80,7 @@ export default async function data() {
       title: "jungletrain",
       subtitle: "A train in constant motion",
       cover:
-        "https://dnbradio.com/images/jungletrain.png",
+        "https://dnbradio.com/player/jungletrainlogo.png",
       website: "https://jungletrain.net",
       facebook: "https://facebook.com/jungletrain",
       twitter: "https://twitter.com/jungletrain",
