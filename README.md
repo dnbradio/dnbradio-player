@@ -65,9 +65,29 @@ pnpm run upload-prod
 
 Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/darkstep/`) on X renders a playable player inside the post on desktop web. Mobile apps and other clients show the station image and link through to the full player.
 
-- `pages/stations/_stationId/embed.vue` is the framed player, served at `/player/embed/` (station 1) and `/player/stations/<id>/embed/`. Playback starts only from the play button.
-- `nuxt.config.js` writes the `twitter:*` and `og:*` tags into each station page at generate time (`generate:page` hook). The site runs with `ssr: false`, so a page's `head()` never reaches the HTML that X's crawler reads.
-- `static/x-card/station-<id>.png` are the 960×560 card images (same 12:7 ratio as the 480×280 player). Add one when adding a station.
+- `pages/stations/_stationId/embed.vue` is the framed player, served at `/player/embed/` (station 1) and `/player/stations/<id>/embed/`. It runs [Webamp](https://github.com/captbaritone/webamp) (Winamp 2 in the browser, MIT) with the base Winamp skin, the classic skins in `static/skins/` (Options > Skins), the spectrum/oscilloscope visualizer, and the equalizer. Playback starts only from Play, and no stream is opened before that.
+  - The default playlist is the five stations plus the 20 newest podcasts (with playcounts). It can't be emptied: Remove all or New list starts a separate list, and Load list > default brings it back. Stations removed from it are offered again in Add URL.
+  - ADD > Add URL, ADD > Add file, LIST OPTS > Save list (.m3u or .pls) and Load list open Winamp-style windows from `components/embed/`. Winamp's main menu (top-left icon or right-click) adds DNBRADIO Schedule, DNBRADIO Podcasts, and Station Info windows.
+  - The kbps, kHz, and mono/stereo readouts come from the stream's or file's own frame headers (`components/embed/audioInfo.js`); Webamp alone shows fixed values for anything it doesn't tag-scan.
+  - Window positions, skin, volume, balance, EQ, visualizer, open windows, and both playlists are kept in `localStorage` (`dnbradio-embed`).
+- `nuxt.config.js` writes the `twitter:*` and `og:*` tags into each station page at generate time (`generate:page` hook). The site runs with `ssr: false`, so a page's `head()` never reaches the HTML that X's crawler reads. The card is square (480×480 player) to match the Winamp layout.
+- `static/x-card/winamp-station-<id>.png` are the 1200×1200 card images: screenshots of the embed for each station in a playing state (fed a short sample of that station's stream), taken in headless Chrome at 480×480 and 2.5× scale. Retake them when the stations or the layout change.
+- Cloudflare Pages previews point their card tags at the preview itself and add `/x-card-test/square/`, `/x-card-test/portrait/`, and `/x-card-test/landscape/`, so card shapes can be compared on X before deploying.
+
+The skins in `static/skins/` are classic Winamp skins, shipped unmodified, as TopazAmp's readme asks:
+
+- Green Dimension V2 (2004): credited in its README to a stylized handle.
+- Internet Archive: LuigiHann.
+- Mac OS X 1.5 (Aqua): DeeLight.
+- TopazAmp 1.2: © 1999 Kelly McLarnon, topazdesigns.com ("distribute freely, but please don't modify the images").
+- Vizor 1.01: © 2002 ViDA.
+- XMMS Turquoise: the XMMS player's Turquoise skin (the archive has no readme).
+- Zaxon Remake 1.0: Daniel Jansson, dj-designs.com.
+
+Webamp reads audio through the Web Audio API, so a stream or file only plays in the embed if every response on its way sends CORS headers. The AzuraCast streams do. Podcast files served through `archive-proxy.dnbradio.com` do too: that site's nginx config adds `Access-Control-Allow-Origin: *` to its redirect. Two sources still send no CORS header, so they show a message in the marquee and Webamp moves on:
+
+- the jungletrain SHOUTcast stream;
+- podcast episodes hosted on SoundCloud, whose `feeds.soundcloud.com` redirect sends none. On 2026-10-24 that was 5 of the 20 newest episodes.
 
 The embed pages must be frameable by X. Forge's default nginx config sends `X-Frame-Options: SAMEORIGIN` for the whole site, so the `dnbradio.com` site config drops it for the embed paths only:
 
