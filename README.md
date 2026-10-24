@@ -74,7 +74,20 @@ Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/da
 - `static/x-card/winamp-station-<id>.png` are the 1200×1200 card images: screenshots of the embed for each station in a playing state (fed a short sample of that station's stream), taken in headless Chrome at 480×480 and 2.5× scale. Retake them when the stations or the layout change.
 - Cloudflare Pages previews point their card tags at the preview itself and add `/x-card-test/square/`, `/x-card-test/portrait/`, and `/x-card-test/landscape/`, so card shapes can be compared on X before deploying.
 
-Webamp reads audio through the Web Audio API, so a stream or file only plays in the embed if its server sends CORS headers (the AzuraCast streams do). The jungletrain SHOUTcast stream and podcast files (via the `archive-proxy.dnbradio.com` redirect) do not yet; those show a message in the marquee and Webamp moves on.
+The skins in `static/skins/` are classic Winamp skins, shipped unmodified, as TopazAmp's readme asks:
+
+- Green Dimension V2 (2004): credited in its README to a stylized handle.
+- Internet Archive: LuigiHann.
+- Mac OS X 1.5 (Aqua): DeeLight.
+- TopazAmp 1.2: © 1999 Kelly McLarnon, topazdesigns.com ("distribute freely, but please don't modify the images").
+- Vizor 1.01: © 2002 ViDA.
+- XMMS Turquoise: the XMMS player's Turquoise skin (the archive has no readme).
+- Zaxon Remake 1.0: Daniel Jansson, dj-designs.com.
+
+Webamp reads audio through the Web Audio API, so a stream or file only plays in the embed if every response on its way sends CORS headers. The AzuraCast streams do. Podcast files served through `archive-proxy.dnbradio.com` do too: that site's nginx config adds `Access-Control-Allow-Origin: *` to its redirect. Two sources still send no CORS header, so they show a message in the marquee and Webamp moves on:
+
+- the jungletrain SHOUTcast stream;
+- podcast episodes hosted on SoundCloud, whose `feeds.soundcloud.com` redirect sends none. On 2026-10-24 that was 5 of the 20 newest episodes.
 
 The embed pages must be frameable by X. Forge's default nginx config sends `X-Frame-Options: SAMEORIGIN` for the whole site, so the `dnbradio.com` site config drops it for the embed paths only:
 
