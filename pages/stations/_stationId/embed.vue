@@ -370,6 +370,15 @@ export default {
         props: { station: this.station.title },
       });
     },
+    // Webamp resumes its suspended AudioContext only from clicks that reach
+    // <body>, and its playlist stops click propagation, so double-clicking a
+    // track before pressing Play started it silently.
+    resumeAudio() {
+      const context = this.webamp && this.webamp.media._context;
+      if (context && context.state === "suspended") {
+        context.resume();
+      }
+    },
     // Webamp moves windows by raw mouse deltas, which the zoom would magnify.
     onDragStart(event) {
       const target = event.target;
@@ -824,6 +833,8 @@ export default {
     this.scaledEvents = new WeakSet();
     this.menuObserver = new MutationObserver(this.extendMainMenu);
     this.menuObserver.observe(document.body, { childList: true });
+    window.addEventListener("pointerdown", this.resumeAudio, true);
+    window.addEventListener("keydown", this.resumeAudio, true);
     window.addEventListener("mousedown", this.onDragStart, true);
     window.addEventListener("mousemove", this.onDragMove, true);
     window.addEventListener("mouseup", this.onDragEnd, true);
@@ -842,6 +853,8 @@ export default {
     if (this.restoreFetch) {
       this.restoreFetch();
     }
+    window.removeEventListener("pointerdown", this.resumeAudio, true);
+    window.removeEventListener("keydown", this.resumeAudio, true);
     window.removeEventListener("mousedown", this.onDragStart, true);
     window.removeEventListener("mousemove", this.onDragMove, true);
     window.removeEventListener("mouseup", this.onDragEnd, true);
