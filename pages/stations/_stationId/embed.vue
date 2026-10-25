@@ -50,6 +50,7 @@ const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
 const PLAYLIST_HEIGHT = 145;
 const LAYOUT_HEIGHT = MAIN_HEIGHT + PLAYLIST_HEIGHT;
+const STANDALONE_MAX_WIDTH = 500;
 const DEFAULT_PODCASTS = 20;
 // Passed as a track duration so Webamp neither probes the URL for its length
 // (which would open every stream on load) nor shows 0:00; rewritten to null.
@@ -435,9 +436,11 @@ export default {
       this.dragOrigin = null;
     },
     fitToFrame() {
+      const framed = window.self !== window.top;
       const scale = Math.min(
         window.innerWidth / LAYOUT_WIDTH,
-        window.innerHeight / LAYOUT_HEIGHT
+        window.innerHeight / LAYOUT_HEIGHT,
+        framed ? Infinity : STANDALONE_MAX_WIDTH / LAYOUT_WIDTH
       );
       this.scale = scale;
       const root = document.getElementById("webamp");
