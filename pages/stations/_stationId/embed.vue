@@ -1,7 +1,11 @@
 <template>
   <div class="winamp-embed">
     <div ref="stage" class="winamp-stage" />
-    <div ref="windows">
+    <div
+      ref="windows"
+      class="dnb-layer"
+      :class="{ 'dnb-layer--behind': webampOnTop }"
+    >
       <ExtraWindows
         v-if="ready && station"
         :windows="extraWindows"
@@ -135,6 +139,7 @@ export default {
       playlistUrls: [],
       extraWindows,
       focusedWindow: null,
+      webampOnTop: false,
       loadMessage: "",
       scale: 1,
       npInterval: null,
@@ -326,6 +331,21 @@ export default {
         if (action.type === "SET_MEDIA") {
           this.showRealAudioInfo(action.id);
         }
+        // Webamp opens windows without raising them, so an EQ opened after
+        // the playlist was clicked appeared behind it.
+        if (
+          (action.type === "TOGGLE_WINDOW" ||
+            action.type === "SET_WINDOW_VISIBILITY") &&
+          store.getState().windows.genWindows[action.windowId]?.open
+        ) {
+          store.dispatch({
+            type: "SET_FOCUSED_WINDOW",
+            window: action.windowId,
+          });
+        }
+        if (action.type === "SET_FOCUSED_WINDOW" && action.window != null) {
+          this.webampOnTop = true;
+        }
         return result;
       };
     },
@@ -446,6 +466,7 @@ export default {
         this.extraWindows[id].z = top + 1;
       }
       this.focusedWindow = id;
+      this.webampOnTop = false;
     },
     moveWindow(id, position) {
       Object.assign(this.extraWindows[id], position);
@@ -690,6 +711,9 @@ export default {
           Object.assign(this.extraWindows[id], win);
         }
       });
+      this.webampOnTop = !Object.values(this.extraWindows).some(
+        (win) => win.open
+      );
     },
     scheduleSave() {
       if (!this.ready || this.saveTimeout) {
@@ -884,6 +908,15 @@ html.dnb-embed #webamp {
 }
 </style>
 <style scoped>
+.dnb-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+.dnb-layer--behind {
+  z-index: -1;
+}
 .winamp-stage {
   position: absolute;
   top: 0;
