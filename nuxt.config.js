@@ -181,11 +181,6 @@ module.exports = {
     ],
     script: [
       { src: "https://code.createjs.com/1.0.0/soundjs.min.js", mode: "client" },
-      {
-        src: "https://plausible.io/js/script.js",
-        defer: true,
-        "data-domain": "dnbradio.com",
-      },
     ],
   },
   loading: { color: "#fff" },
