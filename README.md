@@ -65,7 +65,7 @@ pnpm run upload-prod
 
 Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/darkstep/`) on X renders a playable player inside the post on desktop web. Mobile apps and other clients show the station image and link through to the full player.
 
-- `pages/stations/_stationId/embed.vue` is the framed player, served at `/player/embed/` (station 1) and `/player/stations/<id>/embed/`. It runs [Webamp](https://github.com/captbaritone/webamp) (Winamp 2 in the browser, MIT) with the base Winamp skin, the classic skins in `static/skins/` (Options > Skins), the spectrum/oscilloscope visualizer, and the equalizer. Playback starts only from Play, and no stream is opened before that.
+- `pages/stations/_stationId/webamp.vue` is the framed player, served at `/player/webamp/` (station 1) and `/player/stations/<id>/webamp/`. The original `/player/embed/` and `/player/stations/<id>/embed/` URLs serve the same page for X cards posted before the move. It runs [Webamp](https://github.com/captbaritone/webamp) (Winamp 2 in the browser, MIT) with the base Winamp skin, the classic skins in `static/skins/` (Options > Skins), the spectrum/oscilloscope visualizer, and the equalizer. Playback starts only from Play, and no stream is opened before that.
   - The default playlist is the five stations plus the 20 newest podcasts (with playcounts). It can't be emptied: Remove all or New list starts a separate list, and Load list > default brings it back. Stations removed from it are offered again in Add URL.
   - ADD > Add URL, ADD > Add file, LIST OPTS > Save list (.m3u or .pls) and Load list open Winamp-style windows from `components/embed/`. Winamp's main menu (top-left icon or right-click) adds DNBRADIO Schedule, DNBRADIO Podcasts, and Station Info windows.
   - The kbps, kHz, and mono/stereo readouts come from the stream's or file's own frame headers (`components/embed/audioInfo.js`); Webamp alone shows fixed values for anything it doesn't tag-scan.
@@ -90,17 +90,17 @@ Webamp reads audio through the Web Audio API, so a stream or file only plays in 
 - the jungletrain SHOUTcast stream;
 - podcast episodes hosted on SoundCloud, whose `feeds.soundcloud.com` redirect sends none. On 2026-10-24 that was 5 of the 20 newest episodes.
 
-The embed pages must be frameable by X. Forge's default nginx config sends `X-Frame-Options: SAMEORIGIN` for the whole site, so the `dnbradio.com` site config drops it for the embed paths only:
+The webamp pages must be frameable by X. Forge's default nginx config sends `X-Frame-Options: SAMEORIGIN` for the whole site, so the `dnbradio.com` site config drops it for the embed paths only:
 
 ```nginx
 # top of the site file, outside the server block
 map $uri $dnb_frame_options {
     default "SAMEORIGIN";
-    ~^/player/(stations/[0-9]+/)?embed(/|/index\.html)?$ "";
+    ~^/player/(stations/[0-9]+/)?(webamp|embed)(/|/index\.html)?$ "";
 }
 map $uri $dnb_frame_ancestors {
     default "";
-    ~^/player/(stations/[0-9]+/)?embed(/|/index\.html)?$ "frame-ancestors 'self' https:";
+    ~^/player/(stations/[0-9]+/)?(webamp|embed)(/|/index\.html)?$ "frame-ancestors 'self' https:";
 }
 
 # in the dnbradio.com server block, replacing add_header X-Frame-Options "SAMEORIGIN";
@@ -113,7 +113,7 @@ An empty value makes `add_header` skip the header. `frame-ancestors` allows any 
 Check after a deploy:
 
 ```bash
-curl -sI https://dnbradio.com/player/embed/ | grep -iE 'x-frame|content-security'   # CSP only
+curl -sI https://dnbradio.com/player/webamp/ | grep -iE 'x-frame|content-security'   # CSP only
 curl -sI https://dnbradio.com/player/ | grep -i x-frame                             # SAMEORIGIN
 curl -s https://dnbradio.com/player/ | grep -o '<meta name="twitter:[^>]*>'
 ```
