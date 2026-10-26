@@ -97,10 +97,10 @@ import ListRows from "./ListRows.vue";
 
 const WIDTH = 275;
 const WINDOWS = [
-  { id: "schedule", title: "DNBRADIO SCHEDULE", height: 145 },
-  { id: "podcasts", title: "DNBRADIO PODCASTS", height: 145 },
-  { id: "info", title: "STATION INFO", height: 145 },
-  { id: "addUrl", title: "ADD URL", height: 145 },
+  { id: "schedule", title: "DNBRADIO SCHEDULE", height: 116 },
+  { id: "podcasts", title: "DNBRADIO PODCASTS", height: 116 },
+  { id: "info", title: "STATION INFO", height: 116 },
+  { id: "addUrl", title: "ADD URL", height: 116 },
   { id: "loadList", title: "LOAD LIST", height: 116 },
   { id: "saveList", title: "SAVE LIST", height: 116 },
 ];
