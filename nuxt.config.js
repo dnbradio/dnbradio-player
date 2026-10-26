@@ -90,9 +90,13 @@ async function xPlayerCardTags(route) {
     "og:title": title,
     "og:description": station.description,
     "og:url": base + (pagePath ? pagePath + "/" : ""),
-    "og:image": image,
-    "og:image:width": String(shape.image[0]),
-    "og:image:height": String(shape.image[1]),
+    // Facebook and Threads only show a link card (no third-party players),
+    // and crop it to 1.91:1, so they get their own wide image.
+    "og:image": `${base}x-card/og-station-${stationId}.png`,
+    "og:image:type": "image/png",
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "og:image:alt": `${station.title} player in a classic Winamp skin`,
   };
   return Object.entries(tags)
     .map(
