@@ -1,6 +1,10 @@
 <template>
   <div class="winamp-embed">
-    <div ref="stage" class="winamp-stage" />
+    <div
+      ref="stage"
+      class="winamp-stage"
+      :style="{ width: `${LAYOUT_WIDTH}px`, height: `${LAYOUT_HEIGHT}px` }"
+    />
     <div
       ref="windows"
       class="dnb-layer"
@@ -48,9 +52,14 @@ import { loadSettings, saveSettings } from "~/components/embed/settings";
 
 const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
-const PLAYLIST_HEIGHT = 145;
+const PLAYLIST_HEIGHT = 116;
 const LAYOUT_HEIGHT = MAIN_HEIGHT + PLAYLIST_HEIGHT;
 const STANDALONE_MAX_WIDTH = 500;
+const WINDOW_LAYOUT = {
+  main: { position: { top: 0, left: 0 } },
+  equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
+  playlist: { position: { top: MAIN_HEIGHT, left: 0 } },
+};
 const DEFAULT_PODCASTS = 20;
 // Passed as a track duration so Webamp neither probes the URL for its length
 // (which would open every stream on load) nor shows 0:00; rewritten to null.
@@ -76,8 +85,8 @@ const EXTRA_WINDOWS = {
   podcasts: { x: 0, y: MAIN_HEIGHT },
   info: { x: 0, y: MAIN_HEIGHT },
   addUrl: { x: 0, y: MAIN_HEIGHT },
-  loadList: { x: 0, y: MAIN_HEIGHT + 29 },
-  saveList: { x: 0, y: MAIN_HEIGHT + 29 },
+  loadList: { x: 0, y: MAIN_HEIGHT },
+  saveList: { x: 0, y: MAIN_HEIGHT },
 };
 const MENU_ITEMS = [
   ["schedule", "DNBRADIO Schedule"],
@@ -172,14 +181,6 @@ export default {
           this.activeList !== "default" ||
           !this.playlistUrls.includes(station.streams[0].url)
       );
-    },
-  },
-  watch: {
-    extraWindows: {
-      deep: true,
-      handler() {
-        this.scheduleSave();
-      },
     },
   },
   methods: {
@@ -339,6 +340,15 @@ export default {
             action.type === "SET_WINDOW_VISIBILITY") &&
           store.getState().windows.genWindows[action.windowId]?.open
         ) {
+          if (action.windowId === "equalizer") {
+            store.dispatch({
+              type: "UPDATE_WINDOW_POSITIONS",
+              positions: {
+                equalizer:
+                  store.getState().windows.genWindows.playlist.position,
+              },
+            });
+          }
           store.dispatch({
             type: "SET_FOCUSED_WINDOW",
             window: action.windowId,
@@ -634,47 +644,9 @@ export default {
       );
       this.podcasts = responses.flat();
     },
-    savedLayout() {
-      const saved = this.settings.windows || {};
-      const layout = {
-        main: { position: { top: 0, left: 0 } },
-        equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
-        playlist: {
-          position: { top: MAIN_HEIGHT, left: 0 },
-          size: { extraHeight: 1, extraWidth: 0 },
-        },
-      };
-      Object.keys(layout).forEach((id) => {
-        const win = saved[id];
-        if (!win) {
-          return;
-        }
-        layout[id].position = { top: win.y, left: win.x };
-        layout[id].closed = !win.open;
-        layout[id].shadeMode = win.shade;
-        if (id === "playlist" && win.size) {
-          layout[id].size = {
-            extraWidth: win.size[0],
-            extraHeight: win.size[1],
-          };
-        }
-      });
-      return layout;
-    },
     restoreSettings() {
-      const { media, equalizer, visualizerStyle, windows } = this.settings;
+      const { media, equalizer, visualizerStyle } = this.settings;
       const store = this.webamp.store;
-      if (windows) {
-        const positions = {};
-        Object.entries(windows).forEach(([id, win]) => {
-          positions[id] = { x: win.x, y: win.y };
-        });
-        store.dispatch({
-          type: "UPDATE_WINDOW_POSITIONS",
-          positions,
-          absolute: true,
-        });
-      }
       if (media) {
         store.dispatch({ type: "SET_VOLUME", volume: media.volume });
         store.dispatch({ type: "SET_BALANCE", balance: media.balance });
@@ -709,14 +681,6 @@ export default {
       ) {
         store.dispatch({ type: "TOGGLE_VISUALIZER_STYLE" });
       }
-      Object.entries(this.settings.extraWindows || {}).forEach(([id, win]) => {
-        if (this.extraWindows[id]) {
-          Object.assign(this.extraWindows[id], win);
-        }
-      });
-      this.webampOnTop = !Object.values(this.extraWindows).some(
-        (win) => win.open
-      );
     },
     scheduleSave() {
       if (!this.ready || this.saveTimeout) {
@@ -725,20 +689,8 @@ export default {
       this.saveTimeout = setTimeout(() => {
         this.saveTimeout = null;
         const state = this.webamp.store.getState();
-        const windows = {};
-        ["main", "equalizer", "playlist"].forEach((id) => {
-          const win = state.windows.genWindows[id];
-          windows[id] = {
-            x: win.position.x,
-            y: win.position.y,
-            open: win.open,
-            shade: !!win.shade,
-            size: win.size,
-          };
-        });
         saveSettings({
           skinUrl: this.skinUrl,
-          windows,
           media: {
             volume: state.media.volume,
             balance: state.media.balance,
@@ -748,7 +700,6 @@ export default {
           },
           equalizer: state.equalizer,
           visualizerStyle: state.display.visualizerStyle,
-          extraWindows: this.extraWindows,
           playlists: { ...this.playlists, active: this.activeList },
         });
       }, 500);
@@ -762,7 +713,6 @@ export default {
         this.rememberPlaylist();
       }
       const persisted = JSON.stringify([
-        state.windows.genWindows,
         state.media.volume,
         state.media.balance,
         state.media.shuffle,
@@ -814,7 +764,7 @@ export default {
           url: `${this.$config.APP_BASE_URL}skins/${file}.wsz`,
           name,
         })),
-        windowLayout: this.savedLayout(),
+        windowLayout: WINDOW_LAYOUT,
         enableHotkeys: true,
         enableMediaSession: true,
         handleAddUrlEvent: () => {
@@ -924,8 +874,6 @@ html.dnb-embed #webamp {
   position: absolute;
   top: 0;
   left: 0;
-  width: 275px;
-  height: 261px;
 }
 .winamp-unsupported {
   color: #0f0;
