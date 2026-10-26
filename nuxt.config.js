@@ -22,7 +22,7 @@ const features = [
 
 // X (Twitter) player card. X's crawler does not run JS, and with ssr: false a
 // page's head() never reaches the generated HTML, so the card tags are written
-// into each station page by the generate:page hook below. The embed pages must
+// into each station page by the generate:page hook below. The webamp pages must
 // also be frameable by X; see "X player card" in the README for the nginx side.
 const stationsData = require("./data/stations").default;
 const X_CARD_ORIGIN = process.env.CF_PAGES_URL || "https://dnbradio.com";
@@ -72,7 +72,9 @@ async function xPlayerCardTags(route) {
   const stationId = station.id;
   const base = X_CARD_ORIGIN + (process.env.ROUTER_BASE || "/");
   const pagePath = route.slice(1);
-  const embedPath = stationId === 1 ? "embed/" : `stations/${stationId}/embed/`;
+  // X frames the player, and nginx only lets /embed/ be framed so far.
+  const playerPath =
+    stationId === 1 ? "embed/" : `stations/${stationId}/embed/`;
   const title = `${station.title} - ${station.subtitle}`;
   const image = base + shape.imagePath(stationId);
   const tags = {
@@ -80,7 +82,7 @@ async function xPlayerCardTags(route) {
     "twitter:site": `@${station.twitterId || "dnbradio"}`,
     "twitter:title": title,
     "twitter:description": station.description,
-    "twitter:player": base + embedPath,
+    "twitter:player": base + playerPath,
     "twitter:player:width": String(shape.player[0]),
     "twitter:player:height": String(shape.player[1]),
     "twitter:image": image,
@@ -247,23 +249,27 @@ module.exports = {
         path: "/darkstep",
         component: resolve(__dirname, "pages/stations/_stationId/index.vue"),
       });
+      const webamp = resolve(__dirname, "pages/stations/_stationId/webamp.vue");
+      routes.push({ name: "webamp", path: "/webamp", component: webamp });
+      // The player's first URLs, still used by X cards posted before the move.
+      routes.push({ name: "embed", path: "/embed", component: webamp });
       routes.push({
-        name: "embed",
-        path: "/embed",
-        component: resolve(__dirname, "pages/stations/_stationId/embed.vue"),
+        name: "stations-stationId-embed",
+        path: "/stations/:stationId/embed",
+        component: webamp,
       });
       if (X_CARD_TEST_ROUTES.length) {
         routes.push({
           name: "x-card-test",
           path: "/x-card-test/:shape",
-          component: resolve(__dirname, "pages/stations/_stationId/embed.vue"),
+          component: webamp,
         });
       }
     },
   },
   hooks: {
     async "generate:page"(page) {
-      const tags = page.route.endsWith("/embed")
+      const tags = /\/(webamp|embed)$/.test(page.route)
         ? DARK_LOADING_SCREEN
         : await xPlayerCardTags(page.route);
       const loadingScreen = page.route.startsWith("/x-card-test/")
@@ -279,6 +285,12 @@ module.exports = {
     devtools: process.env.DEVTOOLS ? process.env.DEVTOOLS : false,
     routes: [
       "/",
+      "/webamp",
+      "/stations/1/webamp",
+      "/stations/2/webamp",
+      "/stations/3/webamp",
+      "/stations/4/webamp",
+      "/stations/5/webamp",
       "/embed",
       "/stations/1/embed",
       "/stations/2/embed",
