@@ -72,8 +72,9 @@ async function xPlayerCardTags(route) {
   const stationId = station.id;
   const base = X_CARD_ORIGIN + (process.env.ROUTER_BASE || "/");
   const pagePath = route.slice(1);
+  // X frames the player, and nginx only lets /embed/ be framed so far.
   const playerPath =
-    stationId === 1 ? "webamp/" : `stations/${stationId}/webamp/`;
+    stationId === 1 ? "embed/" : `stations/${stationId}/embed/`;
   const title = `${station.title} - ${station.subtitle}`;
   const image = base + shape.imagePath(stationId);
   const tags = {
