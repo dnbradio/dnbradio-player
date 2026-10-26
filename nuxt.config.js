@@ -22,8 +22,9 @@ const features = [
 
 // X (Twitter) player card. X's crawler does not run JS, and with ssr: false a
 // page's head() never reaches the generated HTML, so the card tags are written
-// into each station page by the generate:page hook below. The webamp pages must
-// also be frameable by X; see "X player card" in the README for the nginx side.
+// into each station page and each webamp page by the generate:page hook below.
+// The webamp pages must also be frameable by X; see "X player card" in the
+// README for the nginx side.
 const stationsData = require("./data/stations").default;
 const X_CARD_ORIGIN = process.env.CF_PAGES_URL || "https://dnbradio.com";
 const X_CARD_SHAPES = {
@@ -56,7 +57,9 @@ const escapeAttr = (value) =>
     .replace(/>/g, "&gt;");
 
 async function xPlayerCardTags(route) {
-  const match = route.match(
+  // A webamp page gets its station's card, so its own URL can be posted too.
+  const stationRoute = route.replace(/\/?(webamp|embed)$/, "") || "/";
+  const match = stationRoute.match(
     /^\/(?:stations\/(\d+)|(darkstep)|x-card-test\/(\w+))?$/
   );
   const shape = X_CARD_SHAPES[match && match[3] ? match[3] : "square"];
@@ -268,12 +271,12 @@ module.exports = {
   },
   hooks: {
     async "generate:page"(page) {
-      const tags = /\/(webamp|embed)$/.test(page.route)
-        ? DARK_LOADING_SCREEN
-        : await xPlayerCardTags(page.route);
-      const loadingScreen = page.route.startsWith("/x-card-test/")
-        ? DARK_LOADING_SCREEN
-        : "";
+      const tags = await xPlayerCardTags(page.route);
+      const loadingScreen =
+        /\/(webamp|embed)$/.test(page.route) ||
+        page.route.startsWith("/x-card-test/")
+          ? DARK_LOADING_SCREEN
+          : "";
       page.html = page.html.replace(
         "</head>",
         () => `${tags}${loadingScreen}</head>`
