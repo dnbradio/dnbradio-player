@@ -365,6 +365,26 @@ export default {
               action = { ...action, length: null };
             }
             break;
+          case "GOT_BUTTERCHURN": {
+            const butterchurn = action.butterchurn;
+            action = {
+              ...action,
+              butterchurn: {
+                createVisualizer(...args) {
+                  const visualizer = butterchurn.createVisualizer(...args);
+                  const resize = visualizer.setRendererSize;
+                  visualizer.setRendererSize = function (...dimensions) {
+                    // Butterchurn beta redraws on resize, but a newly loaded
+                    // preset has no transition frame until render() runs.
+                    this.render();
+                    return resize.apply(this, dimensions);
+                  };
+                  return visualizer;
+                },
+              },
+            };
+            break;
+          }
           case "SET_SKIN_DATA":
             this.skinUrl = this.requestedSkinUrl || this.skinUrl;
             break;
@@ -497,13 +517,16 @@ export default {
         window.innerHeight,
         window.visualViewport ? window.visualViewport.height : Infinity
       );
+      const state = this.webamp && this.webamp.store.getState();
+      const windows = state && state.windows.genWindows;
+      const milkdropOpen = windows && windows.milkdrop.open;
       const mobileMilkdrop =
-        !this.windowLayout.milkdrop.closed &&
-        window.innerWidth <= MOBILE_MAX_WIDTH;
+        milkdropOpen && window.innerWidth <= MOBILE_MAX_WIDTH;
       let scale;
-      if (!this.windowLayout.milkdrop.closed && this.webamp) {
-        const state = this.webamp.store.getState();
-        const windows = state.windows.genWindows;
+      this.standaloneMaxWidth = milkdropOpen
+        ? MILKDROP_MAX_WIDTH
+        : STANDALONE_MAX_WIDTH;
+      if (milkdropOpen) {
         const mainWidth = LAYOUT_WIDTH * (state.display.doubled ? 2 : 1);
         const positions = {};
         let top = 0;
@@ -555,6 +578,32 @@ export default {
             positions,
           });
         }
+      }
+      if (windows && !milkdropOpen) {
+        const bounds = Object.values(windows)
+          .filter((entry) => entry.open)
+          .map((entry) => {
+            const doubled = state.display.doubled && entry.canDouble ? 2 : 1;
+            return {
+              right:
+                entry.position.x +
+                (LAYOUT_WIDTH + entry.size[0] * RESIZE_WIDTH) * doubled,
+              bottom:
+                entry.position.y +
+                (entry.shade
+                  ? SHADE_HEIGHT
+                  : MAIN_HEIGHT + entry.size[1] * RESIZE_HEIGHT) *
+                  doubled,
+            };
+          });
+        this.LAYOUT_WIDTH = Math.max(
+          LAYOUT_WIDTH,
+          ...bounds.map((b) => b.right)
+        );
+        this.LAYOUT_HEIGHT = Math.max(
+          SHADE_HEIGHT,
+          ...bounds.map((b) => b.bottom)
+        );
       }
       if (!mobileMilkdrop) {
         scale = Math.min(
@@ -825,12 +874,13 @@ export default {
       const state = this.webamp.store.getState();
       const layout = JSON.stringify([
         state.display.doubled,
+        state.windows.genWindows.milkdrop.open,
         ...["main", "equalizer", "playlist"].map((id) => {
           const entry = state.windows.genWindows[id];
           return [entry.open, entry.shade, entry.size];
         }),
       ]);
-      if (!this.windowLayout.milkdrop.closed && layout !== this.lastLayout) {
+      if (layout !== this.lastLayout) {
         this.lastLayout = layout;
         // Native shade actions also reposition docked windows. Fit after the
         // complete action so their follow-up dispatch cannot undo this layout.
