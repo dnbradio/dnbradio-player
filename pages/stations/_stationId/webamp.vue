@@ -53,14 +53,16 @@ import { loadSettings, saveSettings } from "~/components/embed/settings";
 const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
 const PLAYLIST_HEIGHT = 116;
-const LAYOUT_HEIGHT = MAIN_HEIGHT + PLAYLIST_HEIGHT;
+const SHADE_HEIGHT = 14;
+const MILKDROP_WIDTH = 400;
+const MILKDROP_HEIGHT = 203;
+const MILKDROP_MAX_WIDTH = 730;
+const MOBILE_MAX_WIDTH = 767;
+const RESIZE_WIDTH = 25;
+const RESIZE_HEIGHT = 29;
+// Webamp's generic window chrome takes 34px; keep at least 1px for the canvas.
+const MILKDROP_MIN_HEIGHT = 35;
 const STANDALONE_MAX_WIDTH = 500;
-const WINDOW_LAYOUT = {
-  main: { position: { top: 0, left: 0 } },
-  equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
-  playlist: { position: { top: MAIN_HEIGHT, left: 0 } },
-  milkdrop: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
-};
 const DEFAULT_PODCASTS = 20;
 // Passed as a track duration so Webamp neither probes the URL for its length
 // (which would open every stream on load) nor shows 0:00; rewritten to null.
@@ -94,6 +96,42 @@ const MENU_ITEMS = [
   ["podcasts", "DNBRADIO Podcasts"],
   ["info", "Station Info"],
 ];
+
+function initialLayout(query) {
+  const milkdrop = query.milkdrop === "1";
+  const minPlayer = query["min-player"] === "1";
+  const minEq = query["min-eq"] === "1";
+  const minPlaylist = query["min-playlist"] === "1";
+  const mainHeight = minPlayer ? SHADE_HEIGHT : MAIN_HEIGHT;
+  const playlistTop = mainHeight + (minEq ? SHADE_HEIGHT : 0);
+  const milkdropTop = playlistTop + (minPlaylist ? SHADE_HEIGHT : 0);
+  return {
+    width: milkdrop ? MILKDROP_WIDTH : LAYOUT_WIDTH,
+    height: milkdrop
+      ? milkdropTop + MILKDROP_HEIGHT
+      : playlistTop + (minPlaylist ? SHADE_HEIGHT : PLAYLIST_HEIGHT),
+    maxWidth: milkdrop ? MILKDROP_MAX_WIDTH : STANDALONE_MAX_WIDTH,
+    windows: {
+      main: { position: { top: 0, left: 0 }, shadeMode: minPlayer },
+      equalizer: {
+        position: { top: mainHeight, left: 0 },
+        shadeMode: minEq,
+        closed: !minEq,
+      },
+      playlist: {
+        position: { top: playlistTop, left: 0 },
+        shadeMode: minPlaylist,
+        closed: milkdrop && !minPlaylist,
+      },
+      milkdrop: {
+        position: { top: milkdropTop, left: 0 },
+        // Webamp's resize increments are 25px wide and 29px high.
+        size: milkdrop ? { extraWidth: 5, extraHeight: 3 } : undefined,
+        closed: !milkdrop,
+      },
+    },
+  };
+}
 
 function decodeEntities(text) {
   const element = document.createElement("textarea");
@@ -130,13 +168,21 @@ export default {
     };
   },
   data() {
+    const layout = initialLayout(this.$route.query);
     const extraWindows = {};
     Object.entries(EXTRA_WINDOWS).forEach(([id, position]) => {
-      extraWindows[id] = { open: false, z: 1, ...position };
+      extraWindows[id] = {
+        open: false,
+        z: 1,
+        ...position,
+        y: layout.windows.playlist.position.top,
+      };
     });
     return {
-      LAYOUT_WIDTH,
-      LAYOUT_HEIGHT,
+      LAYOUT_WIDTH: layout.width,
+      LAYOUT_HEIGHT: layout.height,
+      standaloneMaxWidth: layout.maxWidth,
+      windowLayout: layout.windows,
       ready: false,
       unsupported: false,
       nowplaying: {},
@@ -319,6 +365,26 @@ export default {
               action = { ...action, length: null };
             }
             break;
+          case "GOT_BUTTERCHURN": {
+            const butterchurn = action.butterchurn;
+            action = {
+              ...action,
+              butterchurn: {
+                createVisualizer(...args) {
+                  const visualizer = butterchurn.createVisualizer(...args);
+                  const resize = visualizer.setRendererSize;
+                  visualizer.setRendererSize = function (...dimensions) {
+                    // Butterchurn beta redraws on resize, but a newly loaded
+                    // preset has no transition frame until render() runs.
+                    this.render();
+                    return resize.apply(this, dimensions);
+                  };
+                  return visualizer;
+                },
+              },
+            };
+            break;
+          }
           case "SET_SKIN_DATA":
             this.skinUrl = this.requestedSkinUrl || this.skinUrl;
             break;
@@ -330,16 +396,16 @@ export default {
         if (action.type === "SET_MEDIA") {
           this.showRealAudioInfo(action.id);
         }
-        // Raise newly opened windows above the playlist and keep the EQ and
-        // Milkdrop in its place so they fit inside the compact player.
+        // Windows hidden at startup share the playlist's compact slot.
         if (
           (action.type === "TOGGLE_WINDOW" ||
             action.type === "SET_WINDOW_VISIBILITY") &&
           store.getState().windows.genWindows[action.windowId]?.open
         ) {
           if (
-            action.windowId === "equalizer" ||
-            action.windowId === "milkdrop"
+            (action.windowId === "equalizer" ||
+              action.windowId === "milkdrop") &&
+            this.windowLayout[action.windowId].closed
           ) {
             store.dispatch({
               type: "UPDATE_WINDOW_POSITIONS",
@@ -447,28 +513,140 @@ export default {
     },
     fitToFrame() {
       const framed = window.self !== window.top;
-      const scale = Math.min(
-        window.innerWidth / LAYOUT_WIDTH,
-        window.innerHeight / LAYOUT_HEIGHT,
-        framed ? Infinity : STANDALONE_MAX_WIDTH / LAYOUT_WIDTH
+      const viewportHeight = Math.min(
+        window.innerHeight,
+        window.visualViewport ? window.visualViewport.height : Infinity
       );
+      const state = this.webamp && this.webamp.store.getState();
+      const windows = state && state.windows.genWindows;
+      const milkdropOpen = windows && windows.milkdrop.open;
+      const mobileMilkdrop =
+        milkdropOpen &&
+        (window.innerWidth <= MOBILE_MAX_WIDTH ||
+          window.matchMedia("(pointer: coarse)").matches);
+      let scale;
+      this.standaloneMaxWidth = milkdropOpen
+        ? MILKDROP_MAX_WIDTH
+        : STANDALONE_MAX_WIDTH;
+      if (milkdropOpen) {
+        const mainWidth = LAYOUT_WIDTH * (state.display.doubled ? 2 : 1);
+        const positions = {};
+        let top = 0;
+        ["main", "equalizer", "playlist"].forEach((id) => {
+          const entry = windows[id];
+          if (!entry.open) return;
+          positions[id] = { x: 0, y: top };
+          top +=
+            (entry.shade
+              ? SHADE_HEIGHT
+              : MAIN_HEIGHT + entry.size[1] * RESIZE_HEIGHT) *
+            (state.display.doubled && entry.canDouble ? 2 : 1);
+        });
+        positions.milkdrop = { x: 0, y: top };
+        scale = Math.min(
+          window.innerWidth / mainWidth,
+          viewportHeight / (top + MILKDROP_MIN_HEIGHT)
+        );
+        const width = mobileMilkdrop
+          ? window.innerWidth / scale
+          : MILKDROP_WIDTH;
+        const height = mobileMilkdrop
+          ? viewportHeight / scale - top
+          : MILKDROP_HEIGHT;
+        const size = [
+          (width - LAYOUT_WIDTH) / RESIZE_WIDTH,
+          (height - MAIN_HEIGHT) / RESIZE_HEIGHT,
+        ];
+        this.LAYOUT_WIDTH = Math.max(mainWidth, width);
+        this.LAYOUT_HEIGHT = top + height;
+        if (
+          windows.milkdrop.size.some((n, i) => Math.abs(n - size[i]) > 1e-6)
+        ) {
+          this.webamp.store.dispatch({
+            type: "WINDOW_SIZE_CHANGED",
+            windowId: "milkdrop",
+            size,
+          });
+        }
+        if (
+          Object.entries(positions).some(
+            ([id, position]) =>
+              windows[id].position.x !== position.x ||
+              windows[id].position.y !== position.y
+          )
+        ) {
+          this.webamp.store.dispatch({
+            type: "UPDATE_WINDOW_POSITIONS",
+            positions,
+          });
+        }
+      }
+      if (windows && !milkdropOpen) {
+        const bounds = Object.values(windows)
+          .filter((entry) => entry.open)
+          .map((entry) => {
+            const doubled = state.display.doubled && entry.canDouble ? 2 : 1;
+            return {
+              right:
+                entry.position.x +
+                (LAYOUT_WIDTH + entry.size[0] * RESIZE_WIDTH) * doubled,
+              bottom:
+                entry.position.y +
+                (entry.shade
+                  ? SHADE_HEIGHT
+                  : MAIN_HEIGHT + entry.size[1] * RESIZE_HEIGHT) *
+                  doubled,
+            };
+          });
+        Object.values(this.extraWindows).forEach((entry) => {
+          if (entry.open) {
+            bounds.push({
+              right: entry.x + LAYOUT_WIDTH,
+              bottom: entry.y + MAIN_HEIGHT,
+            });
+          }
+        });
+        this.LAYOUT_WIDTH = Math.max(
+          LAYOUT_WIDTH,
+          ...bounds.map((b) => b.right)
+        );
+        this.LAYOUT_HEIGHT = Math.max(
+          SHADE_HEIGHT,
+          ...bounds.map((b) => b.bottom)
+        );
+      }
+      if (!mobileMilkdrop) {
+        scale = Math.min(
+          window.innerWidth / this.LAYOUT_WIDTH,
+          viewportHeight / this.LAYOUT_HEIGHT,
+          framed ? Infinity : this.standaloneMaxWidth / this.LAYOUT_WIDTH
+        );
+      }
       this.scale = scale;
       const root = document.getElementById("webamp");
       if (root) {
         Object.assign(root.style, {
           position: "absolute",
           zoom: scale,
-          left: `${(window.innerWidth - LAYOUT_WIDTH * scale) / 2 / scale}px`,
-          top: `${(window.innerHeight - LAYOUT_HEIGHT * scale) / 2 / scale}px`,
+          left: mobileMilkdrop
+            ? "0px"
+            : `${
+                (window.innerWidth - this.LAYOUT_WIDTH * scale) / 2 / scale
+              }px`,
+          top: mobileMilkdrop
+            ? "0px"
+            : `${(viewportHeight - this.LAYOUT_HEIGHT * scale) / 2 / scale}px`,
         });
       }
     },
     openWindow(id) {
       this.extraWindows[id].open = true;
+      this.fitToFrame();
       this.focusWindow(id);
     },
     closeWindow(id) {
       this.extraWindows[id].open = false;
+      this.fitToFrame();
       if (id === "loadList") {
         this.loadMessage = "";
       }
@@ -706,6 +884,21 @@ export default {
     },
     onStateChange() {
       const state = this.webamp.store.getState();
+      const layout = JSON.stringify([
+        state.display.doubled,
+        state.windows.genWindows.milkdrop.open,
+        ...["main", "equalizer", "playlist"].map((id) => {
+          const entry = state.windows.genWindows[id];
+          return [entry.open, entry.shade, entry.size];
+        }),
+      ]);
+      if (layout !== this.lastLayout) {
+        this.lastLayout = layout;
+        // Native shade actions also reposition docked windows. Fit after the
+        // complete action so their follow-up dispatch cannot undo this layout.
+        cancelAnimationFrame(this.layoutFrame);
+        this.layoutFrame = requestAnimationFrame(this.fitToFrame);
+      }
       this.palette = state.display.skinPlaylistStyle || CLASSIC_PLAYLIST_STYLE;
       const urls = state.playlist.trackOrder.map((id) => state.tracks[id].url);
       if (urls.join("\n") !== this.playlistUrls.join("\n")) {
@@ -756,6 +949,17 @@ export default {
         ...this.settings.playlists,
       };
       this.skinUrl = this.settings.skinUrl || null;
+      const skin = this.$route.query.skin;
+      if (typeof skin === "string") {
+        const selected = CLASSIC_SKINS.find(
+          ([file]) => file.toLowerCase() === skin.toLowerCase()
+        );
+        if (skin.toLowerCase() === "default") {
+          this.skinUrl = null;
+        } else if (selected) {
+          this.skinUrl = `${this.$config.APP_BASE_URL}skins/${selected[0]}.wsz`;
+        }
+      }
       this.watchSkinRequests();
       this.webamp = new Webamp({
         initialTracks: [],
@@ -764,7 +968,7 @@ export default {
           url: `${this.$config.APP_BASE_URL}skins/${file}.wsz`,
           name,
         })),
-        windowLayout: WINDOW_LAYOUT,
+        windowLayout: this.windowLayout,
         enableHotkeys: true,
         enableMediaSession: true,
         handleAddUrlEvent: () => {
@@ -816,6 +1020,9 @@ export default {
     window.addEventListener("mousemove", this.onDragMove, true);
     window.addEventListener("mouseup", this.onDragEnd, true);
     window.addEventListener("resize", this.fitToFrame);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", this.fitToFrame);
+    }
     await this.startWebamp();
     this.fetchAllNowplaying();
     this.npInterval = setInterval(this.fetchAllNowplaying, 30000);
@@ -836,6 +1043,10 @@ export default {
     window.removeEventListener("mousemove", this.onDragMove, true);
     window.removeEventListener("mouseup", this.onDragEnd, true);
     window.removeEventListener("resize", this.fitToFrame);
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener("resize", this.fitToFrame);
+    }
+    cancelAnimationFrame(this.layoutFrame);
     if (this.webamp) {
       this.webamp.dispose();
     }
