@@ -53,14 +53,11 @@ import { loadSettings, saveSettings } from "~/components/embed/settings";
 const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
 const PLAYLIST_HEIGHT = 116;
-const LAYOUT_HEIGHT = MAIN_HEIGHT + PLAYLIST_HEIGHT;
+const SHADE_HEIGHT = 14;
+const MILKDROP_WIDTH = 400;
+const MILKDROP_HEIGHT = 203;
+const MILKDROP_MAX_WIDTH = 730;
 const STANDALONE_MAX_WIDTH = 500;
-const WINDOW_LAYOUT = {
-  main: { position: { top: 0, left: 0 } },
-  equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
-  playlist: { position: { top: MAIN_HEIGHT, left: 0 } },
-  milkdrop: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
-};
 const DEFAULT_PODCASTS = 20;
 // Passed as a track duration so Webamp neither probes the URL for its length
 // (which would open every stream on load) nor shows 0:00; rewritten to null.
@@ -94,6 +91,42 @@ const MENU_ITEMS = [
   ["podcasts", "DNBRADIO Podcasts"],
   ["info", "Station Info"],
 ];
+
+function initialLayout(query) {
+  const milkdrop = query.milkdrop === "1";
+  const minPlayer = query["min-player"] === "1";
+  const minEq = query["min-eq"] === "1";
+  const minPlaylist = query["min-playlist"] === "1";
+  const mainHeight = minPlayer ? SHADE_HEIGHT : MAIN_HEIGHT;
+  const playlistTop = mainHeight + (minEq ? SHADE_HEIGHT : 0);
+  const milkdropTop = playlistTop + (minPlaylist ? SHADE_HEIGHT : 0);
+  return {
+    width: milkdrop ? MILKDROP_WIDTH : LAYOUT_WIDTH,
+    height: milkdrop
+      ? milkdropTop + MILKDROP_HEIGHT
+      : playlistTop + (minPlaylist ? SHADE_HEIGHT : PLAYLIST_HEIGHT),
+    maxWidth: milkdrop ? MILKDROP_MAX_WIDTH : STANDALONE_MAX_WIDTH,
+    windows: {
+      main: { position: { top: 0, left: 0 }, shadeMode: minPlayer },
+      equalizer: {
+        position: { top: mainHeight, left: 0 },
+        shadeMode: minEq,
+        closed: !minEq,
+      },
+      playlist: {
+        position: { top: playlistTop, left: 0 },
+        shadeMode: minPlaylist,
+        closed: milkdrop && !minPlaylist,
+      },
+      milkdrop: {
+        position: { top: milkdropTop, left: 0 },
+        // Webamp's resize increments are 25px wide and 29px high.
+        size: milkdrop ? { extraWidth: 5, extraHeight: 3 } : undefined,
+        closed: !milkdrop,
+      },
+    },
+  };
+}
 
 function decodeEntities(text) {
   const element = document.createElement("textarea");
@@ -130,13 +163,21 @@ export default {
     };
   },
   data() {
+    const layout = initialLayout(this.$route.query);
     const extraWindows = {};
     Object.entries(EXTRA_WINDOWS).forEach(([id, position]) => {
-      extraWindows[id] = { open: false, z: 1, ...position };
+      extraWindows[id] = {
+        open: false,
+        z: 1,
+        ...position,
+        y: layout.windows.playlist.position.top,
+      };
     });
     return {
-      LAYOUT_WIDTH,
-      LAYOUT_HEIGHT,
+      LAYOUT_WIDTH: layout.width,
+      LAYOUT_HEIGHT: layout.height,
+      standaloneMaxWidth: layout.maxWidth,
+      windowLayout: layout.windows,
       ready: false,
       unsupported: false,
       nowplaying: {},
@@ -330,16 +371,16 @@ export default {
         if (action.type === "SET_MEDIA") {
           this.showRealAudioInfo(action.id);
         }
-        // Raise newly opened windows above the playlist and keep the EQ and
-        // Milkdrop in its place so they fit inside the compact player.
+        // Windows hidden at startup share the playlist's compact slot.
         if (
           (action.type === "TOGGLE_WINDOW" ||
             action.type === "SET_WINDOW_VISIBILITY") &&
           store.getState().windows.genWindows[action.windowId]?.open
         ) {
           if (
-            action.windowId === "equalizer" ||
-            action.windowId === "milkdrop"
+            (action.windowId === "equalizer" ||
+              action.windowId === "milkdrop") &&
+            this.windowLayout[action.windowId].closed
           ) {
             store.dispatch({
               type: "UPDATE_WINDOW_POSITIONS",
@@ -448,9 +489,9 @@ export default {
     fitToFrame() {
       const framed = window.self !== window.top;
       const scale = Math.min(
-        window.innerWidth / LAYOUT_WIDTH,
-        window.innerHeight / LAYOUT_HEIGHT,
-        framed ? Infinity : STANDALONE_MAX_WIDTH / LAYOUT_WIDTH
+        window.innerWidth / this.LAYOUT_WIDTH,
+        window.innerHeight / this.LAYOUT_HEIGHT,
+        framed ? Infinity : this.standaloneMaxWidth / this.LAYOUT_WIDTH
       );
       this.scale = scale;
       const root = document.getElementById("webamp");
@@ -458,8 +499,12 @@ export default {
         Object.assign(root.style, {
           position: "absolute",
           zoom: scale,
-          left: `${(window.innerWidth - LAYOUT_WIDTH * scale) / 2 / scale}px`,
-          top: `${(window.innerHeight - LAYOUT_HEIGHT * scale) / 2 / scale}px`,
+          left: `${
+            (window.innerWidth - this.LAYOUT_WIDTH * scale) / 2 / scale
+          }px`,
+          top: `${
+            (window.innerHeight - this.LAYOUT_HEIGHT * scale) / 2 / scale
+          }px`,
         });
       }
     },
@@ -756,6 +801,17 @@ export default {
         ...this.settings.playlists,
       };
       this.skinUrl = this.settings.skinUrl || null;
+      const skin = this.$route.query.skin;
+      if (typeof skin === "string") {
+        const selected = CLASSIC_SKINS.find(
+          ([file]) => file.toLowerCase() === skin.toLowerCase()
+        );
+        if (skin.toLowerCase() === "default") {
+          this.skinUrl = null;
+        } else if (selected) {
+          this.skinUrl = `${this.$config.APP_BASE_URL}skins/${selected[0]}.wsz`;
+        }
+      }
       this.watchSkinRequests();
       this.webamp = new Webamp({
         initialTracks: [],
@@ -764,7 +820,7 @@ export default {
           url: `${this.$config.APP_BASE_URL}skins/${file}.wsz`,
           name,
         })),
-        windowLayout: WINDOW_LAYOUT,
+        windowLayout: this.windowLayout,
         enableHotkeys: true,
         enableMediaSession: true,
         handleAddUrlEvent: () => {
