@@ -521,7 +521,9 @@ export default {
       const windows = state && state.windows.genWindows;
       const milkdropOpen = windows && windows.milkdrop.open;
       const mobileMilkdrop =
-        milkdropOpen && window.innerWidth <= MOBILE_MAX_WIDTH;
+        milkdropOpen &&
+        (window.innerWidth <= MOBILE_MAX_WIDTH ||
+          window.matchMedia("(pointer: coarse)").matches);
       let scale;
       this.standaloneMaxWidth = milkdropOpen
         ? MILKDROP_MAX_WIDTH
@@ -596,6 +598,14 @@ export default {
                   doubled,
             };
           });
+        Object.values(this.extraWindows).forEach((entry) => {
+          if (entry.open) {
+            bounds.push({
+              right: entry.x + LAYOUT_WIDTH,
+              bottom: entry.y + MAIN_HEIGHT,
+            });
+          }
+        });
         this.LAYOUT_WIDTH = Math.max(
           LAYOUT_WIDTH,
           ...bounds.map((b) => b.right)
@@ -631,10 +641,12 @@ export default {
     },
     openWindow(id) {
       this.extraWindows[id].open = true;
+      this.fitToFrame();
       this.focusWindow(id);
     },
     closeWindow(id) {
       this.extraWindows[id].open = false;
+      this.fitToFrame();
       if (id === "loadList") {
         this.loadMessage = "";
       }
