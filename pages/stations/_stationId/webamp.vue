@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import webampScriptUrl from "!!file-loader?name=[name].[contenthash:7].[ext]!webamp/built/webamp.bundle.min.js";
+import webampScriptUrl from "!!file-loader?name=[name].[contenthash:7].js!webamp/built/webamp.butterchurn-bundle.min.mjs";
 import stations from "@/data/stations";
 import Station from "@/models/Station";
 import ExtraWindows from "~/components/embed/ExtraWindows.vue";
@@ -59,6 +59,7 @@ const WINDOW_LAYOUT = {
   main: { position: { top: 0, left: 0 } },
   equalizer: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
   playlist: { position: { top: MAIN_HEIGHT, left: 0 } },
+  milkdrop: { position: { top: MAIN_HEIGHT, left: 0 }, closed: true },
 };
 const DEFAULT_PODCASTS = 20;
 // Passed as a track duration so Webamp neither probes the URL for its length
@@ -100,17 +101,13 @@ function decodeEntities(text) {
   return element.value;
 }
 
-function loadWebamp() {
-  if (window.Webamp) {
-    return Promise.resolve(window.Webamp);
-  }
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = webampScriptUrl;
-    script.onload = () => resolve(window.Webamp);
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+async function loadWebamp() {
+  // Keep the prebuilt module outside Nuxt's older webpack parser. Its default
+  // export includes Milkdrop; window.Webamp still points to the base class.
+  const { default: Webamp } = await import(
+    /* webpackIgnore: true */ webampScriptUrl
+  );
+  return Webamp;
 }
 
 function downloadText(text, filename, type) {
@@ -333,18 +330,21 @@ export default {
         if (action.type === "SET_MEDIA") {
           this.showRealAudioInfo(action.id);
         }
-        // Webamp opens windows without raising them, so an EQ opened after
-        // the playlist was clicked appeared behind it.
+        // Raise newly opened windows above the playlist and keep the EQ and
+        // Milkdrop in its place so they fit inside the compact player.
         if (
           (action.type === "TOGGLE_WINDOW" ||
             action.type === "SET_WINDOW_VISIBILITY") &&
           store.getState().windows.genWindows[action.windowId]?.open
         ) {
-          if (action.windowId === "equalizer") {
+          if (
+            action.windowId === "equalizer" ||
+            action.windowId === "milkdrop"
+          ) {
             store.dispatch({
               type: "UPDATE_WINDOW_POSITIONS",
               positions: {
-                equalizer:
+                [action.windowId]:
                   store.getState().windows.genWindows.playlist.position,
               },
             });
