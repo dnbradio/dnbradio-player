@@ -82,14 +82,16 @@ These options work on `/player/webamp/`, station-specific webamp pages, and the 
 
 `https://dnbradio.com/player/webamp/?milkdrop=1&skin=green-dimension-v2&min-player=1`
 
-| Option | Startup behavior |
-| --- | --- |
-| `milkdrop=1` | Open MilkDrop directly below the player and hide the playlist. At desktop size the visualizer is approximately 730 × 370 px, using Webamp's native sprite increments. It scales down to fit smaller screens. |
-| `skin=green-dimension-v2` | Select a bundled skin, overriding the saved skin. Unknown names leave the saved/default skin in place. |
-| `skin=default` | Select the original Winamp skin, overriding the saved skin. |
-| `min-player=1` | Start the main player in its 14 px shade mode. |
-| `min-eq=1` | Show the equalizer in shade mode below the main player. |
-| `min-playlist=1` | Show the playlist in shade mode, including when MilkDrop is open. |
+| Option                    | Startup behavior                                                                                                                                                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `milkdrop=1`              | Open MilkDrop directly below the player and hide the playlist. At desktop size the visualizer is approximately 730 × 370 px, using Webamp's native sprite increments. On mobile (up to 767 px wide), the player starts at the top of the screen and MilkDrop fills the remaining visible height. |
+| `skin=green-dimension-v2` | Select a bundled skin, overriding the saved skin. Unknown names leave the saved/default skin in place.                                                                                                                                                                                           |
+| `skin=default`            | Select the original Winamp skin, overriding the saved skin.                                                                                                                                                                                                                                      |
+| `min-player=1`            | Start the main player in its 14 px shade mode.                                                                                                                                                                                                                                                   |
+| `min-eq=1`                | Show the equalizer in shade mode below the main player.                                                                                                                                                                                                                                          |
+| `min-playlist=1`          | Show the playlist in shade mode, including when MilkDrop is open.                                                                                                                                                                                                                                |
+
+Mobile sizing updates when windows are shaded or opened, the browser chrome changes the visible height, or the device rotates. Normal and minimized player heights are both accounted for.
 
 Shaded EQ and playlist windows stack between the main player and MilkDrop. Only the exact value `1` enables a window option. URL layout options apply to the current visit; the selected skin is saved with the other player settings.
 
