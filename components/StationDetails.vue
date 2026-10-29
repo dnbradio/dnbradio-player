@@ -84,10 +84,7 @@
             @click="playIfStopped"
           />
         </transition>
-        <DjHead
-          v-if="$dj.current && station && station.id === 1"
-          :dj="$dj.current"
-        />
+        <DjHead v-if="djVisible" :dj="$dj.current" />
         <div class="player__dots" role="group" aria-label="Choose station">
           <button
             v-for="item in stations"
@@ -286,6 +283,7 @@ export default {
   computed: {
     ...mapState("player", [
       "status",
+      "source",
       "message",
       "nowplaying",
       "volume",
@@ -299,6 +297,13 @@ export default {
       "playingStationId",
       "episode",
     ]),
+    djVisible() {
+      return (
+        this.$dj.current &&
+        this.station?.id === 1 &&
+        (!this.source || this.playingStationId === 1)
+      );
+    },
     stations() {
       return stationList;
     },

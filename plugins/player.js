@@ -70,7 +70,12 @@ export default function ({ app, store }, inject) {
   }
   let audio = createAudio();
   let motion = app.$djProfile
-    ? createAudioMotion(audio, app.$djProfile, fallbackAudio)
+    ? createAudioMotion(
+        audio,
+        app.$djProfile,
+        fallbackAudio,
+        () => !source() || isMainStream(),
+      )
     : null;
   const dj = shallowReactive({ current: motion });
   inject("dj", dj);
@@ -80,6 +85,9 @@ export default function ({ app, store }, inject) {
   const state = () => store.state.player;
   const source = () => state().source;
   const isLive = () => !source() || source().kind === "station";
+  function isMainStream() {
+    return source()?.kind === "station" && source().stationId === 1;
+  }
 
   let stations = [];
   const ready = stationsData().then((list) => {
@@ -128,7 +136,7 @@ export default function ({ app, store }, inject) {
   }
 
   function setSrc(url) {
-    const mainStream = source()?.kind === "station" && source().stationId === 1;
+    const mainStream = isMainStream();
     if (
       motion &&
       !mainStream &&
@@ -146,7 +154,12 @@ export default function ({ app, store }, inject) {
       const volume = audio.volume;
       audio = createAudio();
       audio.volume = volume;
-      motion = createAudioMotion(audio, app.$djProfile, fallbackAudio);
+      motion = createAudioMotion(
+        audio,
+        app.$djProfile,
+        fallbackAudio,
+        () => !source() || isMainStream(),
+      );
       motion.state.available = available;
       motion.state.enabled = enabled;
       dj.current = motion;
@@ -179,8 +192,7 @@ export default function ({ app, store }, inject) {
   function start() {
     lastProgressAt = Date.now();
     armStallWatch();
-    if (!quiet && source()?.kind === "station" && source().stationId === 1)
-      motion?.resume();
+    if (!quiet && isMainStream()) motion?.resume();
     const attemptAudio = audio;
     const attemptSrc = audio.getAttribute("src");
     const attempt = audio.play();

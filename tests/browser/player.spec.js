@@ -452,8 +452,26 @@ test("a DJ query keeps podcasts on native audio without analysis", async ({
   expect(await page.evaluate(() => window.contexts)).toBe(0);
   expect(await page.evaluate(() => window.testAudio[0].crossOrigin)).toBe(null);
   await expect(page.locator(".dj-mode")).toHaveCount(0);
-  await play.click();
-  expect(await page.evaluate(() => window.testAudio[0].paused)).toBe(true);
+  await page.evaluate(() =>
+    document
+      .getElementById("app")
+      .__vue_app__.config.globalProperties.$router.push("/"),
+  );
+  await expect(page.locator(".player__controls")).toBeVisible();
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
+  await page.evaluate(() => {
+    const dj =
+      document.getElementById("app").__vue_app__.config.globalProperties.$dj
+        .current;
+    dj.toggle();
+    dj.toggle();
+  });
+  expect(await page.evaluate(() => window.contexts)).toBe(0);
+  expect(await page.evaluate(() => window.testAudio[0].crossOrigin)).toBe(null);
+  const time = await page.evaluate(() => window.testAudio[0].currentTime);
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+    .toBeGreaterThan(time);
 });
 
 test("an analysis failure before play cannot assign an empty source or start audio", async ({
