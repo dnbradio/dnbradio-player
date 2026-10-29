@@ -61,6 +61,29 @@ pnpm run generate-prod
 pnpm run upload-prod
 ```
 
+## Player
+
+One audio element (`plugins/player.js`) plays for the whole app, so a station
+or podcast keeps playing while the listener browses the schedule, podcasts,
+donate, or chat pages; those pages show a mini player above their bottom nav.
+Playback state lives in `store/player.js`; components call `this.$player`.
+
+- Pausing a station drops the connection, and Play reconnects at the live
+  edge. A dropped stream retries with backoff for up to ten minutes, and
+  immediately when the device comes back online.
+- Lock screens and headsets get the station or track title and artwork,
+  play/pause/stop, and previous/next station (seek for podcasts).
+- iOS ignores `HTMLMediaElement.volume`, so the volume buttons are hidden
+  there and their slots stay empty, keeping play and the station arrows in
+  place.
+- Tapping the track (or the line under it) opens recently played, up next,
+  the next live shows, and a sleep timer. The home icon opens the station
+  list with each station's now playing.
+- Desktop keys: Space or K plays and pauses, Left and Right switch stations,
+  Up and Down change volume.
+- The visuals toggle and volume are saved in `localStorage`
+  (`dnbradio-player`).
+
 ## X player card
 
 Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/darkstep/`, `/player/webamp/`, `/player/stations/<id>/webamp/`) on X renders a playable player inside the post on desktop web. Mobile apps and other clients show the station image and link through to the full player.
@@ -89,14 +112,14 @@ including station switches and returning from the podcast or schedule pages.
 Other stations keep their existing stream URLs. This applies to the popup
 player, not the separate Webamp/embed player.
 
-Run the source-selection and playback regression checks with
-`node --test tests/source-attribution.test.mjs` after `pnpm install`.
+Run the source-selection, now playing, and schedule checks with
+`node --test tests/` after `pnpm install`.
 
 Verify after deployment:
 
 1. Open `/player?src=discord`, press Play, and check the browser Network panel
    for `https://azura.drmnbss.org/listen/dnbradio/discord.mp3?<timestamp>`.
-2. Switch to another station and back using next/previous or shuffle, then
+2. Switch to another station and back using next/previous, then
    visit a schedule or podcast page and return. DNBRADIO should still request
    `discord.mp3`; other stations should request their usual streams.
 3. Repeat with each supported source, no `src`, and `src=unknown`. Invalid

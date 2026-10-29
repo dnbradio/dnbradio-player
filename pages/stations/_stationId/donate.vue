@@ -1,191 +1,176 @@
 <template>
-  <div>
-    <v-toolbar color="transparent" dark flat>
-      <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
-      <v-btn icon class="ml-2" @click="$router.go(-1)">
-        <v-icon medium transparent>arrow_back</v-icon>
-      </v-btn>
-      <v-toolbar-title></v-toolbar-title>
-      <v-spacer></v-spacer>
-    </v-toolbar>
-
-    <v-container>
-      <p class="text-center">
-        There are several ways to support this station.
-        <br /><small>*All donations can be made anonymously.</small>
+  <PageShell
+    title="Support the station"
+    eyebrow="Donate"
+    :station="station"
+    active="donate"
+  >
+    <div class="support-hero">
+      <span class="support-hero__heart" aria-hidden="true"
+        ><v-icon size="30">favorite</v-icon></span
+      >
+      <h2>Keepin' the beats rollin'</h2>
+      <p>
+        dnbradio is a non-profit station run by and for its listeners. Donations
+        help pay licensing, hosting, and development.
       </p>
-      <v-row dense>
-        <v-col cols="12">
-          <v-card color="#090909" dark>
-            <v-card-title class="headline"
-              ><v-icon class="pr-2">mdi-patreon</v-icon> Become a patron on
-              Patreon</v-card-title
-            >
-            <v-card-subtitle
-              >Support this station and get perks in return via
-              Patreon.</v-card-subtitle
-            >
-            <v-card-actions>
-              <v-btn @click="launchLink('https://patreon.com/dnbradio')"
-                >Become a patron</v-btn
-              >
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row dense>
-        <v-col cols="12">
-          <v-card color="#090909" dark>
-            <v-card-title class="headline"
-              ><v-icon class="pr-2">mdi-credit-card-outline</v-icon> Donate via
-              PayPal</v-card-title
-            >
-            <v-card-subtitle
-              >Support this station via a single or recurring PayPal
-              donation.</v-card-subtitle
-            >
-            <v-card-actions>
-              <v-btn @click="launchLink('https://dnbradio.com/donate')"
-                >Donate via PayPal</v-btn
-              >
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row dense>
-        <v-col cols="12">
-          <v-card color="#090909" dark>
-            <v-card-title class="headline"
-              ><v-icon class="pr-2">mdi-tshirt-crew</v-icon> Buy
-              Merch</v-card-title
-            >
-            <v-card-subtitle
-              >Support by buying t-shirts, dogtags, and stickers from our
-              shop.</v-card-subtitle
-            >
-            <v-card-actions>
-              <v-btn @click="launchLink('https://shop.dnbradio.com')"
-                >Visit Shop</v-btn
-              >
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row dense>
-        <v-col cols="12">
-          <v-card color="#090909" dark>
-            <v-card-title class="headline"
-              ><v-icon class="pr-2">mdi-bitcoin</v-icon> Donate
-              Bitcoin</v-card-title
-            >
-            <v-card-subtitle
-              >Support this station by sending Bitcoin to our BTC
-              wallet.</v-card-subtitle
-            >
-            <v-card-actions>
-              <v-btn @click="showBitcoinAddress">Send Bitcoin</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row dense>
-        <v-col cols="12">
-          <v-card color="#090909" dark>
-            <v-card-title class="headline"
-              ><v-icon class="pr-2">mdi-ethereum</v-icon> Donate
-              Ethereum</v-card-title
-            >
-            <v-card-subtitle
-              >Support this station by sending Bitcoin to our ETH
-              wallet.</v-card-subtitle
-            >
-            <v-card-actions>
-              <v-btn @click="showEthAddress">Send Ethereum</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
+      <p class="support-hero__note">All donations can be made anonymously.</p>
+    </div>
+
+    <div class="support-list">
+      <ActionCard
+        icon="mdi-patreon"
+        title="Become a patron"
+        text="Support the station every month on Patreon and get perks in return."
+        featured
+      >
+        <a
+          href="https://patreon.com/dnbradio"
+          target="_blank"
+          rel="noopener"
+          class="dnb-button dnb-button--primary"
+        >
+          Join on Patreon<v-icon size="16">mdi-arrow-top-right</v-icon>
+        </a>
+      </ActionCard>
+
+      <ActionCard
+        icon="mdi-credit-card-outline"
+        title="Donate via PayPal"
+        text="A single or recurring donation through PayPal."
+      >
+        <a
+          href="https://dnbradio.com/donate"
+          target="_blank"
+          rel="noopener"
+          class="dnb-button"
+        >
+          Donate with PayPal<v-icon size="16">mdi-arrow-top-right</v-icon>
+        </a>
+      </ActionCard>
+
+      <ActionCard
+        icon="mdi-tshirt-crew"
+        title="Buy merch"
+        text="T-shirts, dog tags, and stickers from the dnbradio shop."
+      >
+        <a
+          href="https://shop.dnbradio.com"
+          target="_blank"
+          rel="noopener"
+          class="dnb-button"
+        >
+          Visit the shop<v-icon size="16">mdi-arrow-top-right</v-icon>
+        </a>
+      </ActionCard>
+
+      <ActionCard
+        v-for="wallet in wallets"
+        :key="wallet.name"
+        :icon="wallet.icon"
+        :title="'Send ' + wallet.name"
+        :text="
+          'Send ' +
+          wallet.name +
+          ' to the station\'s ' +
+          wallet.symbol +
+          ' wallet.'
+        "
+      >
+        <div class="dnb-code">
+          <code>{{ wallet.address }}</code>
+          <button
+            type="button"
+            class="dnb-button"
+            :aria-label="'Copy ' + wallet.symbol + ' address'"
+            @click="copy(wallet)"
+          >
+            <v-icon size="16">mdi-content-copy</v-icon>Copy
+          </button>
+        </div>
+      </ActionCard>
+    </div>
+  </PageShell>
 </template>
 
 <script>
-// init data
-import stations from "@/data/stations";
-
-// models
-import Station from "@/models/Station";
-
-// comp
-import StationSchedule from "~/components/StationSchedule";
-import Logo from "~/components/Logo.vue";
+import { EventBus } from "@/components/eventbus";
+import PageShell from "~/components/ui/PageShell";
+import ActionCard from "~/components/ui/ActionCard";
+import stationMixin from "~/mixins/station";
 
 export default {
-  components: {
-    Logo
-  },
-  async fetch() {
-    const stationsInitData = await stations();
-    Station.create({ data: stationsInitData });
-  },
+  components: { PageShell, ActionCard },
+  mixins: [stationMixin],
   data() {
-    return {};
+    return {
+      wallets: [
+        {
+          name: "Bitcoin",
+          symbol: "BTC",
+          icon: "mdi-bitcoin",
+          address: "1FGW9JXGPNfvgGMpSKiRSVuaaz6DiYYpyv",
+        },
+        {
+          name: "Ethereum",
+          symbol: "ETH",
+          icon: "mdi-ethereum",
+          address: "0x5659C68c3176CFF2641CeFA2f4F9eE9C26F66EE6",
+        },
+      ],
+    };
   },
   methods: {
-    showBitcoinAddress() {
-      this.$dialog.confirm({
-        title: "BTC Wallet Address",
-        text: "1FGW9JXGPNfvgGMpSKiRSVuaaz6DiYYpyv",
-        actions: { true: "OK" }
-      });
+    async copy(wallet) {
+      try {
+        await navigator.clipboard.writeText(wallet.address);
+        EventBus.$emit("toast", wallet.symbol + " address copied");
+      } catch (error) {
+        EventBus.$emit("toast", "Copy failed. Select the address to copy it.");
+      }
     },
-    showEthAddress() {
-      this.$dialog.confirm({
-        title: "ETH Wallet Address",
-        text: "0x5659C68c3176CFF2641CeFA2f4F9eE9C26F66EE6",
-        actions: { true: "OK" }
-      });
-    },
-    launchLink(link) {
-      this.$dialog
-        .confirm({
-          title: "Do you want to proceed?",
-          text:
-            "You are about to launch the following external link in a new browser tab:" +
-            "<br /><br />" +
-            link,
-          actions: {
-            false: "Cancel",
-            true: "YES, LAUNCH THE LINK."
-          }
-        })
-        .then(res => {
-          if (res) {
-            window.open(link, "_blank");
-          }
-        });
-    }
   },
-  async mounted() {
-    const stationsInitData = await stations();
-    Station.create({ data: stationsInitData });
-  },
-  computed: {
-    currenStationIndex() {
-      return this.$route.params && this.$route.params.stationId
-        ? this.$route.params.stationId
-        : 0;
-    },
-    stations() {
-      return Station.query().get();
-    },
-    station() {
-      let index = this.currenStationIndex || 0;
-      return this.stations.filter(
-        item => item.id == this.currenStationIndex
-      )[0];
-    }
-  }
 };
 </script>
-<style></style>
+
+<style scoped>
+.support-hero {
+  padding: 8px 8px 20px;
+  text-align: center;
+}
+.support-hero__heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(244, 67, 54, 0.14);
+}
+.support-hero__heart .v-icon {
+  color: var(--dnb-red) !important;
+}
+.support-hero h2 {
+  margin: 12px 0 6px;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 700;
+}
+.support-hero p {
+  max-width: 420px;
+  margin: 0 auto !important;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--dnb-text-2);
+}
+.support-hero .support-hero__note {
+  margin-top: 8px !important;
+  font-size: 13px;
+  color: var(--dnb-text-3);
+}
+.support-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+</style>

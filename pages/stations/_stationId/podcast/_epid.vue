@@ -1,602 +1,504 @@
 <template>
-  <div>
-    <v-toolbar
-      color="transparent"
-      dark
-      flat
-      style="margin:auto; opacity: 0.24;"
-    >
-      <v-btn class="ml-3" @click="$router.go(-1)">
-        <v-icon medium transparent>arrow_back</v-icon> Back
-      </v-btn>
-      <v-divider />
-      <v-btn
-        class="ml-6"
-        @click="$router.push('/stations/' + currenStationIndex)"
+  <PageShell
+    title="Live Recordings"
+    eyebrow="Episode"
+    :station="station"
+    active="podcast"
+    :back="station ? '/stations/' + station.id + '/podcast' : ''"
+  >
+    <div v-if="item" class="ep">
+      <img
+        :src="item.image"
+        alt=""
+        class="ep__art"
+        :class="{ 'ep__art--on': playing }"
+        @click="playIfStopped"
+      />
+      <p class="ep__overline">Recorded live on dnbradio.com</p>
+      <h2 class="ep__artist">{{ artist }}</h2>
+      <p class="ep__title">{{ title }}</p>
+      <p class="ep__meta">
+        {{ recorded
+        }}<template v-if="item.plays">
+          · {{ Number(item.plays).toLocaleString() }} plays</template
+        >
+      </p>
+
+      <div class="ep__seek">
+        <input
+          type="range"
+          min="0"
+          :max="duration || 0"
+          step="1"
+          :value="position"
+          :disabled="!current || !duration"
+          :style="{
+            '--fill': duration ? (position / duration) * 100 + '%' : '0%',
+          }"
+          aria-label="Seek"
+          :aria-valuetext="clock(position) + ' of ' + clock(duration)"
+          @input="scrubbing = Number($event.target.value)"
+          @change="seekTo($event.target.value)"
+        />
+        <div class="ep__times">
+          <span>{{ clock(position) }}</span>
+          <span>{{
+            duration ? "-" + clock(duration - position) : "--:--"
+          }}</span>
+        </div>
+      </div>
+
+      <div class="ep__controls">
+        <button
+          type="button"
+          class="ep__control"
+          :disabled="!prev"
+          aria-label="Newer episode"
+          @click="go(prev)"
+        >
+          <v-icon size="30">skip_previous</v-icon>
+        </button>
+        <button
+          type="button"
+          class="ep__control"
+          :disabled="!current"
+          aria-label="Back 30 seconds"
+          @click="$player.seek(-30)"
+        >
+          <v-icon size="30">mdi-rewind-30</v-icon>
+        </button>
+        <PlayButton :size="68" :active="playing" :busy="busy" @click="toggle" />
+        <button
+          type="button"
+          class="ep__control"
+          :disabled="!current"
+          aria-label="Forward 30 seconds"
+          @click="$player.seek(30)"
+        >
+          <v-icon size="30">mdi-fast-forward-30</v-icon>
+        </button>
+        <button
+          type="button"
+          class="ep__control"
+          :disabled="!next"
+          aria-label="Older episode"
+          @click="go(next)"
+        >
+          <v-icon size="30">skip_next</v-icon>
+        </button>
+      </div>
+
+      <div class="ep__actions">
+        <nuxt-link :to="'/stations/' + station.id" class="chip">
+          <v-icon size="18">mdi-radio</v-icon>Live radio
+        </nuxt-link>
+        <button type="button" class="chip" @click="share">
+          <v-icon size="18">mdi-share-variant</v-icon>Share
+        </button>
+        <a
+          v-if="item.download_url"
+          :href="item.download_url"
+          class="chip"
+          download
+        >
+          <v-icon size="18">mdi-download</v-icon>Download
+        </a>
+        <a
+          v-if="item.profile && item.profile.url"
+          :href="item.profile.url"
+          target="_blank"
+          rel="noopener"
+          class="chip"
+        >
+          <v-icon size="18">mdi-account-music</v-icon>DJ profile
+        </a>
+      </div>
+
+      <section v-if="tracks.length" class="ep__section">
+        <h3 class="ep__section-title">Tracklist</h3>
+        <ol class="ep__tracks">
+          <li v-for="(track, index) in tracks" :key="index">{{ track }}</li>
+        </ol>
+      </section>
+      <section v-if="description" class="ep__section">
+        <h3 class="ep__section-title">About this show</h3>
+        <p class="ep__description">{{ description }}</p>
+      </section>
+    </div>
+
+    <div v-else-if="failed" class="ep-state">
+      This recording couldn't be found.
+      <nuxt-link :to="'/stations/' + (station ? station.id : 1) + '/podcast'"
+        >Browse all recordings</nuxt-link
       >
-        <v-icon medium transparent>mdi-radio</v-icon>
-        <span class="pl-1">SWITCH TO RADIO</span>
-      </v-btn>
-    </v-toolbar>
-    <v-card
-      v-if="loaded && episode"
-      class="transparent"
-      style="margin:auto; margin-top:0px;"
-      flat
-      :max-width="560"
-      v-touch="{
-        left: () => swipe('Left'),
-        right: () => swipe('Right'),
-        up: () => swipe('Up'),
-        down: () => swipe('Down')
-      }"
-    >
-      <v-card
-        style="margin:auto;
-      text-align: center;"
-        flat
-        class="categoryCont transparent"
-        v-show="1"
-        v-if="episode"
-      >
-        <small>EPISODE</small>
-        <h2 class="categoryTitle">{{ episode.artist }}</h2>
-
-        <h4 class="categorySubtitle" style="text-transform: uppercase;">
-          <small>{{ episode.title }}</small>
-        </h4>
-        <!-- <div class="categoryDescription">
-            <small>
-              {{ episode.description }}
-            </small>
-          </div> -->
-
-        <div
-          v-if="windowHeight <= 680"
-          style="text-align:center; height: 165px;"
-        >
-          <v-img
-            contain
-            :max-width="180"
-            :src="cover"
-            aspect-ratio="1"
-            style="margin:auto; background-color: transparent;"
-            :class="isLoading || isPlaying ? 'pulse' : 'faded'"
-            @click="playIfStopped()"
-          ></v-img>
-        </div>
-        <div
-          v-if="windowHeight > 681 && windowHeight < 799"
-          style="text-align:center; height: 265px;"
-        >
-          <v-img
-            contain
-            :max-width="210"
-            :src="cover"
-            aspect-ratio="1"
-            style="margin:auto; background-color: transparent;"
-            :class="isLoading || isPlaying ? 'pulse' : 'faded'"
-            @click="playIfStopped()"
-          ></v-img>
-        </div>
-        <div
-          v-if="windowHeight >= 850"
-          style="text-align:center; height: 285px;"
-        >
-          <v-img
-            contain
-            :max-width="250"
-            :src="cover"
-            aspect-ratio="1"
-            style="margin:auto; background-color: transparent;"
-            :class="isLoading || isPlaying ? 'pulse' : 'faded'"
-            @click="playIfStopped()"
-          ></v-img>
-        </div>
-        <!-- <div>
-          <div style="text-align:center;">
-            <v-avatar color="black" size="400">
-              <v-img
-              :src="cover"
-              contain
-              style="margin:auto; background-color: transparent;"
-              :class="(isLoading || isPlaying) ? 'pulse' : ''"
-              @click="playIfStopped()"
-              ></v-img>
-            </v-avatar>
-          </div>
-        </div> -->
-      </v-card>
-      <v-card-text style="text-align:center;">
-        <small>
-          <span v-if="isLoading" style="color:yellow;"
-            >LOADING - please wait...</span
-          >
-          <span
-            v-else-if="!isPlaying && this.durationString != '00:00:00'"
-            style="color:green;"
-            >READY!</span
-          >
-          <span v-else-if="!isPlaying && !this.durationString">LOADING...</span>
-          <span v-else>
-            <span>PLAYING</span>
-          </span>
-          <br /><br />
-          <span v-if="durationString" style="font-size:2.4em;">
-            <span
-              v-if="durationString == '00:00:00'"
-              style="opacity: 0.2; color: #d1d1d1;"
-            >
-              00:00:00
-            </span>
-            <span v-else style="color:green;">
-              {{ this.currentTimeString }}
-            </span>
-            /
-            <span
-              v-if="durationString == '00:00:00'"
-              style="opacity: 0.2; color: #d1d1d1;"
-            >
-              --:--:--
-            </span>
-            <span v-else style="color:green;">
-              {{ this.durationString }}
-            </span>
-          </span>
-        </small>
-        <!-- <div v-if="isPlaying">
-          <strong>
-            {{ this.artist }}
-          </strong>
-          <br />
-          {{ this.title }}
-
-        </div>
-        <div v-else-if="!isPlaying">
-            CLICK PLAY TO<br />START YOUR STREAM
-        </div>
-        <div v-else>
-          <br /><br />
-        </div> -->
-      </v-card-text>
-      <!-- <v-progress-linear
-        color="teal"
-        :buffer-value="amountLoaded"
-        v-model="progress"
-        stream
-        reactive
-          ></v-progress-linear>
-      <v-card-actions fluid> -->
-
-      <v-row justify="space-around">
-        <v-btn icon @click="loadPrev" style="margin-top:15px;">
-          <v-icon medium dark>skip_previous</v-icon>
-        </v-btn>
-        <v-btn icon @click="seek(-30)" style="margin-top:15px;">
-          <v-icon medium dark>mdi-rewind-30</v-icon>
-        </v-btn>
-        <v-icon size="50" v-if="!isPlaying" @click="play"
-          >play_circle_filled</v-icon
-        >
-        <v-icon size="50" v-if="isPlaying" @click="pause"
-          >pause_circle_filled</v-icon
-        >
-        <v-btn icon @click="seek(30)" style="margin-top:15px;">
-          <v-icon medium dark>mdi-fast-forward-30</v-icon>
-        </v-btn>
-        <v-btn icon @click="loadNext" style="margin-top:15px;">
-          <v-icon medium dark>skip_next</v-icon>
-        </v-btn>
-        <!-- <v-icon small dark>settings_input_antenna</v-icon> -->
-      </v-row>
-
-      <v-row>
-        <v-col
-          class="text-center"
-          style="margin-top: 10px;color: rgb(99, 99, 99);"
-        >
-          <v-btn
-            type="text"
-            rounded
-            color="transparent"
-            @click="$router.push('/stations/' + currIndex + '/donate')"
-          >
-            <small>This station depends on your donations to survive!</small>
-          </v-btn>
-        </v-col>
-      </v-row>
-      <!-- <v-card-actions v-if="station">
-        <v-container fluid>
-          <v-row justify="space-around">
-            <v-btn icon :class="(!shuffleOn) ? 'iconoff' : 'iconon'"
-            @click="shuffleOn=!shuffleOn">
-              <v-icon medium dark>shuffle</v-icon>
-            </v-btn>
-            <v-btn icon style="opacity: 0.7;" :disabled="!station.podcast" @click="loadPodcast">
-              <v-icon medium dark>voicemail</v-icon>
-            </v-btn>
-            <v-btn icon style="opacity: 0.7;" :disabled="!station.schedule"
-            @click="$router.push('/stations/' + station.id + '/schedule')">
-              <v-icon medium dark>mdi-calendar-month</v-icon>
-            </v-btn>
-            <v-btn icon :class="(!likedOn) ? 'iconoff' : 'iconon'"
-            v-if="!likedOn"
-            @click="likedOn=!likedOn">
-              <v-icon medium dark>favorite_border</v-icon>
-            </v-btn>
-            <v-btn icon :class="(!likedOn) ? 'iconoff' : 'iconon'"
-            v-else
-            @click="likedOn=!likedOn">
-              <v-icon medium dark>favorite</v-icon>
-            </v-btn>
-          </v-row>
-        </v-container>
-      </v-card-actions> -->
-    </v-card>
-  </div>
+    </div>
+    <div v-else class="ep-state">
+      <v-progress-circular indeterminate size="28" width="2" color="#e7ff2c" />
+    </div>
+  </PageShell>
 </template>
 
 <script>
-import Station from "@/models/Station";
-import stations from "@/data/stations";
-import { EventBus } from "@/components/eventbus.js";
+import { mapGetters, mapState } from "vuex";
+import { EventBus } from "@/components/eventbus";
+import PageShell from "~/components/ui/PageShell";
+import PlayButton from "~/components/player/PlayButton";
+import stationMixin from "~/mixins/station";
+import { cleanMeta, stripTags } from "~/lib/text";
 
 export default {
-  async fetch() {
-    const stationsInitData = await stations();
-    Station.create({ data: stationsInitData });
-    this.loaded = true;
-  },
+  components: { PageShell, PlayButton },
+  mixins: [stationMixin],
   data() {
-    return {
-      sound: null,
-      items: null,
-      shuffleOn: false,
-      likedOn: false,
-      showStationDetails: false,
-      loaded: false,
-      currentTime: 0,
-      duration: 0,
-      nowplaying: {
-        artist: null,
-        title: null,
-        listeners: null,
-        albumyear: null,
-        album: null,
-        song_type: null,
-        label: null
-      },
-      isPlaying: false,
-      isLoading: false
-    };
-  },
-  watch: {
-    streamurl(val) {
-      console.log("streamurl changed", val);
-      if (!val) {
-        return;
-      }
-      this.initStream({
-        url: val,
-        mimetype: "audio/mpeg"
-      });
-    }
-  },
-  methods: {
-    playIfStopped() {
-      if (!this.isPlaying) {
-        this.play();
-      }
-    },
-    swipe(direction) {
-      switch (direction) {
-        case "left":
-          this.loadPrev();
-          break;
-        case "right":
-          this.loadNext();
-          break;
-      }
-    },
-    loadPodcast() {
-      //this.$dialog.confirm({text: 'This station\'s podcast is available on the station\'s website. We will be adding a podcast listening feature to this app soon, but in the meantime please visit the station\'s website to listen to the podcast there.'})
-      this.$router.push("/stations/" + this.station.id + "/podcast");
-    },
-    loadPrev() {
-      if (this.shuffleOn) {
-        this.loadRandom();
-        return;
-      }
-      if (this.$sound) {
-        this.$sound.pause();
-      }
-      this.$router.push(
-        "/stations/" + this.station.id + "/podcast/" + this.prevItem.id
-      );
-    },
-    loadNext() {
-      if (this.shuffleOn) {
-        this.loadRandom();
-        return;
-      }
-      if (this.$sound) {
-        this.$sound.pause();
-      }
-      this.$router.push(
-        "/stations/" + this.station.id + "/podcast/" + this.nextItem.id
-      );
-    },
-    loadRandom() {
-      if (this.$sound) {
-        this.$sound.pause();
-      }
-      this.$router.push(
-        "/stations/" + this.station.id + "/podcast/" + this.nextItem.id
-      );
-    },
-    seek(x) {
-      if (!this.$sound) {
-        return;
-      }
-      let seek = this.$sound?.currentTime + x;
-      this.$sound.currentTime = seek;
-    },
-    initStream(stream) {
-      console.log("initStream", stream);
-      if (!stream?.url) {
-        return;
-      }
-      this.isLoading = true;
-      if (this.$sound?.src == stream.url) {
-        if (this.$sound?.paused) {
-          this.$sound.play().catch(err => {
-            console.log("play error", err);
-            this.isPlaying = false;
-          });
-        } else {
-          this.isPlaying = true;
-        }
-        console.log("stream already loaded");
-
-        if (
-          this.$sound.paused ||
-          this.$sound.ended ||
-          this.isPlaying == false
-        ) {
-          this.isLoading = false;
-          //this.isPlaying = true;
-        }
-        return true;
-      } else {
-        const streamUrl = stream.url;
-        const streamMimeType = stream.mimetype;
-        if (this.$sound && streamUrl) {
-          this.$sound.src = streamUrl;
-          this.$sound.type = streamMimeType;
-          //this.isPlaying = true;
-          return true;
-        } else {
-          return false;
-        }
-      }
-    },
-    play() {
-      this.initStream({
-        url: this.streamurl,
-        mimetype: "audio/mpeg"
-      });
-      if (this.$sound) {
-        this.$sound
-          .play()
-          .catch(err => {
-            console.log("play error", err);
-            this.isPlaying = false;
-          })
-          .then(() => {
-            this.isPlaying = true;
-          });
-      } else {
-        this.isPlaying = false;
-      }
-      this.isLoading = false;
-    },
-    pause() {
-      this.isPlaying = false;
-      this.isLoading = false;
-      if (this.$sound) {
-        this.$sound.pause();
-      }
-    },
-    decodeHTMLEntities(text) {
-      var entities = [
-        ["amp", "&"],
-        ["apos", "'"],
-        ["#x27", "'"],
-        ["#x2F", "/"],
-        ["#39", "'"],
-        ["#47", "/"],
-        ["lt", "<"],
-        ["gt", ">"],
-        ["nbsp", " "],
-        ["quot", '"']
-      ];
-
-      for (var i = 0, max = entities.length; i < max; ++i)
-        text = text.replace(
-          new RegExp("&" + entities[i][0] + ";", "g"),
-          entities[i][1]
-        );
-
-      return text;
-    },
-    audioProgress(e) {
-      this.currentTime = this.$sound?.currentTime || 0;
-      this.duration = this.$sound?.duration || 0;
-      this.isLoading = false;
-      //console.log("audioProgress", this.$sound?.currentTime);
-    },
-    audioDuration(e) {
-      this.duration = this.$sound?.duration || 0;
-      this.currentTime = this.$sound?.currentTime || 0;
-      this.isLoading = false;
-      if (this.$sound) {
-        this.$sound
-          .play()
-          .then(() => {
-            this.play();
-          })
-          .catch(err => {
-            console.log("play error", err);
-            this.pause();
-            this.isPlaying = false;
-            return;
-          });
-      }
-    }
-  },
-  beforeDestroy() {
-    this.$root.$off("audioProgress", this.audioProgress);
-    this.$root.$off("audioDuration", this.audioDuration);
-  },
-  async mounted() {
-    const stationsInitData = await stations();
-    Station.create({ data: stationsInitData });
-    this.loaded = true;
-
-    this.$root.$on("audioProgress", this.audioProgress);
-    this.$root.$on("audioDuration", this.audioDuration);
-    if (this.station && this.station.podcast) {
-      this.$axios.get(this.station.podcast.url).then(res => {
-        this.items = res.data.data;
-      });
-    }
-    if (
-      this.$sound?.readyState > 0 &&
-      this.$sound?.paused == false &&
-      this.$sound?.ended == false
-    ) {
-      //this.isPlaying = true;
-    }
+    return { item: null, failed: false, scrubbing: null };
   },
   computed: {
-    durationString() {
-      const date = new Date(null);
-      if (!this.duration) {
-        return "00:00";
+    ...mapState("player", ["episodes", "currentTime", "duration", "status"]),
+    ...mapGetters("player", ["episode", "isActive", "isBusy"]),
+    id() {
+      return Number(this.$route.params.epid);
+    },
+    current() {
+      return Boolean(this.episode && this.episode.id === this.id);
+    },
+    playing() {
+      return this.current && this.isActive;
+    },
+    busy() {
+      return this.current && this.isBusy;
+    },
+    position() {
+      if (this.scrubbing !== null) {
+        return this.scrubbing;
       }
-      date.setSeconds(this.duration); // specify value for SECONDS here
-      const result = date.toISOString().slice(11, 19);
-      return result;
+      return this.current ? Math.floor(this.currentTime) : 0;
     },
-    currentTimeString() {
-      const date = new Date(null);
-      date.setSeconds(this.currentTime); // specify value for SECONDS here
-      const result = date.toISOString().slice(11, 19);
-      return result;
+    artist() {
+      return cleanMeta(this.item.artist);
     },
-    windowHeight() {
-      if (process.client) {
-        return screen.height;
-      }
+    title() {
+      return cleanMeta(this.item.title);
     },
-    windowWidth() {
-      if (process.client) {
-        return screen.width;
-      }
+    recorded() {
+      const date = new Date(this.item.timestamp);
+      return isNaN(date)
+        ? ""
+        : date.toLocaleString(undefined, {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          });
     },
-    currenStationIndex() {
-      return this.$route.params && this.$route.params.stationId
-        ? this.$route.params.stationId
-        : 1;
+    tracks() {
+      return stripTags(this.item.tracklist)
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean);
     },
-    stations() {
-      return Station.query().get();
+    description() {
+      const text = stripTags(this.item.description).trim();
+      return text === "Recorded live on dnbradio.com" ? "" : text;
+    },
+    index() {
+      return this.episodes.findIndex((item) => item.id === this.id);
+    },
+    prev() {
+      return this.index > 0 ? this.episodes[this.index - 1] : null;
+    },
+    next() {
+      return this.index >= 0 && this.index < this.episodes.length - 1
+        ? this.episodes[this.index + 1]
+        : null;
+    },
+  },
+  watch: {
+    id: {
+      immediate: true,
+      handler() {
+        this.load();
+      },
     },
     station() {
-      let index = this.currenStationIndex ? this.currenStationIndex : 1;
-      return this.stations.filter(item => item.id == index)[0];
+      this.load();
     },
-    episode() {
-      if (!this.items) {
-        return null;
+  },
+  methods: {
+    async load() {
+      if (!this.station || !this.station.podcast) {
+        return;
       }
-      return this.items.filter(item => item.id == this.currIndex)[0];
-    },
-    currIndex() {
-      return this.$route.params.epid;
-    },
-    currentId() {
-      return this.$route.params.epid;
-    },
-    nextItem() {
-      if (this.items) {
-        return this.items[this.nextIndex];
+      const listed = this.episodes.find((item) => item.id === this.id);
+      if (listed) {
+        this.item = listed;
+        return;
+      }
+      this.item = null;
+      this.failed = false;
+      try {
+        const response = await fetch(this.station.podcast.url + "/" + this.id);
+        if (!response.ok) {
+          throw new Error(response.status);
+        }
+        this.item = (await response.json()).data;
+      } catch (error) {
+        this.failed = true;
       }
     },
-    prevItem() {
-      if (this.items) {
-        return this.items[this.prevIndex];
+    clock(seconds) {
+      const s = Math.max(0, Math.floor(seconds || 0));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const rest = String(s % 60).padStart(2, "0");
+      return h
+        ? h + ":" + String(m).padStart(2, "0") + ":" + rest
+        : m + ":" + rest;
+    },
+    seekTo(value) {
+      this.$player.seekTo(Number(value));
+      this.scrubbing = null;
+    },
+    toggle() {
+      if (this.playing) {
+        this.$player.pause();
+      } else {
+        this.$player.playEpisode(this.item);
       }
     },
-    randomIndex() {
-      let currIndex = this.items.findIndex(item => item.id == this.station.id);
-      return currIndex;
-    },
-    nextIndex() {
-      let nextIndex =
-        this.items.findIndex(item => item.id == this.currentId) + 1;
-      if (nextIndex > this.items.length - 1) {
-        nextIndex = 0;
+    playIfStopped() {
+      if (!this.playing) {
+        this.$player.playEpisode(this.item);
       }
-      return nextIndex;
     },
-    prevIndex() {
-      let prevIndex =
-        this.items.findIndex(item => item.id == this.currentId) - 1;
-      if (prevIndex < 0) {
-        prevIndex = this.items.length - 1;
+    go(item) {
+      if (item) {
+        this.$router.replace(
+          "/stations/" + this.station.id + "/podcast/" + item.id
+        );
       }
-      return prevIndex;
     },
-    cover() {
-      return this.episode.image || "https://picsum.photos/350/165?random";
+    async share() {
+      const url = this.item.permalink || window.location.href;
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: this.artist + " – " + this.title,
+            url,
+          });
+          return;
+        }
+        await navigator.clipboard.writeText(url);
+        EventBus.$emit("toast", "Link copied");
+      } catch (error) {
+        // Share sheet dismissed.
+      }
     },
-    streamurl() {
-      return this.episode?.download_url;
-    }
-  }
+  },
 };
 </script>
 
-<style>
-.pulse {
-  transform: scale(1);
-  /* animation: pulse 2s infinite; */
-  animation: pulse 2s 3;
+<style scoped>
+.ep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
-.faded {
-  opacity: 0.4;
+.ep__art {
+  width: min(64vw, 260px);
+  aspect-ratio: 1;
+  border-radius: 16px;
+  object-fit: cover;
+  background: #111;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
 }
-@keyframes pulse {
-  0% {
-    transform: scale(0.95);
-  }
-
-  70% {
-    transform: scale(1);
-  }
-
-  100% {
-    transform: scale(0.95);
-  }
+.ep__overline {
+  margin: 18px 0 4px !important;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dnb-text-3);
 }
-.iconoff {
-  opacity: 0.6;
+.ep__artist {
+  margin: 0;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 700;
 }
-.iconon {
-  opacity: 1;
+.ep__title {
+  margin: 2px 0 0 !important;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--dnb-text-2);
 }
-.iconon.theme--dark.v-btn.v-btn--icon {
-  color: #fb1313;
+.ep__meta {
+  margin: 6px 0 0 !important;
+  font-size: 13px;
+  color: var(--dnb-text-3);
+}
+.ep__seek {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 18px;
+}
+.ep__seek input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+.ep__seek input:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.ep__seek input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--dnb-accent) var(--fill),
+    rgba(255, 255, 255, 0.2) var(--fill)
+  );
+}
+.ep__seek input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--dnb-accent) var(--fill),
+    rgba(255, 255, 255, 0.2) var(--fill)
+  );
+}
+.ep__seek input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #fff;
+}
+.ep__seek input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+.ep__seek input:focus-visible {
+  outline: 2px solid var(--dnb-accent);
+  outline-offset: 2px;
+}
+.ep__times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--dnb-text-3);
+  font-variant-numeric: tabular-nums;
+}
+.ep__controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 8px;
+}
+.ep__control {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.ep__control .v-icon {
+  color: var(--dnb-control) !important;
+}
+.ep__control:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.ep__control:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.ep__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--dnb-line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--dnb-text) !important;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.chip .v-icon {
+  color: inherit !important;
+}
+.chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.ep__section {
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--dnb-line);
+  border-radius: 14px;
+  background: var(--dnb-surface);
+  text-align: left;
+}
+.ep__section-title {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dnb-text-3);
+}
+.ep__tracks {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--dnb-text-2);
+}
+.ep__description {
+  margin: 0 !important;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--dnb-text-2);
+  white-space: pre-line;
+}
+.ep-state {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--dnb-text-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ep-state a {
+  color: var(--dnb-accent) !important;
 }
 </style>
