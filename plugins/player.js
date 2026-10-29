@@ -330,7 +330,7 @@ export default function ({ app, store }, inject) {
   function fallbackAudio() {
     if (!motion || audio.crossOrigin !== "anonymous") return false;
     const url = audio.getAttribute("src");
-    const position = audio.currentTime;
+    const position = resumeAt ?? audio.currentTime;
     const volume = audio.volume;
     audioEvents.abort();
     motion.disable();
