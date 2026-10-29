@@ -131,14 +131,17 @@ test("navigation preserves the initial source, other query options, and hash", a
 test("initial play and previous/next use the attributed stream with a cache buster", async () => {
   const { streamUrl } = await visit("/?src=discord");
   // plugins/player.js plays freshStreamUrl($stationStreamUrl(station)).
-  assert.match(freshStreamUrl(streamUrl(stations[0])), /\/discord\.mp3\?\d+$/);
+  assert.match(
+    freshStreamUrl(streamUrl(stations[0])),
+    /\/discord\.mp3\?_ic2=\d+$/,
+  );
 
   let station = stations[1];
   for (const step of [-1, 1]) {
     const next = adjacentStation(stations, station, step);
     const url = freshStreamUrl(streamUrl(next));
     if (next.id === 1) {
-      assert.match(url, /\/discord\.mp3\?\d+$/);
+      assert.match(url, /\/discord\.mp3\?_ic2=\d+$/);
     } else {
       assert.equal(url.split("?")[0], next.streams[0].url);
     }
@@ -149,6 +152,25 @@ test("initial play and previous/next use the attributed stream with a cache bust
       item.streams[0].url,
     );
   }
+});
+
+test("fresh streams satisfy Icecast Safari redirects and preserve existing query parameters", () => {
+  const stream = new URL(
+    freshStreamUrl(
+      "https://azrelay.drmnbss.org/listen/plushrecs/radio.mp3?token=keep&_ic2=old#live",
+      123,
+    ),
+  );
+  assert.equal(stream.origin, "https://azrelay.drmnbss.org");
+  assert.equal(stream.pathname, "/listen/plushrecs/radio.mp3");
+  assert.equal(stream.searchParams.get("_ic2"), "123");
+  assert.equal(stream.searchParams.getAll("_ic2").length, 1);
+  assert.equal(stream.searchParams.get("token"), "keep");
+  assert.equal(stream.hash, "#live");
+  assert.notEqual(
+    freshStreamUrl(stream.href, 123),
+    freshStreamUrl(stream.href, 124),
+  );
 });
 
 test("previous and next wrap around the station list", () => {

@@ -99,6 +99,7 @@ test.beforeEach(async ({ page, baseURL }) => {
     if (
       url.includes("/listen/") ||
       url.includes("/streamtest/") ||
+      url.startsWith("https://a7.asurahosting.com:7880/woodsiaalpina") ||
       url.startsWith("https://audio.example.test/")
     ) {
       return route.fulfill({
@@ -147,6 +148,71 @@ test("live audio survives navigation, stops its connection, and keeps attributio
     .toBe(null);
   expect(page.url()).toContain("src=discord");
   expect(errors).toEqual([]);
+});
+
+test("every station and reconnect bypass Icecast's broken Safari redirect", async ({
+  page,
+}) => {
+  const redirected = [];
+  await page.route("**/listen/**", (route) => {
+    if (new URL(route.request().url()).searchParams.has("_ic2"))
+      return route.fallback();
+    redirected.push(route.request().url());
+    return route.fulfill({
+      status: 302,
+      headers: { Location: "http://localhost:8010/radio.mp3" },
+    });
+  });
+  await page.goto("./?src=discord");
+  await page.locator(".player__controls .play-button").click();
+  for (const stationId of [1, 2, 3, 4, 5]) {
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const globals =
+            document.getElementById("app").__vue_app__.config.globalProperties;
+          return [
+            globals.$store.state.player.source?.stationId,
+            globals.$store.state.player.status,
+          ];
+        }),
+      )
+      .toEqual([stationId, "playing"]);
+    const url = new URL(await page.evaluate(() => window.currentAudio.src));
+    expect(url.searchParams.get("_ic2")).toMatch(/^\d+$/);
+    if (stationId === 1)
+      expect(url.pathname).toBe("/listen/dnbradio/discord.mp3");
+    if (stationId === 3)
+      expect(url.origin + url.pathname).toBe(
+        "https://a7.asurahosting.com:7880/woodsiaalpina",
+      );
+    if (stationId < 5)
+      await page
+        .getByRole("button", { name: "Next station", exact: true })
+        .click();
+  }
+  const previous = await page.evaluate(() => window.currentAudio.src);
+  await page.evaluate(() =>
+    window.currentAudio.dispatchEvent(new Event("error")),
+  );
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.src))
+    .not.toBe(previous);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          document.getElementById("app").__vue_app__.config.globalProperties
+            .$store.state.player.status,
+      ),
+    )
+    .toBe("playing");
+  expect(
+    new URL(
+      await page.evaluate(() => window.currentAudio.src),
+    ).searchParams.get("_ic2"),
+  ).toMatch(/^\d+$/);
+  expect(redirected).toEqual([]);
 });
 
 test("direct episode links reload and play", async ({ page }) => {

@@ -95,7 +95,7 @@ export const stationList = [
       },
       streams: [
         {
-          url: "https://chat.jungletrain.net/streamtest/;stream/1",
+          url: "https://a7.asurahosting.com:7880/woodsiaalpina",
           format: "mp3",
           mimetype: "audio/mpeg",
         },
