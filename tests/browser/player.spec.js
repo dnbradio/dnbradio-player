@@ -1093,16 +1093,18 @@ test("MilkDrop rotates during playback and triple taps or N advance without chan
   const initial = await canvas.getAttribute("data-milkdrop-preset");
   await advanceFrames(20);
   await expect(canvas).toHaveAttribute("data-milkdrop-preset", initial);
-  // Mobile triple taps and desktop clicks use the same non-control surface.
-  const surface = page.locator(".player__subtitle");
+  // Keep clear of the title button: mobile WebKit adjusts taps on nearby
+  // subtitle text onto that control, opening the station dialog.
+  const surface = page.locator(".player");
+  const box = await surface.boundingBox();
+  const position = { x: 4, y: box.height / 2 };
   if (isMobile) {
-    const box = await surface.boundingBox();
     for (let i = 0; i < 3; i++) {
-      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+      await page.touchscreen.tap(box.x + position.x, box.y + position.y);
       if (i < 2)
         await expect(canvas).toHaveAttribute("data-milkdrop-preset", initial);
     }
-  } else await surface.click({ clickCount: 3 });
+  } else await surface.click({ clickCount: 3, position });
   try {
     await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", initial);
   } catch (error) {
