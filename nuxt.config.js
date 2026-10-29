@@ -193,6 +193,7 @@ module.exports = {
   },
   loading: { color: "#fff" },
   plugins: [
+    { ssr: false, src: "~/plugins/source-attribution.js" },
     { ssr: false, src: "~/plugins/vuetify.js" },
     { ssr: false, src: "~plugins/createjs.js" },
     { ssr: false, src: "~plugins/headful.js" },
