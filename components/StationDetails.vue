@@ -7,6 +7,7 @@
         'player--framed': framed,
         'player--desktop': $device.isDesktop,
         'player--minimized': minimized,
+        'player--milkdrop': visualization === 'milkdrop',
       }"
       @dblclick="expandFromBar"
     >
@@ -41,7 +42,13 @@
           :class="{ 'player__icon--on': visualsEnabled }"
           :aria-pressed="visualsEnabled ? 'true' : 'false'"
           :aria-label="visualizationLabel"
-          :title="visualizationLabel"
+          :title="
+            visualization === 'milkdrop'
+              ? visualizationLabel +
+                '. Triple-tap the background or press N for the next MilkDrop effect.'
+              : visualizationLabel
+          "
+          :aria-keyshortcuts="visualization === 'milkdrop' ? 'N' : undefined"
           @click="toggleVisuals"
         >
           <UiIcon :size="iconSize">mdi-waveform</UiIcon>
@@ -782,6 +789,9 @@ export default {
   inset: 0;
   z-index: 0;
   overflow: hidden;
+}
+.player--milkdrop {
+  touch-action: manipulation;
 }
 .player {
   --gap: clamp(6px, 1.6svh, 16px);

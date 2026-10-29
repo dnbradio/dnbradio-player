@@ -108,6 +108,11 @@ single playback graph. Stars and rain require no audio analysis. Native playback
 remains the default outside main-stream DJ mode unless MilkDrop is selected.
 Streams that reject analysis/CORS fall back to native playback; stars and rain
 remain available. Changing audio sources preserves playback and podcast position.
+MilkDrop starts on a random preset and shuffles through the bundled effects
+without immediate repeats, blending for 3 seconds after every 15 seconds of
+visible playback. Pausing, hidden tabs and reduced motion pause rotation.
+Triple-tap the player background or press **N** to advance immediately, including
+while paused. Playback buttons, links and text inputs retain their usual actions.
 
 The top-left button collapses the player upward to a **40px marquee bar**. Artist,
 title and station remain visible alongside play/pause, effect selection and
