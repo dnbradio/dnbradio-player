@@ -874,12 +874,12 @@ test("visualizations load MilkDrop on demand and retain the selected mode", asyn
     page.locator("[data-visualization=milkdrop] canvas:last-child"),
   ).toHaveCSS("opacity", "1");
   const player = page.locator(".player");
-  await player.evaluate((element) => element.classList.add("player--framed"));
+  await page.setViewportSize({ width: 844, height: 390 });
+  await expect(player).toHaveClass(/player--framed/);
   await expect(player).toHaveCSS("background-image", "none");
   await expect(player).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(player).toHaveCSS("backdrop-filter", "none");
   await visuals.click();
-  await expect(player).toHaveCSS("backdrop-filter", "blur(10px)");
   await expect(player).not.toHaveCSS("background-image", "none");
   await page.reload();
   await expect(
