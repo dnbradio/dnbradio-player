@@ -15,14 +15,15 @@
     >
       <circle cx="25" cy="25" r="23" />
     </svg>
-    <v-icon :size="Math.round(size * 0.56)" aria-hidden="true">
+    <UiIcon :size="Math.round(size * 0.56)" aria-hidden="true">
       {{ active ? "pause" : "play_arrow" }}
-    </v-icon>
+    </UiIcon>
   </button>
 </template>
 
 <script>
 export default {
+  emits: ["click"],
   props: {
     active: { type: Boolean, default: false },
     busy: { type: Boolean, default: false },
@@ -45,7 +46,9 @@ export default {
   border: 0;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.12s ease, background-color 0.2s ease;
+  transition:
+    transform 0.12s ease,
+    background-color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .play-button:active {
@@ -54,7 +57,7 @@ export default {
 .play-button--solid {
   background: var(--dnb-control);
 }
-.play-button--solid .v-icon {
+.play-button--solid .ui-icon {
   color: #000 !important;
 }
 .play-button--solid:hover {
@@ -64,7 +67,7 @@ export default {
   background: transparent;
   border: 1px solid var(--dnb-line-strong);
 }
-.play-button--ghost .v-icon {
+.play-button--ghost .ui-icon {
   color: var(--dnb-text) !important;
 }
 .play-button:focus-visible {

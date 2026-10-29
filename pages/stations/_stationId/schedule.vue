@@ -14,15 +14,15 @@
         :title="view === 'day' ? 'Week' : 'Day'"
         @click="setView(view === 'day' ? 'week' : 'day')"
       >
-        <v-icon>{{
+        <UiIcon>{{
           view === "day" ? "mdi-calendar-week" : "mdi-calendar-today"
-        }}</v-icon>
+        }}</UiIcon>
       </button>
     </template>
 
     <div v-if="!hideTitle" class="schedule-intro">
       <p class="schedule-intro__zone">
-        <v-icon size="16" aria-hidden="true">mdi-earth</v-icon>
+        <UiIcon size="16" aria-hidden="true">mdi-earth</UiIcon>
         Times in your time zone: {{ zone }}
       </p>
       <button
@@ -63,7 +63,7 @@
     </div>
 
     <div v-if="loading" class="schedule-state">
-      <v-progress-circular indeterminate size="28" width="2" color="#e7ff2c" />
+      <Spinner indeterminate size="28" width="2" color="#e7ff2c" />
     </div>
     <p v-else-if="failed" class="schedule-state">
       The schedule didn't load.
@@ -131,7 +131,7 @@
         />
         <p class="detail__title">{{ detail.title }}</p>
         <p class="detail__when">
-          <v-icon size="18" aria-hidden="true">mdi-clock-outline</v-icon>
+          <UiIcon size="18" aria-hidden="true">mdi-clock-outline</UiIcon>
           {{
             detail.startAt.toLocaleDateString(undefined, {
               weekday: "long",
@@ -146,7 +146,7 @@
           >
         </p>
         <p v-if="detail.location" class="detail__when">
-          <v-icon size="18" aria-hidden="true">mdi-map-marker-outline</v-icon
+          <UiIcon size="18" aria-hidden="true">mdi-map-marker-outline</UiIcon
           >{{ detail.location }}
         </p>
         <p v-if="detail.description" class="detail__description">
@@ -159,7 +159,7 @@
             class="action action--primary"
             @click="listen"
           >
-            <v-icon size="18">play_arrow</v-icon>Listen live
+            <UiIcon size="18">play_arrow</UiIcon>Listen live
           </button>
           <a
             :href="googleUrl(detail)"
@@ -167,10 +167,10 @@
             rel="noopener"
             class="action"
           >
-            <v-icon size="18">mdi-google</v-icon>Google Calendar
+            <UiIcon size="18">mdi-google</UiIcon>Google Calendar
           </a>
           <button type="button" class="action" @click="downloadIcs(detail)">
-            <v-icon size="18">mdi-calendar-plus</v-icon>Add to calendar (.ics)
+            <UiIcon size="18">mdi-calendar-plus</UiIcon>Add to calendar (.ics)
           </button>
           <a
             v-if="detail.profile && detail.profile.url"
@@ -179,7 +179,7 @@
             rel="noopener"
             class="action"
           >
-            <v-icon size="18">mdi-account-music</v-icon>DJ profile
+            <UiIcon size="18">mdi-account-music</UiIcon>DJ profile
           </a>
         </div>
       </template>
@@ -188,11 +188,11 @@
 </template>
 
 <script>
-import PageShell from "~/components/ui/PageShell";
-import BottomSheet from "~/components/ui/BottomSheet";
-import ShowRow from "~/components/schedule/ShowRow";
-import stationMixin from "~/mixins/station";
-import { stationPath } from "~/lib/stations";
+import PageShell from "~/components/ui/PageShell.vue";
+import BottomSheet from "~/components/ui/BottomSheet.vue";
+import ShowRow from "~/components/schedule/ShowRow.vue";
+import stationMixin from "~/mixins/station.js";
+import { stationPath } from "~/lib/stations.js";
 import {
   fetchSchedule,
   formatTime,
@@ -206,7 +206,7 @@ import {
   timeRange,
   timezoneLabel,
   weekDays,
-} from "~/lib/schedule";
+} from "~/lib/schedule.js";
 
 export default {
   components: { PageShell, BottomSheet, ShowRow },
@@ -258,7 +258,7 @@ export default {
   mounted() {
     this.clock = setInterval(() => (this.now = new Date()), 60000);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.clock);
   },
   methods: {
@@ -295,7 +295,7 @@ export default {
       return this.shows.filter(
         (show) =>
           overlapsLocalDay(show, day) &&
-          (show.endAt > this.now || !sameLocalDay(day, this.now))
+          (show.endAt > this.now || !sameLocalDay(day, this.now)),
       );
     },
     countFor(day) {
@@ -341,7 +341,7 @@ export default {
     downloadIcs(show) {
       const blob = new Blob(
         [showIcs(show, this.station.title, this.listenUrl())],
-        { type: "text/calendar" }
+        { type: "text/calendar" },
       );
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
@@ -371,7 +371,7 @@ export default {
   background: none;
   cursor: pointer;
 }
-.icon-button .v-icon {
+.icon-button .ui-icon {
   color: var(--dnb-text) !important;
 }
 .icon-button:hover {
@@ -386,7 +386,7 @@ export default {
   font-size: 13px;
   color: var(--dnb-text-3);
 }
-.schedule-intro__zone .v-icon {
+.schedule-intro__zone .ui-icon {
   color: inherit !important;
 }
 .live-banner {
@@ -564,7 +564,7 @@ export default {
   font-size: 14px;
   color: var(--dnb-text-2);
 }
-.detail__when .v-icon {
+.detail__when .ui-icon {
   color: var(--dnb-text-3) !important;
 }
 .detail__live {
@@ -607,7 +607,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-.action .v-icon {
+.action .ui-icon {
   color: inherit !important;
 }
 .action--primary {

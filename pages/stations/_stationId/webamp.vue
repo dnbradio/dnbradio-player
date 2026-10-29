@@ -42,13 +42,17 @@
 </template>
 
 <script>
-import webampScriptUrl from "!!file-loader?name=[name].[contenthash:7].js!webamp/built/webamp.butterchurn-bundle.min.mjs";
-import stations from "@/data/stations";
-import Station from "@/models/Station";
+import webampScriptUrl from "webamp/butterchurn?url";
+import { markRaw } from "vue";
+import { stationList } from "@/data/stations";
 import ExtraWindows from "~/components/embed/ExtraWindows.vue";
-import { readAudioInfo } from "~/components/embed/audioInfo";
-import { parsePlaylist, toM3u, toPls } from "~/components/embed/playlistFiles";
-import { loadSettings, saveSettings } from "~/components/embed/settings";
+import { readAudioInfo } from "~/components/embed/audioInfo.js";
+import {
+  parsePlaylist,
+  toM3u,
+  toPls,
+} from "~/components/embed/playlistFiles.js";
+import { loadSettings, saveSettings } from "~/components/embed/settings.js";
 
 const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
@@ -140,11 +144,8 @@ function decodeEntities(text) {
 }
 
 async function loadWebamp() {
-  // Keep the prebuilt module outside Nuxt's older webpack parser. Its default
-  // export includes Milkdrop; window.Webamp still points to the base class.
-  const { default: Webamp } = await import(
-    /* webpackIgnore: true */ webampScriptUrl
-  );
+  // Load the prebuilt Milkdrop module only when opening a Webamp route.
+  const { default: Webamp } = await import(/* @vite-ignore */ webampScriptUrl);
   return Webamp;
 }
 
@@ -161,12 +162,6 @@ function downloadText(text, filename, type) {
 export default {
   layout: "ls-widget",
   components: { ExtraWindows },
-  head() {
-    return {
-      title: this.station ? `${this.station.title} live player` : "live player",
-      htmlAttrs: { class: "dnb-embed" },
-    };
-  },
   data() {
     const layout = initialLayout(this.$route.query);
     const extraWindows = {};
@@ -207,7 +202,7 @@ export default {
         : 1;
     },
     stations() {
-      return Station.query().get();
+      return stationList;
     },
     station() {
       return this.stations.find((item) => item.id == this.currenStationIndex);
@@ -222,7 +217,7 @@ export default {
       return this.stations.filter(
         (station) =>
           this.activeList !== "default" ||
-          !this.playlistUrls.includes(station.streams[0].url)
+          !this.playlistUrls.includes(station.streams[0].url),
       );
     },
   },
@@ -255,7 +250,7 @@ export default {
       return this.stations
         .map(this.stationEntry)
         .concat(
-          this.podcasts.slice(0, DEFAULT_PODCASTS).map(this.podcastEntry)
+          this.podcasts.slice(0, DEFAULT_PODCASTS).map(this.podcastEntry),
         );
     },
     defaultEntries() {
@@ -298,7 +293,7 @@ export default {
         .map(
           (track) =>
             this.entries.get(track.url) ||
-            this.urlEntry(track.url, track.title || track.defaultName)
+            this.urlEntry(track.url, track.title || track.defaultName),
         );
       if (this.activeList === "default") {
         const keys = new Set(entries.map((entry) => entry.key));
@@ -308,7 +303,7 @@ export default {
           .filter((entry) => !keys.has(entry.key))
           .map((entry) => entry.key);
         this.playlists.addedToDefault = entries.filter(
-          (entry) => !baseKeys.has(entry.key)
+          (entry) => !baseKeys.has(entry.key),
         );
       } else {
         this.playlists.user = entries;
@@ -515,7 +510,7 @@ export default {
       const framed = window.self !== window.top;
       const viewportHeight = Math.min(
         window.innerHeight,
-        window.visualViewport ? window.visualViewport.height : Infinity
+        window.visualViewport ? window.visualViewport.height : Infinity,
       );
       const state = this.webamp && this.webamp.store.getState();
       const windows = state && state.windows.genWindows;
@@ -545,7 +540,7 @@ export default {
         positions.milkdrop = { x: 0, y: top };
         scale = Math.min(
           window.innerWidth / mainWidth,
-          viewportHeight / (top + MILKDROP_MIN_HEIGHT)
+          viewportHeight / (top + MILKDROP_MIN_HEIGHT),
         );
         const width = mobileMilkdrop
           ? window.innerWidth / scale
@@ -572,7 +567,7 @@ export default {
           Object.entries(positions).some(
             ([id, position]) =>
               windows[id].position.x !== position.x ||
-              windows[id].position.y !== position.y
+              windows[id].position.y !== position.y,
           )
         ) {
           this.webamp.store.dispatch({
@@ -608,18 +603,18 @@ export default {
         });
         this.LAYOUT_WIDTH = Math.max(
           LAYOUT_WIDTH,
-          ...bounds.map((b) => b.right)
+          ...bounds.map((b) => b.right),
         );
         this.LAYOUT_HEIGHT = Math.max(
           SHADE_HEIGHT,
-          ...bounds.map((b) => b.bottom)
+          ...bounds.map((b) => b.bottom),
         );
       }
       if (!mobileMilkdrop) {
         scale = Math.min(
           window.innerWidth / this.LAYOUT_WIDTH,
           viewportHeight / this.LAYOUT_HEIGHT,
-          framed ? Infinity : this.standaloneMaxWidth / this.LAYOUT_WIDTH
+          framed ? Infinity : this.standaloneMaxWidth / this.LAYOUT_WIDTH,
         );
       }
       this.scale = scale;
@@ -670,7 +665,7 @@ export default {
         ? [...menu.children].find(
             (item) =>
               item.classList.contains("parent") &&
-              item.lastChild.textContent === "Skins"
+              item.lastChild.textContent === "Skins",
           )
         : null;
       if (!skins || menu.querySelector(".dnb-menu-item")) {
@@ -713,7 +708,7 @@ export default {
     },
     async loadPlaylistFile(file) {
       const entries = parsePlaylist(await file.text()).map((item) =>
-        this.urlEntry(item.url, item.title || item.url)
+        this.urlEntry(item.url, item.title || item.url),
       );
       if (!entries.length) {
         this.loadMessage = `No http(s) URLs found in ${file.name}`;
@@ -751,11 +746,11 @@ export default {
       this.showUserMessage(
         entry && entry.kind === "station"
           ? `${entry.artist} can't play here - open the full player from Station Info`
-          : "This track can't play here - its server blocks web players"
+          : "This track can't play here - its server blocks web players",
       );
     },
     fetchNowplaying(station) {
-      return this.$axios
+      return this.$http
         .get(station.nowplaying_url.url, { progress: false })
         .then((res) => {
           let nowplaying;
@@ -785,7 +780,7 @@ export default {
           }
           nowplaying.artist = decodeEntities(nowplaying.artist);
           nowplaying.title = decodeEntities(nowplaying.title);
-          this.$set(this.nowplaying, station.id, nowplaying);
+          this.nowplaying[station.id] = nowplaying;
           const track = this.webamp
             .getPlaylistTracks()
             .find((item) => item.url === station.streams[0].url);
@@ -809,7 +804,7 @@ export default {
       const pages = Math.ceil(DEFAULT_PODCASTS / 10);
       const responses = await Promise.all(
         Array.from({ length: pages }, (_, i) =>
-          this.$axios
+          this.$http
             .get(`${this.station.podcast.url}?page=${i + 1}`, {
               progress: false,
             })
@@ -817,8 +812,8 @@ export default {
             .catch((err) => {
               console.log("cannot fetch podcasts", err.message);
               return [];
-            })
-        )
+            }),
+        ),
       );
       this.podcasts = responses.flat();
     },
@@ -952,7 +947,7 @@ export default {
       const skin = this.$route.query.skin;
       if (typeof skin === "string") {
         const selected = CLASSIC_SKINS.find(
-          ([file]) => file.toLowerCase() === skin.toLowerCase()
+          ([file]) => file.toLowerCase() === skin.toLowerCase(),
         );
         if (skin.toLowerCase() === "default") {
           this.skinUrl = null;
@@ -961,29 +956,31 @@ export default {
         }
       }
       this.watchSkinRequests();
-      this.webamp = new Webamp({
-        initialTracks: [],
-        initialSkin: this.skinUrl ? { url: this.skinUrl } : undefined,
-        availableSkins: CLASSIC_SKINS.map(([file, name]) => ({
-          url: `${this.$config.APP_BASE_URL}skins/${file}.wsz`,
-          name,
-        })),
-        windowLayout: this.windowLayout,
-        enableHotkeys: true,
-        enableMediaSession: true,
-        handleAddUrlEvent: () => {
-          this.openWindow("addUrl");
-          return Promise.resolve(null);
-        },
-        handleLoadListEvent: () => {
-          this.openWindow("loadList");
-          return Promise.resolve(null);
-        },
-        handleSaveListEvent: () => {
-          this.openWindow("saveList");
-        },
-        __customMiddlewares: [(store) => this.webampMiddleware(store)],
-      });
+      this.webamp = markRaw(
+        new Webamp({
+          initialTracks: [],
+          initialSkin: this.skinUrl ? { url: this.skinUrl } : undefined,
+          availableSkins: CLASSIC_SKINS.map(([file, name]) => ({
+            url: `${this.$config.APP_BASE_URL}skins/${file}.wsz`,
+            name,
+          })),
+          windowLayout: this.windowLayout,
+          enableHotkeys: true,
+          enableMediaSession: true,
+          handleAddUrlEvent: () => {
+            this.openWindow("addUrl");
+            return Promise.resolve(null);
+          },
+          handleLoadListEvent: () => {
+            this.openWindow("loadList");
+            return Promise.resolve(null);
+          },
+          handleSaveListEvent: () => {
+            this.openWindow("saveList");
+          },
+          __customMiddlewares: [(store) => this.webampMiddleware(store)],
+        }),
+      );
       this.webamp.onWillClose((cancel) => cancel());
       await this.webamp.renderWhenReady(this.$refs.stage);
       document.getElementById("webamp").appendChild(this.$refs.windows);
@@ -992,12 +989,14 @@ export default {
       // open a live stream connection on every card view.
       this.activeList = this.playlists.active === "user" ? "user" : "default";
       this.appendEntries(
-        this.activeList === "user" ? this.playlists.user : this.defaultEntries()
+        this.activeList === "user"
+          ? this.playlists.user
+          : this.defaultEntries(),
       );
       this.restoreSettings();
       this.webamp.media._source._audio.addEventListener(
         "error",
-        this.onMediaError
+        this.onMediaError,
       );
       this.webamp.__onStateChange(this.onStateChange);
       this.fitToFrame();
@@ -1006,9 +1005,7 @@ export default {
     },
   },
   async mounted() {
-    const stationsInitData = await stations();
-    Station.create({ data: stationsInitData });
-
+    document.title = `${this.station.title} live player`;
     this.entries = new Map();
     this.audioInfo = new Map();
     this.scaledEvents = new WeakSet();
@@ -1027,7 +1024,7 @@ export default {
     this.fetchAllNowplaying();
     this.npInterval = setInterval(this.fetchAllNowplaying, 30000);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.npInterval);
     clearTimeout(this.userMessageTimeout);
     clearTimeout(this.saveTimeout);
@@ -1088,7 +1085,9 @@ html.dnb-embed #webamp {
 }
 .winamp-unsupported {
   color: #0f0;
-  font: 12px Arial, sans-serif;
+  font:
+    12px Arial,
+    sans-serif;
   padding: 16px;
 }
 .winamp-unsupported a {

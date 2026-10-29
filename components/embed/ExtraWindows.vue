@@ -91,7 +91,6 @@
 </template>
 
 <script>
-import moment from "moment-timezone";
 import GenWindow from "./GenWindow.vue";
 import ListRows from "./ListRows.vue";
 
@@ -196,7 +195,7 @@ export default {
           ["Shop", "https://shop.dnbradio.com"],
         ]
           .filter(([, href]) => href)
-          .map(([text, href]) => ({ key: text, text, href, detail: "open" }))
+          .map(([text, href]) => ({ key: text, text, href, detail: "open" })),
       );
     },
     suggestionRows() {
@@ -245,18 +244,22 @@ export default {
   },
   methods: {
     fetchSchedule() {
-      const now = moment();
-      return this.$axios
+      const now = new Date();
+      return this.$http
         .get(this.station.schedule.url, { progress: false })
         .then((res) => {
           this.schedule = res.data
-            .filter((show) => moment(show.end).isAfter(now))
-            .sort((a, b) => moment(a.start).diff(moment(b.start)))
+            .filter((show) => new Date(show.end) > now)
+            .sort((a, b) => new Date(a.start) - new Date(b.start))
             .slice(0, 30)
             .map((show) => ({
               ...show,
-              live: moment(show.start).isSameOrBefore(now),
-              when: moment(show.start).format("ddd HH:mm"),
+              live: new Date(show.start) <= now,
+              when: new Intl.DateTimeFormat(undefined, {
+                weekday: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              }).format(new Date(show.start)),
             }));
         })
         .catch((err) => {

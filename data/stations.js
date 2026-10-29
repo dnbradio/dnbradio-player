@@ -1,7 +1,4 @@
-// Emulating todo records which should be returned from API backend
-// in the real world.
-export default async function data() {
-  return [
+export const stationList = [
     {
       id: 1,
       pathname: "default",
@@ -175,4 +172,7 @@ export default async function data() {
       position: 5,
     },
   ];
+
+export default async function data() {
+  return stationList;
 }

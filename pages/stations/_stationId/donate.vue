@@ -7,7 +7,7 @@
   >
     <div class="support-hero">
       <span class="support-hero__heart" aria-hidden="true"
-        ><v-icon size="30">favorite</v-icon></span
+        ><UiIcon size="30">favorite</UiIcon></span
       >
       <h2>Keepin' the beats rollin'</h2>
       <p>
@@ -30,7 +30,7 @@
           rel="noopener"
           class="dnb-button dnb-button--primary"
         >
-          Join on Patreon<v-icon size="16">mdi-arrow-top-right</v-icon>
+          Join on Patreon<UiIcon size="16">mdi-arrow-top-right</UiIcon>
         </a>
       </ActionCard>
 
@@ -45,7 +45,7 @@
           rel="noopener"
           class="dnb-button"
         >
-          Donate with PayPal<v-icon size="16">mdi-arrow-top-right</v-icon>
+          Donate with PayPal<UiIcon size="16">mdi-arrow-top-right</UiIcon>
         </a>
       </ActionCard>
 
@@ -60,7 +60,7 @@
           rel="noopener"
           class="dnb-button"
         >
-          Visit the shop<v-icon size="16">mdi-arrow-top-right</v-icon>
+          Visit the shop<UiIcon size="16">mdi-arrow-top-right</UiIcon>
         </a>
       </ActionCard>
 
@@ -85,7 +85,7 @@
             :aria-label="'Copy ' + wallet.symbol + ' address'"
             @click="copy(wallet)"
           >
-            <v-icon size="16">mdi-content-copy</v-icon>Copy
+            <UiIcon size="16">mdi-content-copy</UiIcon>Copy
           </button>
         </div>
       </ActionCard>
@@ -94,10 +94,10 @@
 </template>
 
 <script>
-import { EventBus } from "@/components/eventbus";
-import PageShell from "~/components/ui/PageShell";
-import ActionCard from "~/components/ui/ActionCard";
-import stationMixin from "~/mixins/station";
+import { EventBus } from "@/components/eventbus.js";
+import PageShell from "~/components/ui/PageShell.vue";
+import ActionCard from "~/components/ui/ActionCard.vue";
+import stationMixin from "~/mixins/station.js";
 
 export default {
   components: { PageShell, ActionCard },
@@ -147,7 +147,7 @@ export default {
   border-radius: 50%;
   background: rgba(244, 67, 54, 0.14);
 }
-.support-hero__heart .v-icon {
+.support-hero__heart .ui-icon {
   color: var(--dnb-red) !important;
 }
 .support-hero h2 {

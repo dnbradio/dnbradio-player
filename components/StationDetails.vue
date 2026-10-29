@@ -1,12 +1,5 @@
 <template>
   <div class="overlap-screen">
-    <vue-headful
-      :title="pageTitle"
-      :description="pageDescription"
-      :keywords="pageKeywords"
-      :image="pageImage"
-      lang="en"
-    />
     <StarField :active="visualsEnabled" />
     <div
       class="player"
@@ -25,7 +18,7 @@
           title="Visuals"
           @click="toggleVisuals"
         >
-          <v-icon :size="iconSize">brightness_2</v-icon>
+          <UiIcon :size="iconSize">brightness_2</UiIcon>
         </button>
         <span class="player__bar-gap" />
         <button
@@ -35,7 +28,7 @@
           title="Stations"
           @click="stationsOpen = true"
         >
-          <v-icon :size="iconSize">mdi-home</v-icon>
+          <UiIcon :size="iconSize">mdi-home</UiIcon>
         </button>
         <button
           v-if="$device.isDesktop"
@@ -45,7 +38,7 @@
           title="Popup player"
           @click="launchPopup"
         >
-          <v-icon :size="iconSize">mdi-open-in-new</v-icon>
+          <UiIcon :size="iconSize">mdi-open-in-new</UiIcon>
         </button>
       </div>
 
@@ -139,10 +132,10 @@
           >
         </button>
         <button type="button" class="player__meta" @click="nowOpen = true">
-          <v-icon size="16" aria-hidden="true">{{ metaIcon }}</v-icon>
+          <UiIcon size="16" aria-hidden="true">{{ metaIcon }}</UiIcon>
           <span>{{ metaText }}</span>
-          <v-icon size="16" class="player__meta-chevron" aria-hidden="true"
-            >expand_less</v-icon
+          <UiIcon size="16" class="player__meta-chevron" aria-hidden="true"
+            >expand_less</UiIcon
           >
         </button>
       </section>
@@ -154,7 +147,7 @@
           aria-label="Previous station"
           @click="step(-1)"
         >
-          <v-icon :size="controlSize">skip_previous</v-icon>
+          <UiIcon :size="controlSize">skip_previous</UiIcon>
         </button>
         <button
           v-if="volumeSupported"
@@ -163,7 +156,7 @@
           aria-label="Volume down"
           @click="nudgeVolume(-0.1)"
         >
-          <v-icon :size="controlSize">mdi-volume-minus</v-icon>
+          <UiIcon :size="controlSize">mdi-volume-minus</UiIcon>
         </button>
         <span v-else aria-hidden="true" />
         <PlayButton
@@ -180,7 +173,7 @@
           aria-label="Volume up"
           @click="nudgeVolume(0.1)"
         >
-          <v-icon :size="controlSize">mdi-volume-plus</v-icon>
+          <UiIcon :size="controlSize">mdi-volume-plus</UiIcon>
         </button>
         <span v-else aria-hidden="true" />
         <button
@@ -189,21 +182,21 @@
           aria-label="Next station"
           @click="step(1)"
         >
-          <v-icon :size="controlSize">skip_next</v-icon>
+          <UiIcon :size="controlSize">skip_next</UiIcon>
         </button>
       </div>
 
       <StationNav :station="station" class="player__nav" />
 
       <footer class="player__footer">
-        <nuxt-link
+        <router-link
           v-if="station"
           :to="'/stations/' + station.id + '/donate'"
           class="player__tagline"
         >
-          <v-icon size="13" aria-hidden="true">favorite</v-icon>Keepin' the
+          <UiIcon size="13" aria-hidden="true">favorite</UiIcon>Keepin' the
           beats rollin' on dnbradio!
-        </nuxt-link>
+        </router-link>
         <a
           href="https://github.com/dnbradio/dnbradio-player"
           title="Contribute to dnbradio-player on GitHub"
@@ -241,20 +234,20 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import Station from "@/models/Station";
-import { EventBus } from "@/components/eventbus";
-import PlayButton from "~/components/player/PlayButton";
-import StarField from "~/components/player/StarField";
-import StationNav from "~/components/player/StationNav";
-import StationsSheet from "~/components/player/StationsSheet";
-import NowPlayingSheet from "~/components/player/NowPlayingSheet";
-import { adjacentStation, stationPath } from "~/lib/stations";
+import { stationList } from "@/data/stations";
+import { EventBus } from "@/components/eventbus.js";
+import PlayButton from "~/components/player/PlayButton.vue";
+import StarField from "~/components/player/StarField.vue";
+import StationNav from "~/components/player/StationNav.vue";
+import StationsSheet from "~/components/player/StationsSheet.vue";
+import NowPlayingSheet from "~/components/player/NowPlayingSheet.vue";
+import { adjacentStation, stationPath } from "~/lib/stations.js";
 import {
   fetchSchedule,
   formatTime,
   liveShow,
   upcomingShows,
-} from "~/lib/schedule";
+} from "~/lib/schedule.js";
 
 const WHATS_NEW_KEY = "dnbradio-player-whats-new-2026-11";
 const DEFAULT_TITLE =
@@ -271,6 +264,7 @@ export default {
   props: ["station"],
   data() {
     return {
+      online: navigator.onLine,
       stationsOpen: false,
       nowOpen: false,
       slide: "logo-fade",
@@ -300,7 +294,7 @@ export default {
       "episode",
     ]),
     stations() {
-      return Station.query().get();
+      return stationList;
     },
     framed() {
       return !this.portrait;
@@ -334,15 +328,15 @@ export default {
       return this.episodePlaying
         ? this.episode.artist
         : this.np
-        ? this.np.artist
-        : "";
+          ? this.np.artist
+          : "";
     },
     title() {
       return this.episodePlaying
         ? this.episode.title
         : this.np
-        ? this.np.title
-        : "";
+          ? this.np.title
+          : "";
     },
     listeners() {
       return this.np && this.np.listeners !== null ? this.np.listeners : null;
@@ -357,7 +351,7 @@ export default {
       );
     },
     offline() {
-      return this.$nuxt.isOffline;
+      return !this.online;
     },
     statusTone() {
       if (this.ownsPlayback) {
@@ -391,9 +385,9 @@ export default {
     liveBadge() {
       return Boolean(
         this.np &&
-          this.np.live &&
-          this.statusTone !== "live" &&
-          !this.episodePlaying
+        this.np.live &&
+        this.statusTone !== "live" &&
+        !this.episodePlaying,
       );
     },
     trackLabel() {
@@ -499,6 +493,12 @@ export default {
     },
   },
   watch: {
+    pageTitle: {
+      immediate: true,
+      handler(title) {
+        document.title = title;
+      },
+    },
     station: {
       immediate: true,
       handler(station, previous) {
@@ -517,13 +517,15 @@ export default {
         }
         if (station.schedule && station.id === 1) {
           fetchSchedule(station.schedule.url).then(
-            (shows) => (this.shows = shows)
+            (shows) => (this.shows = shows),
           );
         }
       },
     },
   },
   mounted() {
+    window.addEventListener("online", this.updateOnline);
+    window.addEventListener("offline", this.updateOnline);
     this.measure();
     window.addEventListener("resize", this.measure);
     window.addEventListener("keydown", this.onKey);
@@ -547,13 +549,18 @@ export default {
       });
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
+    window.removeEventListener("online", this.updateOnline);
+    window.removeEventListener("offline", this.updateOnline);
     window.removeEventListener("resize", this.measure);
     window.removeEventListener("keydown", this.onKey);
     clearInterval(this.clock);
     clearTimeout(this.whatsNewTimer);
   },
   methods: {
+    updateOnline() {
+      this.online = navigator.onLine;
+    },
     dismissWhatsNew() {
       this.whatsNew = false;
       try {
@@ -626,7 +633,7 @@ export default {
       this.$player.setVolume(this.volume + delta);
       EventBus.$emit(
         "toast",
-        "Volume " + Math.round(this.$player.audio.volume * 100) + "%"
+        "Volume " + Math.round(this.$player.audio.volume * 100) + "%",
       );
     },
     onKey(event) {
@@ -679,7 +686,7 @@ export default {
           width +
           ",height=" +
           height +
-          ",left=25,top=25,screenX=100,screenY=100,resizable=0,scrollbars=0,toolbar=no,location=no,status=no,menubar=no"
+          ",left=25,top=25,screenX=100,screenY=100,resizable=0,scrollbars=0,toolbar=no,location=no,status=no,menubar=no",
       );
     },
   },
@@ -757,15 +764,15 @@ export default {
   -webkit-tap-highlight-color: transparent;
   transition: background-color 0.2s ease;
 }
-.player__icon .v-icon {
+.player__icon .ui-icon {
   color: rgba(255, 255, 255, 0.62) !important;
   transition: color 0.2s ease;
 }
 .player__icon:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-.player__icon:hover .v-icon,
-.player__icon--on .v-icon {
+.player__icon:hover .ui-icon,
+.player__icon--on .ui-icon {
   color: #fff !important;
 }
 .player__icon--on {
@@ -921,7 +928,9 @@ export default {
   margin: -3px 0 0 -3px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.32);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 .player__dot--on::after {
   background: #fff;
@@ -1051,7 +1060,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.player__meta .v-icon {
+.player__meta .ui-icon {
   color: var(--dnb-text-3) !important;
 }
 .player__meta:hover {
@@ -1081,9 +1090,11 @@ export default {
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.2s ease, transform 0.12s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.12s ease;
 }
-.player__control .v-icon {
+.player__control .ui-icon {
   color: var(--dnb-control) !important;
 }
 .player__control:hover {
@@ -1121,7 +1132,7 @@ export default {
   text-transform: uppercase;
   text-decoration: none;
 }
-.player__tagline .v-icon {
+.player__tagline .ui-icon {
   color: var(--dnb-red) !important;
 }
 .player__tagline:hover {
@@ -1183,7 +1194,9 @@ export default {
 }
 .whats-new-enter-active,
 .whats-new-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 .whats-new-enter,
 .whats-new-leave-to {
@@ -1198,7 +1211,9 @@ export default {
 .logo-next-leave-active,
 .logo-prev-enter-active,
 .logo-prev-leave-active {
-  transition: opacity 0.16s ease, transform 0.16s ease;
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
 }
 .logo-fade-enter,
 .logo-fade-leave-to {

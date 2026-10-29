@@ -91,11 +91,11 @@ export default {
       this.$emit("move", {
         x: Math.max(
           0,
-          Math.min(maxX, this.drag.x + event.clientX - this.drag.clientX)
+          Math.min(maxX, this.drag.x + event.clientX - this.drag.clientX),
         ),
         y: Math.max(
           0,
-          Math.min(maxY, this.drag.y + event.clientY - this.drag.clientY)
+          Math.min(maxY, this.drag.y + event.clientY - this.drag.clientY),
         ),
       });
     },
@@ -105,7 +105,7 @@ export default {
       window.removeEventListener("mouseup", this.endDrag);
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.endDrag();
   },
 };

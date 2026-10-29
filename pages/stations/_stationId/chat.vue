@@ -24,7 +24,7 @@
           rel="noopener"
           class="dnb-button dnb-button--primary"
         >
-          Open Discord<v-icon size="16">mdi-arrow-top-right</v-icon>
+          Open Discord<UiIcon size="16">mdi-arrow-top-right</UiIcon>
         </a>
         <a
           href="https://discord.com/download"
@@ -46,7 +46,7 @@
           rel="noopener"
           class="dnb-button"
         >
-          Open webchat<v-icon size="16">mdi-arrow-top-right</v-icon>
+          Open webchat<UiIcon size="16">mdi-arrow-top-right</UiIcon>
         </a>
       </ActionCard>
 
@@ -67,7 +67,7 @@
               aria-label="Copy channel name"
               @click="copy('#dnbradio')"
             >
-              <v-icon size="16">mdi-content-copy</v-icon>
+              <UiIcon size="16">mdi-content-copy</UiIcon>
             </button>
           </dd>
           <dt>Clients</dt>
@@ -88,10 +88,10 @@
 </template>
 
 <script>
-import { EventBus } from "@/components/eventbus";
-import PageShell from "~/components/ui/PageShell";
-import ActionCard from "~/components/ui/ActionCard";
-import stationMixin from "~/mixins/station";
+import { EventBus } from "@/components/eventbus.js";
+import PageShell from "~/components/ui/PageShell.vue";
+import ActionCard from "~/components/ui/ActionCard.vue";
+import stationMixin from "~/mixins/station.js";
 
 export default {
   components: { PageShell, ActionCard },

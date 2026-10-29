@@ -1,0 +1,84 @@
+* {
+  box-sizing: border-box;
+}
+html {
+  font-size: 16px;
+  overflow-y: auto;
+}
+body {
+  margin: 0;
+  color: white;
+  font-family:
+    Roboto,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  line-height: 1.5;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  text-transform: none;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  background: transparent;
+}
+p {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+a {
+  color: inherit;
+}
+img {
+  border-style: none;
+}
+.ui-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+  flex-shrink: 0;
+  color: inherit;
+  font-style: normal;
+}
+.ui-icon.material-icons {
+  font-family: "Material Icons";
+  font-weight: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+.logo-next-enter-from {
+  opacity: 0;
+  transform: translateX(24px) scale(0.96);
+}
+.logo-prev-enter-from {
+  opacity: 0;
+  transform: translateX(-24px) scale(0.96);
+}
+.toast-enter-from {
+  opacity: 0;
+  transform: translate(-50%, 8px);
+}
+
+html.broadcast-overlay,
+html.broadcast-overlay body,
+html.broadcast-overlay #app {
+  background: transparent;
+}

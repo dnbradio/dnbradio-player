@@ -1,65 +1,59 @@
-# dnbradio-player - Static site generated using Nuxt.
+# DNBRadio Player
 
-> Note: Please ignore server components found in `./server/` and also ignore any proxy definitions found in the `nuxt.config.js`. They are deprecated.
+Static Vue 3 application built with Vite. Live: https://dnbradio.com/player/
 
-## Live example:
+The approved player layout and native audio engine are retained. Vue Router
+handles navigation, Vuex 4 holds playback state, and ordinary HTML/CSS controls
+replace Vuetify. Webamp is loaded only on its dedicated embed routes.
+The deprecated `server/` directory is historical and is not part of this build.
 
-> A production instance of `dnbradio-player` can be found here: https://dnbradio.com/player
+## Development and verification
 
-Screenshot:
+Use Node 22.23.4 (`.node-version`) and pnpm 8.15.9.
 
-<img src="https://github.com/dnbradio/dnbradio-player/raw/main/static/dnbradio-screenshot.png" width="300" />
-
-## Environment
-
-See env.example for environment variables to get you started.
-
-```
-# .env
-NODE_PORT=9000
-NODE_HOST=0.0.0.0
-NODE_ENV=development
-```
-
-## Install dependencies
-
-```bash
-pnpm run install
+```sh
+corepack enable
+corepack prepare pnpm@8.15.9 --activate
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm test
+pnpm build
+pnpm exec playwright install chromium webkit
+pnpm test:browser
 ```
 
-## Local Development
+The browser suite serves the production files under `/player/`. It verifies
+actual HTML audio playback using a generated PCM fixture, persistent playback
+while navigating, source attribution, direct episode reloads, native dialog
+keyboard behavior and error-page recovery in Chromium and mobile WebKit.
+It does not depend on public radio/API uptime. Live stream/device testing
+complements this suite.
 
-Serve the app with hot reload on your localhost
+## Build and deployment
 
-```bash
-pnpm run dev
+`pnpm generate-prod` builds `/player/` for the existing Forge deployment.
+`pnpm generate-cloudflare` builds `/` for branch previews. Both create static
+route HTML (including X/OG card metadata) and `200.html` for client-side links.
+`scripts/static-routes.mjs` declares generated station and widget URLs.
+The build exposes only APP_BASE_URL, APP_BRANCH and APP_VERSION to the client.
+
+The Player checks workflow runs unit tests, production generation and browser
+checks on pull requests and main/staging pushes. The existing Deploy workflow
+uses the pinned toolchain, frozen lockfile and unit tests before copying files.
+Merge after Player checks and preview checks pass on the proposed head.
+
+Production nginx must retain this scoped fallback for podcast deep links:
+
+```nginx
+location /player/ {
+    try_files $uri $uri/ /player/200.html;
+}
 ```
 
-## Debugging
-
-This runs `nuxt generate --devtools && nuxt start` which starts a nuxt server for the static content, but with vue-dev-tools enabled.
-
-```bash
-pnpm run debug
-```
-
-## Development - Deploy a branch
-
-Generates and deploys static site to `dnbradio.com/player-${branch_name}`. Based on the current branch you have checked out.
-
-```bash
-pnpm run generate
-pnpm run upload
-```
-
-## Production - Deploy main branch
-
-Generates and deploys static site to `dnbradio.com/player`
-
-```bash
-pnpm run generate-prod
-pnpm run upload-prod
-```
+`pnpm start` serves a local production build at http://127.0.0.1:4173/player/.
+Use HOST and PORT to override the bind address and port. This preview server
+is for validation and container previews; production remains static nginx.
+Docker Compose maps host NODE_PORT (default 4173) to the container listener on 4173.
 
 ## Player
 
@@ -94,7 +88,7 @@ Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/da
   - The kbps, kHz, and mono/stereo readouts come from the stream's or file's own frame headers (`components/embed/audioInfo.js`); Webamp alone shows fixed values for anything it doesn't tag-scan.
   - MilkDrop runs through Webamp's bundled Butterchurn engine and presets. Open the main menu (top-left icon or right-click) and select Milkdrop. By default it starts closed and opens in the playlist's place. While focused, Space advances presets and L opens the preset list. Presets also cycle every 15 seconds during playback. Double-click the visuals for fullscreen where the browser or embedding frame allows it. Rendering needs WebGL 2.
   - Without URL options, every load starts with the main window above the playlist at its base size; the EQ, MilkDrop, and the DNBRADIO windows open in the playlist's place. Window placement is not remembered. Skin, volume, balance, EQ settings, visualizer, and both playlists are kept in `localStorage` (`dnbradio-embed`).
-- `nuxt.config.js` writes the `twitter:*` and `og:*` tags into each station page and each webamp page at generate time (`generate:page` hook). The site runs with `ssr: false`, so a page's `head()` never reaches the HTML that X's crawler reads. The card is square (480×480 player) to match the Winamp layout.
+- `scripts/social-cards.mjs` writes the `twitter:*` and `og:*` tags into each station and Webamp page during the static build so crawlers can read them without JavaScript. The card is square (480×480 player) to match the Winamp layout.
 - `static/x-card/winamp-station-<id>.png` are the 1200×1200 card images: screenshots of the embed for each station in a playing state (fed a short sample of that station's stream), taken in headless Chrome at 480×480 and 2.5× scale. Retake them when the stations or the layout change.
 - Facebook and Threads don't play third-party players from link previews (Facebook's `og:video` only takes MP4 or the retired Flash type), so they show a link card. `og:image` points at `static/x-card/og-station-<id>.png` (1200×630, the 1.91:1 ratio both crop to), made from the square card with the station name beside it; `twitter:image` keeps the square image for X.
 - Cloudflare Pages previews point their card tags at the preview itself and add `/x-card-test/square/`, `/x-card-test/portrait/`, and `/x-card-test/landscape/`, so card shapes can be compared on X before deploying.
@@ -113,7 +107,7 @@ Other stations keep their existing stream URLs. This applies to the popup
 player, not the separate Webamp/embed player.
 
 Run the source-selection, now playing, and schedule checks with
-`node --test tests/` after `pnpm install`.
+`pnpm test` after `pnpm install`.
 
 Verify after deployment:
 

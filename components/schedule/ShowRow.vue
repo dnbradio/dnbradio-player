@@ -30,14 +30,14 @@
         {{ [show.location, repeat].filter(Boolean).join(" · ") }}
       </span>
     </span>
-    <v-icon size="20" class="show__chevron" aria-hidden="true"
-      >chevron_right</v-icon
+    <UiIcon size="20" class="show__chevron" aria-hidden="true"
+      >chevron_right</UiIcon
     >
   </button>
 </template>
 
 <script>
-import { formatTime, recurrence } from "~/lib/schedule";
+import { formatTime, recurrence } from "~/lib/schedule.js";
 
 export default {
   props: {
@@ -75,7 +75,9 @@ export default {
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 .show:hover {
   background: var(--dnb-surface-2);

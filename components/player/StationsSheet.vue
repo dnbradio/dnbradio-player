@@ -1,9 +1,9 @@
 <template>
   <BottomSheet
-    :value="value"
+    :modelValue="modelValue"
     eyebrow="dnbradio.com"
     title="Stations"
-    @input="$emit('input', $event)"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <ul class="stations">
       <li v-for="item in stations" :key="item.id">
@@ -34,19 +34,19 @@
             }}</span>
           </span>
           <span class="stations__side">
-            <v-icon
+            <UiIcon
               v-if="playingStationId === item.id && isActive"
               size="20"
               class="stations__eq"
               aria-label="Playing"
-              >mdi-equalizer</v-icon
+              >mdi-equalizer</UiIcon
             >
             <span
               v-if="np(item) && np(item).listeners !== null"
               class="stations__count"
             >
               {{ np(item).listeners
-              }}<v-icon size="14" aria-hidden="true">mdi-headphones</v-icon>
+              }}<UiIcon size="14" aria-hidden="true">mdi-headphones</UiIcon>
             </span>
           </span>
         </button>
@@ -65,11 +65,11 @@
           rel="noopener"
           class="chip"
         >
-          <v-icon size="18" aria-hidden="true">{{ link.icon }}</v-icon
+          <UiIcon size="18" aria-hidden="true">{{ link.icon }}</UiIcon
           >{{ link.label }}
         </a>
         <button v-if="canShare" type="button" class="chip" @click="share">
-          <v-icon size="18" aria-hidden="true">mdi-share-variant</v-icon>Share
+          <UiIcon size="18" aria-hidden="true">mdi-share-variant</UiIcon>Share
         </button>
       </div>
       <p class="stations__listen">
@@ -82,22 +82,22 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import Station from "@/models/Station";
-import { EventBus } from "@/components/eventbus";
-import BottomSheet from "~/components/ui/BottomSheet";
-import { stationPath } from "~/lib/stations";
+import { stationList } from "@/data/stations";
+import { EventBus } from "@/components/eventbus.js";
+import BottomSheet from "~/components/ui/BottomSheet.vue";
+import { stationPath } from "~/lib/stations.js";
 
 export default {
   components: { BottomSheet },
   props: {
-    value: { type: Boolean, default: false },
+    modelValue: { type: Boolean, default: false },
     station: { type: Object, default: null },
   },
   computed: {
     ...mapState("player", ["nowplaying"]),
     ...mapGetters("player", ["playingStationId", "isActive"]),
     stations() {
-      return Station.query().get();
+      return stationList;
     },
     canShare() {
       return true;
@@ -139,7 +139,7 @@ export default {
     },
   },
   watch: {
-    value(open) {
+    modelValue(open) {
       this.$player.watchAllStations(open);
     },
   },
@@ -156,7 +156,7 @@ export default {
       if (!this.station || item.id !== this.station.id) {
         this.$router.push(stationPath(item));
       }
-      this.$emit("input", false);
+      this.$emit("update:modelValue", false);
     },
     async share() {
       const url =
@@ -202,7 +202,9 @@ export default {
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 .stations__row:hover {
   background: var(--dnb-surface-2);
@@ -274,7 +276,7 @@ export default {
   color: var(--dnb-text-3);
   font-variant-numeric: tabular-nums;
 }
-.stations__count .v-icon {
+.stations__count .ui-icon {
   color: inherit !important;
 }
 .stations__about {
@@ -302,7 +304,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-.chip .v-icon {
+.chip .ui-icon {
   color: inherit !important;
 }
 .chip:hover {

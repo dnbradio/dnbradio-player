@@ -3,8 +3,8 @@
 </template>
 
 <script>
-import StationDetails from "@/components/StationDetails";
-import stationMixin from "~/mixins/station";
+import StationDetails from "@/components/StationDetails.vue";
+import stationMixin from "~/mixins/station.js";
 
 export default {
   components: { StationDetails },

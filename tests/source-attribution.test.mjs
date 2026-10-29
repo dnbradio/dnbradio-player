@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import test from "node:test";
-
-const require = createRequire(import.meta.url);
-const Vue = require("vue");
-const VueRouter = require("vue-router");
-Vue.use(VueRouter);
+import { nextTick } from "vue";
+import {
+  createRouter,
+  createMemoryHistory,
+  isNavigationFailure,
+} from "vue-router";
 
 async function loadModule(path, transform = (source) => source) {
   const source = transform(
-    await readFile(new URL(path, import.meta.url), "utf8")
+    await readFile(new URL(path, import.meta.url), "utf8"),
   );
   return (
     await import(
@@ -21,20 +21,22 @@ async function loadModule(path, transform = (source) => source) {
 
 const attribution = await loadModule("../plugins/source-attribution.js");
 const stations = await (await loadModule("../data/stations.js"))();
-const { adjacentStation, freshStreamUrl } = await import(
-  "./load-module.mjs"
-).then(({ loadModule: load }) =>
-  load(new URL("../lib/stations.js", import.meta.url))
-);
+const { adjacentStation, freshStreamUrl } =
+  await import("./load-module.mjs").then(({ loadModule: load }) =>
+    load(new URL("../lib/stations.js", import.meta.url)),
+  );
 
 async function visit(url) {
-  const router = new VueRouter({ mode: "abstract", routes: [{ path: "*" }] });
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: "/:pathMatch(.*)*", component: {} }],
+  });
   const injected = {};
   attribution(
-    { route: router.resolve(url).route, app: { router } },
+    { route: router.resolve(url), app: { router } },
     (name, value) => {
       injected[name] = value;
-    }
+    },
   );
   await router.push(url);
   return { router, streamUrl: injected.stationStreamUrl };
@@ -42,9 +44,9 @@ async function visit(url) {
 
 async function navigate(router, url) {
   await router.push(url).catch((error) => {
-    if (!VueRouter.isNavigationFailure(error)) throw error;
+    if (!isNavigationFailure(error)) throw error;
   });
-  await Vue.nextTick();
+  await nextTick();
 }
 
 for (const source of ["web", "discord", "tunein", "radionet"]) {
@@ -52,14 +54,14 @@ for (const source of ["web", "discord", "tunein", "radionet"]) {
     const { streamUrl } = await visit(`/?src=${source}`);
     assert.equal(
       streamUrl(stations[0]),
-      `https://azura.drmnbss.org/listen/dnbradio/${source}.mp3`
+      `https://azura.drmnbss.org/listen/dnbradio/${source}.mp3`,
     );
     for (const station of stations.slice(1)) {
       assert.equal(streamUrl(station), station.streams[0].url);
     }
     assert.equal(
       stations[0].streams[0].url,
-      "https://azura.drmnbss.org/listen/dnbradio/web.mp3"
+      "https://azura.drmnbss.org/listen/dnbradio/web.mp3",
     );
   });
 }
@@ -80,7 +82,7 @@ for (const query of [
     const { streamUrl } = await visit(`/${query}`);
     assert.equal(
       streamUrl(stations[0]),
-      "https://azura.drmnbss.org/listen/dnbradio/web.mp3"
+      "https://azura.drmnbss.org/listen/dnbradio/web.mp3",
     );
   });
 }
@@ -88,31 +90,41 @@ for (const query of [
 test("navigation preserves the initial source, other query options, and hash", async () => {
   const { router, streamUrl } = await visit("/?src=discord");
   await navigate(router, "/stations/2/schedule?calendar=1#today");
-  assert.deepEqual(router.currentRoute.query, {
+  assert.deepEqual(router.currentRoute.value.query, {
     calendar: "1",
     src: "discord",
   });
-  assert.equal(router.currentRoute.hash, "#today");
+  assert.equal(router.currentRoute.value.hash, "#today");
   await navigate(router, "/stations/1?src=tunein");
-  assert.equal(router.currentRoute.query.src, "discord");
-  router.back();
-  await Vue.nextTick();
-  assert.equal(router.currentRoute.path, "/stations/2/schedule");
-  assert.deepEqual(router.currentRoute.query, {
+  assert.equal(router.currentRoute.value.query.src, "discord");
+  await new Promise((resolve) => {
+    const off = router.afterEach(() => {
+      off();
+      resolve();
+    });
+    router.back();
+  });
+  assert.equal(router.currentRoute.value.path, "/stations/2/schedule");
+  assert.deepEqual(router.currentRoute.value.query, {
     calendar: "1",
     src: "discord",
   });
-  router.forward();
-  await Vue.nextTick();
-  assert.equal(router.currentRoute.path, "/stations/1");
+  await new Promise((resolve) => {
+    const off = router.afterEach(() => {
+      off();
+      resolve();
+    });
+    router.forward();
+  });
+  assert.equal(router.currentRoute.value.path, "/stations/1");
   assert.equal(
     streamUrl(stations[0]),
-    "https://azura.drmnbss.org/listen/dnbradio/discord.mp3"
+    "https://azura.drmnbss.org/listen/dnbradio/discord.mp3",
   );
   const fresh = await visit("/");
   assert.equal(
     fresh.streamUrl(stations[0]),
-    "https://azura.drmnbss.org/listen/dnbradio/web.mp3"
+    "https://azura.drmnbss.org/listen/dnbradio/web.mp3",
   );
 });
 
@@ -134,7 +146,7 @@ test("initial play and previous/next use the attributed stream with a cache bust
   for (const item of stations.slice(1)) {
     assert.equal(
       freshStreamUrl(streamUrl(item)).split("?")[0],
-      item.streams[0].url
+      item.streams[0].url,
     );
   }
 });
@@ -142,11 +154,11 @@ test("initial play and previous/next use the attributed stream with a cache bust
 test("previous and next wrap around the station list", () => {
   assert.equal(
     adjacentStation(stations, stations[0], -1).id,
-    stations.at(-1).id
+    stations.at(-1).id,
   );
   assert.equal(
     adjacentStation(stations, stations.at(-1), 1).id,
-    stations[0].id
+    stations[0].id,
   );
   assert.equal(adjacentStation(stations, stations[1], 1).id, stations[2].id);
 });

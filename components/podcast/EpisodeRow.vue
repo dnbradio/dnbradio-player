@@ -21,9 +21,9 @@
 </template>
 
 <script>
-import PlayButton from "~/components/player/PlayButton";
-import { cleanMeta } from "~/lib/text";
-import { relativeTime } from "~/lib/schedule";
+import PlayButton from "~/components/player/PlayButton.vue";
+import { cleanMeta } from "~/lib/text.js";
+import { relativeTime } from "~/lib/schedule.js";
 
 export default {
   components: { PlayButton },
@@ -74,7 +74,9 @@ export default {
   border: 1px solid var(--dnb-line);
   border-radius: 14px;
   background: var(--dnb-surface);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 .episode:hover {
   background: var(--dnb-surface-2);

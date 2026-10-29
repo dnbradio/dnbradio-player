@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { EventBus } from "@/components/eventbus";
+import { EventBus } from "@/components/eventbus.js";
 
 export default {
   data() {
@@ -16,7 +16,7 @@ export default {
   mounted() {
     EventBus.$on("toast", this.show);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     EventBus.$off("toast", this.show);
   },
   methods: {
@@ -49,7 +49,9 @@ export default {
 }
 .toast-enter-active,
 .toast-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .toast-enter,
 .toast-leave-to {
