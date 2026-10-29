@@ -656,6 +656,17 @@ test("visualizations cycle through stars, audio-reactive MilkDrop, rain and off"
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
   await expect(page.locator('[data-visualization="off"]')).toBeHidden();
   await expect(page.locator(".player__icon .mdi-waveform")).toHaveCount(1);
+  // Butterchurn 3 owns an internal WebGL canvas and copies into this 2D canvas.
+  // Re-entering MilkDrop must create a fresh renderer after losing the old GL context.
+  await toggle.click();
+  await toggle.click();
+  await expect(page.locator('[data-visualization="milkdrop"]')).toHaveAttribute(
+    "data-milkdrop-input",
+    "live",
+  );
+  await expect(
+    page.getByRole("status").filter({ hasText: "unavailable" }),
+  ).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
