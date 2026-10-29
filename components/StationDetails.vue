@@ -41,7 +41,13 @@
           :class="{ 'player__icon--on': visualsEnabled }"
           :aria-pressed="visualsEnabled ? 'true' : 'false'"
           :aria-label="visualizationLabel"
-          :title="visualizationLabel"
+          :title="
+            visualization === 'milkdrop'
+              ? visualizationLabel +
+                '. Triple-tap the background or press N for the next MilkDrop effect.'
+              : visualizationLabel
+          "
+          :aria-keyshortcuts="visualization === 'milkdrop' ? 'N' : undefined"
           @click="toggleVisuals"
         >
           <UiIcon :size="iconSize">mdi-waveform</UiIcon>

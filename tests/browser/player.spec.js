@@ -971,42 +971,126 @@ test("MilkDrop visibly responds to bass attacks instead of only elapsed time", a
     canvas.width = canvas.height = 64;
     const visualizer = await createMilkDrop(context, canvas, source, 64, 64);
     try {
-      // Run the actual compiled preset and renderer with controlled audio.
-      // Hold timing constant so a stronger beat must change rendered parameters.
-      const runner = visualizer.renderer.presetEquationRunner;
-      const run = runner.runFrameEquations.bind(runner);
-      let frame;
-      runner.runFrameEquations = (vars) => {
-        frame = run(vars);
-        return frame;
-      };
-      function render(amplitude) {
-        const wave = Uint8Array.from({ length: 1024 }, (_, i) =>
-          Math.round(128 + amplitude * Math.sin((2 * Math.PI * 2 * i) / 1024)),
-        );
-        visualizer.render({
-          elapsedTime: 1 / 60,
-          audioLevels: {
-            timeByteArray: wave,
-            timeByteArrayL: wave,
-            timeByteArrayR: wave,
-          },
-        });
-        return { zoom: frame.zoom, alpha: frame.wave_a };
+      const visited = new Set();
+      let response;
+      for (let presetIndex = 0; presetIndex < 29; presetIndex++) {
+        const name = canvas.dataset.milkdropPreset;
+        visited.add(name);
+        if (
+          name === "Flexi, martin + geiss - dedicated to the sherwin maxawow"
+        ) {
+          // Exercise the real FFT, compiled preset and renderer with bass attacks.
+          const runner = visualizer.renderer.presetEquationRunner;
+          const run = runner.runFrameEquations.bind(runner);
+          let frame;
+          runner.runFrameEquations = (vars) => {
+            frame = run(vars);
+            return frame;
+          };
+          function render(amplitude) {
+            const wave = Uint8Array.from({ length: 1024 }, (_, i) =>
+              Math.round(
+                128 + amplitude * Math.sin((2 * Math.PI * 2 * i) / 1024),
+              ),
+            );
+            visualizer.render({
+              elapsedTime: 1 / 60,
+              audioLevels: {
+                timeByteArray: wave,
+                timeByteArrayL: wave,
+                timeByteArrayR: wave,
+              },
+            });
+            return { zoom: frame.zoom, alpha: frame.wave_a };
+          }
+          let steady;
+          for (let i = 0; i < 100; i++) steady = render(10);
+          const attack = render(90);
+          for (let i = 0; i < 100; i++) render(90);
+          response = { steady, attack, settled: render(90) };
+        } else visualizer.render({ elapsedTime: 1 / 60 });
+        if (presetIndex < 28) await visualizer.nextPreset(0);
       }
-      let steady;
-      for (let i = 0; i < 100; i++) steady = render(10);
-      const attack = render(90);
-      for (let i = 0; i < 100; i++) render(90);
-      const settled = render(90);
-      return { steady, attack, settled };
+      return { ...response, presets: visited.size };
     } finally {
       visualizer.dispose();
       await context.close();
     }
   }, moduleUrl);
+  expect(result.presets).toBe(29);
   expect(result.steady.alpha).toBeLessThan(0.05);
   expect(result.attack.alpha).toBeGreaterThan(0.3);
   expect(result.attack.zoom).toBeLessThan(result.steady.zoom - 0.01);
   expect(result.settled.alpha).toBeLessThan(0.05);
+});
+
+test("MilkDrop rotates during playback and triple taps or N advance without changing transport", async ({
+  page,
+  isMobile,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  // Advance visual frame timestamps without changing media time or watchdog timers.
+  await page.addInitScript(() => {
+    window.visualTimeOffset = 0;
+    const request = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback) =>
+      request((time) => callback(time + window.visualTimeOffset));
+  });
+  async function advanceFrames(count) {
+    for (let i = 0; i < count; i++)
+      await page.evaluate(
+        () =>
+          new Promise((resolve) =>
+            requestAnimationFrame(() => {
+              window.visualTimeOffset += 1000;
+              resolve();
+            }),
+          ),
+      );
+  }
+  await page.goto("./");
+  const fx = page.getByRole("button", { name: /^Visualizations:/ });
+  await fx.click();
+  await fx.click();
+  const host = page.locator("[data-visualization=milkdrop]");
+  const canvas = host.locator("canvas:last-child");
+  await expect(canvas).toHaveAttribute("data-milkdrop-preset", /.+/);
+  const initial = await canvas.getAttribute("data-milkdrop-preset");
+  await advanceFrames(20);
+  await expect(canvas).toHaveAttribute("data-milkdrop-preset", initial);
+  // Mobile triple taps and desktop clicks use the same non-control surface.
+  const surface = page.locator(".player__subtitle");
+  if (isMobile) {
+    const box = await surface.boundingBox();
+    for (let i = 0; i < 3; i++)
+      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  } else await surface.click({ clickCount: 3 });
+  await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", initial);
+  expect(await page.evaluate(() => window.currentAudio.paused)).toBe(true);
+  const manual = await canvas.getAttribute("data-milkdrop-preset");
+  await page.keyboard.press("n");
+  await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", manual);
+  const keyboard = await canvas.getAttribute("data-milkdrop-preset");
+  // Three control clicks must not count as a preset gesture.
+  const minimize = page.getByRole("button", {
+    name: /^(Minimize|Expand) player$/,
+  });
+  for (let i = 0; i < 3; i++) await minimize.click();
+  await expect(canvas).toHaveAttribute("data-milkdrop-preset", keyboard);
+  await minimize.click();
+  await page.locator(".player__controls .play-button").click();
+  await expect(host).toHaveAttribute("data-milkdrop-input", "live");
+  await advanceFrames(20);
+  await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", keyboard);
+  expect(await page.evaluate(() => window.currentAudio.paused)).toBe(false);
+  const playing = await canvas.getAttribute("data-milkdrop-preset");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await advanceFrames(20);
+  await expect(canvas).toHaveAttribute("data-milkdrop-preset", playing);
+  await page.keyboard.press("n");
+  await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", playing);
+  await fx.click();
+  await page.keyboard.press("n");
+  expect(errors).toEqual([]);
 });
