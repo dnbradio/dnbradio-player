@@ -36,7 +36,7 @@
         aria-label="Close player"
         @click="$player.stop()"
       >
-        <v-icon size="20">mdi-close</v-icon>
+        <UiIcon size="20">mdi-close</UiIcon>
       </button>
     </section>
   </transition>
@@ -44,9 +44,9 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import Station from "@/models/Station";
-import PlayButton from "./PlayButton";
-import { stationPath } from "~/lib/stations";
+import { stationList } from "@/data/stations";
+import PlayButton from "./PlayButton.vue";
+import { stationPath } from "~/lib/stations.js";
 
 export default {
   components: { PlayButton },
@@ -72,7 +72,9 @@ export default {
       return this.isBusy;
     },
     station() {
-      return this.playingStationId ? Station.find(this.playingStationId) : null;
+      return this.playingStationId
+        ? stationList.find((item) => item.id === this.playingStationId)
+        : null;
     },
     np() {
       return this.station ? this.nowplaying[this.station.id] : null;
@@ -84,13 +86,13 @@ export default {
       }
       return Boolean(
         this.episode &&
-          route.name === "stations-stationId-podcast-epid" &&
-          route.params.epid == this.episode.id
+        route.name === "stations-stationId-podcast-epid" &&
+        route.params.epid == this.episode.id,
       );
     },
     visible() {
       return Boolean(
-        this.source && (this.station || this.episode) && !this.onPlayerScreen
+        this.source && (this.station || this.episode) && !this.onPlayerScreen,
       );
     },
     live() {
@@ -245,15 +247,17 @@ export default {
   border-radius: 10px;
   cursor: pointer;
 }
-.mini__close .v-icon {
+.mini__close .ui-icon {
   color: var(--dnb-text-3) !important;
 }
-.mini__close:hover .v-icon {
+.mini__close:hover .ui-icon {
   color: var(--dnb-text) !important;
 }
 .mini-enter-active,
 .mini-leave-active {
-  transition: opacity 0.2s ease, transform 0.25s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s ease;
 }
 .mini-enter,
 .mini-leave-to {

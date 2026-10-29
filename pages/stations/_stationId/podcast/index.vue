@@ -12,7 +12,7 @@
     </p>
 
     <form class="archive-search" role="search" @submit.prevent="submitSearch">
-      <v-icon size="20" aria-hidden="true">mdi-magnify</v-icon>
+      <UiIcon size="20" aria-hidden="true">mdi-magnify</UiIcon>
       <input
         v-model="query"
         type="search"
@@ -28,7 +28,7 @@
         aria-label="Clear search"
         @click="clearSearch"
       >
-        <v-icon size="18">mdi-close</v-icon>
+        <UiIcon size="18">mdi-close</UiIcon>
       </button>
     </form>
 
@@ -60,7 +60,7 @@
     </ol>
 
     <div v-if="loading" class="archive-state">
-      <v-progress-circular indeterminate size="28" width="2" color="#e7ff2c" />
+      <Spinner indeterminate size="28" width="2" color="#e7ff2c" />
     </div>
     <p v-else-if="failed" class="archive-state">
       The archive didn't load.
@@ -84,9 +84,9 @@
 
 <script>
 import { mapGetters } from "vuex";
-import PageShell from "~/components/ui/PageShell";
-import EpisodeRow from "~/components/podcast/EpisodeRow";
-import stationMixin from "~/mixins/station";
+import PageShell from "~/components/ui/PageShell.vue";
+import EpisodeRow from "~/components/podcast/EpisodeRow.vue";
+import stationMixin from "~/mixins/station.js";
 
 let debounceTimer = null;
 
@@ -238,7 +238,7 @@ export default {
 .archive-search:focus-within {
   border-color: var(--dnb-accent);
 }
-.archive-search .v-icon {
+.archive-search .ui-icon {
   color: var(--dnb-text-3) !important;
 }
 .archive-search input {

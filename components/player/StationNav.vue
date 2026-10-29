@@ -4,27 +4,25 @@
     :class="`station-nav--${variant}`"
     aria-label="Station"
   >
-    <template v-for="item in items">
+    <template v-for="item in items" :key="item.key">
       <a
         v-if="item.href"
-        :key="item.key"
         :href="item.href"
         target="_blank"
         rel="noopener"
         class="station-nav__item"
         :aria-label="item.label + ' (opens shop.dnbradio.com)'"
       >
-        <v-icon size="24" aria-hidden="true">{{ item.icon }}</v-icon>
+        <UiIcon size="24" aria-hidden="true">{{ item.icon }}</UiIcon>
         <span
           >{{ item.label
-          }}<v-icon size="11" class="station-nav__ext" aria-hidden="true"
-            >mdi-arrow-top-right</v-icon
+          }}<UiIcon size="11" class="station-nav__ext" aria-hidden="true"
+            >mdi-arrow-top-right</UiIcon
           ></span
         >
       </a>
-      <nuxt-link
+      <router-link
         v-else
-        :key="item.key"
         :to="item.to"
         class="station-nav__item"
         :class="{
@@ -35,11 +33,11 @@
         :aria-disabled="item.disabled ? 'true' : undefined"
         :tabindex="item.disabled ? -1 : undefined"
       >
-        <v-icon size="24" :class="item.iconClass" aria-hidden="true">{{
+        <UiIcon size="24" :class="item.iconClass" aria-hidden="true">{{
           item.icon
-        }}</v-icon>
+        }}</UiIcon>
         <span>{{ item.label }}</span>
-      </nuxt-link>
+      </router-link>
     </template>
   </nav>
 </template>
@@ -115,10 +113,12 @@ export default {
   font-weight: 500;
   letter-spacing: 0.04em;
   white-space: nowrap;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.station-nav__item .v-icon {
+.station-nav__item .ui-icon {
   color: inherit;
 }
 .station-nav__item:hover {

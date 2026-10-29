@@ -56,7 +56,7 @@
           aria-label="Newer episode"
           @click="go(prev)"
         >
-          <v-icon size="30">skip_previous</v-icon>
+          <UiIcon size="30">skip_previous</UiIcon>
         </button>
         <button
           type="button"
@@ -65,7 +65,7 @@
           aria-label="Back 30 seconds"
           @click="$player.seek(-30)"
         >
-          <v-icon size="30">mdi-rewind-30</v-icon>
+          <UiIcon size="30">mdi-rewind-30</UiIcon>
         </button>
         <PlayButton :size="68" :active="playing" :busy="busy" @click="toggle" />
         <button
@@ -75,7 +75,7 @@
           aria-label="Forward 30 seconds"
           @click="$player.seek(30)"
         >
-          <v-icon size="30">mdi-fast-forward-30</v-icon>
+          <UiIcon size="30">mdi-fast-forward-30</UiIcon>
         </button>
         <button
           type="button"
@@ -84,16 +84,16 @@
           aria-label="Older episode"
           @click="go(next)"
         >
-          <v-icon size="30">skip_next</v-icon>
+          <UiIcon size="30">skip_next</UiIcon>
         </button>
       </div>
 
       <div class="ep__actions">
-        <nuxt-link :to="'/stations/' + station.id" class="chip">
-          <v-icon size="18">mdi-radio</v-icon>Live radio
-        </nuxt-link>
+        <router-link :to="'/stations/' + station.id" class="chip">
+          <UiIcon size="18">mdi-radio</UiIcon>Live radio
+        </router-link>
         <button type="button" class="chip" @click="share">
-          <v-icon size="18">mdi-share-variant</v-icon>Share
+          <UiIcon size="18">mdi-share-variant</UiIcon>Share
         </button>
         <a
           v-if="item.download_url"
@@ -101,7 +101,7 @@
           class="chip"
           download
         >
-          <v-icon size="18">mdi-download</v-icon>Download
+          <UiIcon size="18">mdi-download</UiIcon>Download
         </a>
         <a
           v-if="item.profile && item.profile.url"
@@ -110,7 +110,7 @@
           rel="noopener"
           class="chip"
         >
-          <v-icon size="18">mdi-account-music</v-icon>DJ profile
+          <UiIcon size="18">mdi-account-music</UiIcon>DJ profile
         </a>
       </div>
 
@@ -128,23 +128,23 @@
 
     <div v-else-if="failed" class="ep-state">
       This recording couldn't be found.
-      <nuxt-link :to="'/stations/' + (station ? station.id : 1) + '/podcast'"
-        >Browse all recordings</nuxt-link
+      <router-link :to="'/stations/' + (station ? station.id : 1) + '/podcast'"
+        >Browse all recordings</router-link
       >
     </div>
     <div v-else class="ep-state">
-      <v-progress-circular indeterminate size="28" width="2" color="#e7ff2c" />
+      <Spinner indeterminate size="28" width="2" color="#e7ff2c" />
     </div>
   </PageShell>
 </template>
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import { EventBus } from "@/components/eventbus";
-import PageShell from "~/components/ui/PageShell";
-import PlayButton from "~/components/player/PlayButton";
-import stationMixin from "~/mixins/station";
-import { cleanMeta, stripTags } from "~/lib/text";
+import { EventBus } from "@/components/eventbus.js";
+import PageShell from "~/components/ui/PageShell.vue";
+import PlayButton from "~/components/player/PlayButton.vue";
+import stationMixin from "~/mixins/station.js";
+import { cleanMeta, stripTags } from "~/lib/text.js";
 
 export default {
   components: { PageShell, PlayButton },
@@ -275,7 +275,7 @@ export default {
     go(item) {
       if (item) {
         this.$router.replace(
-          "/stations/" + this.station.id + "/podcast/" + item.id
+          "/stations/" + this.station.id + "/podcast/" + item.id,
         );
       }
     },
@@ -421,7 +421,7 @@ export default {
   background: none;
   cursor: pointer;
 }
-.ep__control .v-icon {
+.ep__control .ui-icon {
   color: var(--dnb-control) !important;
 }
 .ep__control:disabled {
@@ -452,7 +452,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-.chip .v-icon {
+.chip .ui-icon {
   color: inherit !important;
 }
 .chip:hover {

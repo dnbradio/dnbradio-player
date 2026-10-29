@@ -1,0 +1,33 @@
+name: Player checks
+on:
+  pull_request:
+  push:
+    branches: [main, staging]
+permissions:
+  contents: read
+concurrency:
+  group: player-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: corepack enable && corepack prepare pnpm@8.15.9 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm run generate-prod
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

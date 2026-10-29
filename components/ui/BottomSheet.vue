@@ -1,11 +1,12 @@
 <template>
-  <v-bottom-sheet
-    :value="value"
-    max-width="560"
-    content-class="dnb-sheet-wrap"
-    @input="$emit('input', $event)"
+  <dialog
+    ref="dialog"
+    class="dnb-sheet-wrap"
+    :aria-label="title"
+    @cancel.prevent="$emit('update:modelValue', false)"
+    @click="dismissBackdrop"
   >
-    <div class="dnb-sheet" role="dialog" :aria-label="title">
+    <div class="dnb-sheet">
       <div class="dnb-sheet__grab" aria-hidden="true" />
       <header class="dnb-sheet__head">
         <div>
@@ -16,22 +17,45 @@
           type="button"
           class="dnb-sheet__close"
           aria-label="Close"
-          @click="$emit('input', false)"
+          @click="$emit('update:modelValue', false)"
         >
-          <v-icon>mdi-close</v-icon>
+          <UiIcon>mdi-close</UiIcon>
         </button>
       </header>
       <div class="dnb-sheet__body">
         <slot />
       </div>
     </div>
-  </v-bottom-sheet>
+  </dialog>
 </template>
 
 <script>
 export default {
+  emits: ["update:modelValue"],
+  mounted() {
+    this.sync();
+  },
+  beforeUnmount() {
+    this.$refs.dialog.close();
+  },
+  watch: {
+    modelValue() {
+      this.sync();
+    },
+  },
+  methods: {
+    sync() {
+      const dialog = this.$refs.dialog;
+      if (this.modelValue && !dialog.open) dialog.showModal();
+      else if (!this.modelValue && dialog.open) dialog.close();
+    },
+    dismissBackdrop(event) {
+      if (event.target === this.$refs.dialog)
+        this.$emit("update:modelValue", false);
+    },
+  },
   props: {
-    value: { type: Boolean, default: false },
+    modelValue: { type: Boolean, default: false },
     title: { type: String, default: "" },
     eyebrow: { type: String, default: "" },
   },
@@ -39,10 +63,22 @@ export default {
 </script>
 
 <style>
-.dnb-sheet-wrap.v-bottom-sheet.v-dialog {
+.dnb-sheet-wrap {
+  position: fixed;
+  inset: auto 0 0;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  width: min(100%, 560px);
+  max-width: 100%;
+  background: transparent;
+  color: white;
   max-height: 88svh;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.7);
+}
+.dnb-sheet-wrap::backdrop {
+  background: rgba(0, 0, 0, 0.46);
 }
 .dnb-sheet {
   display: flex;

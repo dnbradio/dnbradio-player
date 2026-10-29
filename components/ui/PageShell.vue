@@ -7,7 +7,7 @@
         :aria-label="backLabel"
         @click="goBack"
       >
-        <v-icon>arrow_back</v-icon>
+        <UiIcon>arrow_back</UiIcon>
       </button>
       <div class="page__heading">
         <span v-if="eyebrow" class="page__eyebrow">{{ eyebrow }}</span>
@@ -27,9 +27,9 @@
 </template>
 
 <script>
-import StationNav from "~/components/player/StationNav";
-import { canGoBack } from "~/lib/history";
-import { stationPath } from "~/lib/stations";
+import StationNav from "~/components/player/StationNav.vue";
+import { canGoBack } from "~/lib/history.js";
+import { stationPath } from "~/lib/stations.js";
 
 export default {
   components: { StationNav },
@@ -45,7 +45,7 @@ export default {
   mounted() {
     document.documentElement.classList.toggle("has-page-nav", !this.hideNav);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     document.documentElement.classList.remove("has-page-nav");
   },
   methods: {
@@ -54,7 +54,7 @@ export default {
         this.$router.back();
       } else {
         this.$router.push(
-          this.back || (this.station ? stationPath(this.station) : "/")
+          this.back || (this.station ? stationPath(this.station) : "/"),
         );
       }
     },
@@ -98,7 +98,7 @@ export default {
   background: none;
   cursor: pointer;
 }
-.page__icon .v-icon {
+.page__icon .ui-icon {
   color: var(--dnb-text) !important;
 }
 .page__icon:hover {

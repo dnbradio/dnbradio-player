@@ -6,7 +6,7 @@
         :style="{ color: iconColor }"
         aria-hidden="true"
       >
-        <v-icon size="24" :color="iconColor">{{ icon }}</v-icon>
+        <UiIcon size="24" :color="iconColor">{{ icon }}</UiIcon>
       </span>
       <div class="action-card__text">
         <h2 class="action-card__title">{{ title }}</h2>
@@ -55,7 +55,7 @@ export default {
   border-radius: 12px;
   background: var(--dnb-surface-2);
 }
-.action-card__icon .v-icon:not([class*="--text"]) {
+.action-card__icon .ui-icon:not([class*="--text"]) {
   color: var(--dnb-text);
 }
 .action-card__text {
@@ -97,7 +97,7 @@ export default {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-.dnb-button .v-icon {
+.dnb-button .ui-icon {
   color: inherit !important;
 }
 .dnb-button:hover {

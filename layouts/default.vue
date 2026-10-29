@@ -1,46 +1,16 @@
 <template>
-  <v-app dark v-cloak>
-    <client-only>
-      <v-main class="module">
-        <v-container class="module-inside">
-          <nuxt />
-        </v-container>
-      </v-main>
-      <MiniPlayer />
-      <Toast />
-    </client-only>
-  </v-app>
+  <main class="app">
+    <div class="module">
+      <div class="module-inside"><slot /></div>
+    </div>
+    <MiniPlayer /><Toast />
+  </main>
 </template>
-
 <script>
-import stations from "@/data/stations";
-import Station from "@/models/Station";
-import MiniPlayer from "~/components/player/MiniPlayer";
-import Toast from "~/components/ui/Toast";
-import { trackHistory } from "~/lib/history";
-
-export default {
-  components: { MiniPlayer, Toast },
-  beforeCreate() {
-    if (process.client) {
-      let userAgent = navigator.userAgent;
-      if (
-        /iphone_os_4|iphone_os_5|iphone_os_6|iphone_os_7|iphone_os_8|iphone_os_9|safari\/525|safari\/533|safari\/534|safari\/601|safari\/600/i.test(
-          userAgent
-        )
-      ) {
-        window.location.href = "https://dnbradio.com/mobile";
-        return;
-      }
-    }
-  },
-  async created() {
-    trackHistory(this.$router);
-    Station.create({ data: await stations() });
-  },
-};
+import MiniPlayer from "~/components/player/MiniPlayer.vue";
+import Toast from "~/components/ui/Toast.vue";
+export default { components: { MiniPlayer, Toast } };
 </script>
-
 <style>
 :root {
   --dnb-bg: #000;
@@ -68,24 +38,17 @@ html.has-page-nav {
 html.has-mini-player {
   --dnb-mini-height: 70px;
 }
-.theme--dark.v-application {
+.app {
   background: black;
 }
-.v-application {
-  font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+.app {
+  font-family:
+    Roboto,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif !important;
   -webkit-font-smoothing: antialiased;
-}
-.v-dialog--active .theme--dark.v-sheet {
-  background: black;
-}
-[v-cloak] {
-  display: none;
-}
-.vuedl-layout {
-  background-color: darkslategrey;
-}
-.v-autocomplete__content .theme--dark.v-card {
-  background: #191919;
 }
 .module {
   position: relative;
@@ -94,7 +57,7 @@ html.has-mini-player {
   position: relative;
   padding: 2px;
 }
-.v-application a {
+.app a {
   color: inherit;
 }
 ::selection {

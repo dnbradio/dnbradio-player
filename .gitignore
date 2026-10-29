@@ -91,3 +91,5 @@ sw.*
 
 mongo-volume
 sw.*
+playwright-report/
+test-results/

@@ -1,9 +1,9 @@
 <template>
   <BottomSheet
-    :value="value"
+    :modelValue="modelValue"
     :eyebrow="station ? station.title : ''"
     title="Now playing"
-    @input="$emit('input', $event)"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template v-if="episode">
       <div class="np-card">
@@ -15,15 +15,15 @@
         </div>
       </div>
       <div class="np-actions">
-        <nuxt-link
+        <router-link
           :to="'/stations/1/podcast/' + episode.id"
           class="chip"
-          @click.native="$emit('input', false)"
+          @click="$emit('update:modelValue', false)"
         >
-          <v-icon size="18">voicemail</v-icon>Open episode
-        </nuxt-link>
+          <UiIcon size="18">voicemail</UiIcon>Open episode
+        </router-link>
         <button type="button" class="chip" @click="backToRadio">
-          <v-icon size="18">mdi-radio</v-icon>Back to live radio
+          <UiIcon size="18">mdi-radio</UiIcon>Back to live radio
         </button>
       </div>
     </template>
@@ -46,7 +46,7 @@
           aria-label="Copy artist and title"
           @click="copy(np)"
         >
-          <v-icon size="20">mdi-content-copy</v-icon>
+          <UiIcon size="20">mdi-content-copy</UiIcon>
         </button>
       </div>
 
@@ -70,12 +70,12 @@
 
     <template v-if="station && station.id === 1 && upcoming.length">
       <p class="dnb-section-label">Next live shows</p>
-      <nuxt-link
+      <router-link
         v-for="show in upcoming"
         :key="show.id + show.start"
         :to="'/stations/' + station.id + '/schedule'"
         class="np-row np-row--link"
-        @click.native="$emit('input', false)"
+        @click="$emit('update:modelValue', false)"
       >
         <img
           v-if="show.image"
@@ -91,7 +91,7 @@
         <span class="np-row__time">
           {{ day(show.startAt) }}<br />{{ time(show.startAt) }}
         </span>
-      </nuxt-link>
+      </router-link>
     </template>
 
     <template v-if="np && np.history.length && !episode">
@@ -144,20 +144,20 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import { EventBus } from "@/components/eventbus";
-import BottomSheet from "~/components/ui/BottomSheet";
+import { EventBus } from "@/components/eventbus.js";
+import BottomSheet from "~/components/ui/BottomSheet.vue";
 import {
   fetchSchedule,
   formatTime,
   relativeTime,
   sameLocalDay,
   upcomingShows,
-} from "~/lib/schedule";
+} from "~/lib/schedule.js";
 
 export default {
   components: { BottomSheet },
   props: {
-    value: { type: Boolean, default: false },
+    modelValue: { type: Boolean, default: false },
     station: { type: Object, default: null },
   },
   data() {
@@ -185,7 +185,7 @@ export default {
     },
   },
   watch: {
-    value(open) {
+    modelValue(open) {
       clearInterval(this.clock);
       if (!open) {
         return;
@@ -194,7 +194,7 @@ export default {
       this.clock = setInterval(() => (this.now = Date.now()), 1000);
       if (this.station && this.station.schedule) {
         fetchSchedule(this.station.schedule.url).then(
-          (shows) => (this.shows = shows)
+          (shows) => (this.shows = shows),
         );
       }
       if (this.station) {
@@ -207,7 +207,7 @@ export default {
       }
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.clock);
   },
   methods: {
@@ -237,12 +237,12 @@ export default {
       this.$player.setSleep(minutes);
       EventBus.$emit(
         "toast",
-        minutes ? "Sleep timer: " + minutes + " min" : "Sleep timer off"
+        minutes ? "Sleep timer: " + minutes + " min" : "Sleep timer off",
       );
     },
     backToRadio() {
       this.$player.playStation(this.station);
-      this.$emit("input", false);
+      this.$emit("update:modelValue", false);
     },
   },
 };
@@ -308,7 +308,7 @@ export default {
   background: none;
   cursor: pointer;
 }
-.np-copy .v-icon {
+.np-copy .ui-icon {
   color: var(--dnb-text-3) !important;
 }
 .np-copy:hover {
@@ -426,7 +426,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-.chip .v-icon {
+.chip .ui-icon {
   color: inherit !important;
 }
 </style>

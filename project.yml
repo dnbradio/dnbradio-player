@@ -2,7 +2,7 @@
 config_version: 1
 project:
   id: dnbradio-player
-  name: DNBRadio Player (Nuxt static)
+  name: DNBRadio Player (Vue static)
   family: dnbradio
 git_host:
   provider: github

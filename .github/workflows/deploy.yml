@@ -13,17 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "20.9.0"
+          node-version-file: .node-version
       - name: Install pnpm
-        run: npm install -g pnpm && node --version
+        run: corepack enable && corepack prepare pnpm@8.15.9 --activate
       - name: Check pnpm version
         run: pnpm --version
       - name: pnpm i
-        run: pnpm i
+        run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm test
       - name: pnpm run generate-prod
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
         run: |

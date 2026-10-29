@@ -1,32 +1,30 @@
 <template>
-  <v-app dark>
-    <client-only>
-      <div class="error-page">
-        <img
-          src="https://dnbradio.com/images/logotags.png"
-          alt=""
-          class="error-page__logo"
-        />
-        <h1>
-          {{
-            error.statusCode === 404
-              ? "This page doesn't exist"
-              : "Something went wrong"
-          }}
-        </h1>
-        <p>
-          {{
-            error.statusCode === 404
-              ? "The link may be old, or the page moved."
-              : "Reload the page or head back to the player."
-          }}
-        </p>
-        <NuxtLink to="/" class="error-page__button"
-          >Back to the player</NuxtLink
-        >
-      </div>
-    </client-only>
-  </v-app>
+  <div>
+    <div class="error-page">
+      <img
+        src="https://dnbradio.com/images/logotags.png"
+        alt=""
+        class="error-page__logo"
+      />
+      <h1>
+        {{
+          error.statusCode === 404
+            ? "This page doesn't exist"
+            : "Something went wrong"
+        }}
+      </h1>
+      <p>
+        {{
+          error.statusCode === 404
+            ? "The link may be old, or the page moved."
+            : "Reload the page or head back to the player."
+        }}
+      </p>
+      <RouterLink to="/" class="error-page__button"
+        >Back to the player</RouterLink
+      >
+    </div>
+  </div>
 </template>
 
 <script>
@@ -35,7 +33,7 @@ export default {
   props: {
     error: {
       type: Object,
-      default: null,
+      default: () => ({ statusCode: 404 }),
     },
   },
   head() {

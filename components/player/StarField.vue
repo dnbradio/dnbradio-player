@@ -33,7 +33,7 @@ export default {
       this.start();
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.stop();
     window.removeEventListener("resize", this.resize);
   },
