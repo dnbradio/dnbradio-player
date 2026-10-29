@@ -1,24 +1,61 @@
 <template>
   <div class="overlap-screen">
-    <StarField :active="visualsEnabled" />
+    <Visualizations :mode="visualization" />
     <div
       class="player"
       :class="{
         'player--framed': framed,
         'player--desktop': $device.isDesktop,
+        'player--minimized': minimized,
       }"
+      @dblclick="expandFromBar"
     >
       <div class="player__bar">
+        <button
+          type="button"
+          class="player__icon player__size"
+          :aria-label="minimized ? 'Expand player' : 'Minimize player'"
+          :title="minimized ? 'Expand player' : 'Minimize player'"
+          :aria-expanded="!minimized"
+          @click="toggleMinimized"
+        >
+          <UiIcon :size="iconSize">{{
+            minimized ? "mdi-chevron-down" : "mdi-window-minimize"
+          }}</UiIcon>
+        </button>
+        <div
+          v-if="minimized"
+          class="player__marquee"
+          role="status"
+          :aria-label="miniReadout"
+          :title="miniReadout"
+        >
+          <div class="player__marquee-track" aria-hidden="true">
+            <span>{{ miniReadout }}</span
+            ><span>{{ miniReadout }}</span>
+          </div>
+        </div>
         <button
           type="button"
           class="player__icon"
           :class="{ 'player__icon--on': visualsEnabled }"
           :aria-pressed="visualsEnabled ? 'true' : 'false'"
-          aria-label="Visuals"
-          title="Visuals"
+          :aria-label="visualizationLabel"
+          :title="visualizationLabel"
           @click="toggleVisuals"
         >
-          <UiIcon :size="iconSize">brightness_2</UiIcon>
+          <UiIcon :size="iconSize">mdi-waveform</UiIcon>
+        </button>
+        <button
+          v-if="minimized"
+          type="button"
+          class="player__icon player__mini-play"
+          :aria-label="stationActive ? 'Pause' : 'Play'"
+          @click="toggle"
+        >
+          <UiIcon :size="24">{{
+            stationActive ? "pause" : "play_arrow"
+          }}</UiIcon>
         </button>
         <span class="player__bar-gap" />
         <button
@@ -84,7 +121,7 @@
             @click="playIfStopped"
           />
         </transition>
-        <DjHead v-if="djVisible" :dj="$dj.current" />
+        <DjHead v-if="djVisible && !minimized" :dj="$dj.current" />
         <div class="player__dots" role="group" aria-label="Choose station">
           <button
             v-for="item in stations"
@@ -239,7 +276,7 @@ import { mapGetters, mapState } from "vuex";
 import { stationList } from "@/data/stations";
 import { EventBus } from "@/components/eventbus.js";
 import PlayButton from "~/components/player/PlayButton.vue";
-import StarField from "~/components/player/StarField.vue";
+import Visualizations from "~/components/player/Visualizations.vue";
 import StationNav from "~/components/player/StationNav.vue";
 import StationsSheet from "~/components/player/StationsSheet.vue";
 import NowPlayingSheet from "~/components/player/NowPlayingSheet.vue";
@@ -259,7 +296,7 @@ export default {
   components: {
     DjHead,
     PlayButton,
-    StarField,
+    Visualizations,
     StationNav,
     StationsSheet,
     NowPlayingSheet,
@@ -270,6 +307,7 @@ export default {
       online: navigator.onLine,
       stationsOpen: false,
       nowOpen: false,
+      minimized: false,
       slide: "logo-fade",
       touch: null,
       shows: [],
@@ -289,6 +327,7 @@ export default {
       "volume",
       "volumeSupported",
       "visualsEnabled",
+      "visualization",
       "sleepAt",
     ]),
     ...mapGetters("player", [
@@ -299,13 +338,32 @@ export default {
     ]),
     djVisible() {
       return (
-        this.$dj.current &&
+        this.$dj.current?.profile &&
         this.station?.id === 1 &&
         (!this.source || this.playingStationId === 1)
       );
     },
     stations() {
       return stationList;
+    },
+    miniReadout() {
+      const track = [this.artist, this.title].filter(Boolean).join(" — ");
+      const station = this.station ? this.station.title : "DNBRadio";
+      return track
+        ? `${track} · ${station}`
+        : `${station} · ${this.statusLabel || "Ready to play"}`;
+    },
+    visualizationLabel() {
+      const names = {
+        off: "Off",
+        stars: "Stars",
+        milkdrop: "MilkDrop",
+        rain: "Rain",
+      };
+      const modes = Object.keys(names);
+      const next =
+        modes[(modes.indexOf(this.visualization) + 1) % modes.length];
+      return `Visualizations: ${names[this.visualization]}. Next: ${names[next]}`;
     },
     framed() {
       return !this.portrait;
@@ -569,6 +627,17 @@ export default {
     clearTimeout(this.whatsNewTimer);
   },
   methods: {
+    toggleMinimized() {
+      this.minimized = !this.minimized;
+      if (this.minimized) {
+        this.dismissWhatsNew();
+        this.stationsOpen = this.nowOpen = false;
+      }
+    },
+    expandFromBar(event) {
+      if (this.minimized && !event.target.closest("button, a, input"))
+        this.minimized = false;
+    },
     updateOnline() {
       this.online = navigator.onLine;
     },
@@ -585,6 +654,9 @@ export default {
     },
     toggleVisuals() {
       this.$store.commit("player/TOGGLE_VISUALS");
+      if (this.visualization === "milkdrop")
+        this.$player.enableVisualizationAudio();
+      else this.$player.disableVisualizationAudio();
     },
     toggle() {
       if (this.stationActive) {
@@ -1260,6 +1332,102 @@ export default {
   .player__logo--on,
   .player__state-dot {
     animation: none;
+  }
+}
+.player {
+  transition: height 0.25s ease;
+}
+.player__marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  color: var(--dnb-text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 38px;
+}
+.player__marquee-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  animation: player-marquee 22s linear infinite;
+}
+.player__marquee-track > span {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-right: 48px;
+}
+.player__marquee:hover .player__marquee-track,
+.player__marquee:focus-within .player__marquee-track {
+  animation-play-state: paused;
+}
+@keyframes player-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.player.player--minimized {
+  height: 40px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #333;
+  border-image: none;
+  background: rgba(10, 10, 10, 0.94);
+  box-shadow: 0 4px 20px #0005;
+}
+.player--minimized > :not(.player__bar) {
+  display: none;
+}
+.player.player--minimized .player__bar {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  gap: 2px;
+}
+.player--minimized .player__bar-gap,
+.player--minimized
+  .player__bar
+  > button[aria-label="Stations and station info"],
+.player--minimized .player__bar > button[aria-label="Open in a popup window"] {
+  display: none;
+}
+.player--minimized .player__icon {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 4px;
+}
+.player--minimized .player__icon .ui-icon,
+.player--minimized .player__icon .v-icon {
+  font-size: 22px !important;
+  width: 22px;
+  height: 22px;
+}
+.player__size:focus-visible,
+.player__mini-play:focus-visible {
+  outline: 2px solid var(--dnb-accent);
+  outline-offset: -3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .player {
+    transition: none;
+  }
+  .player__marquee-track {
+    animation: none;
+    display: block;
+    width: 100%;
+  }
+  .player__marquee-track > span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+  }
+  .player__marquee-track > span + span {
+    display: none;
   }
 }
 </style>

@@ -8,6 +8,12 @@ dependencies:
   '@mdi/font':
     specifier: ^7.4.47
     version: 7.4.47
+  butterchurn:
+    specifier: 3.0.0-beta.5
+    version: 3.0.0-beta.5
+  butterchurn-presets:
+    specifier: 3.0.0-beta.4
+    version: 3.0.0-beta.4
   vue:
     specifier: ^3.5.44
     version: 3.5.44
@@ -37,6 +43,10 @@ devDependencies:
 
 packages:
 
+  /@assemblyscript/loader@0.17.14:
+    resolution: {integrity: sha512-+PVTOfla/0XMLRTQLJFPg4u40XcdTfon6GGea70hBGi8Pd7ZymIXyVUR+vK8wt5Jb4MVKTKPIz43Myyebw5mZA==}
+    dev: false
+
   /@babel/helper-string-parser@7.29.11:
     resolution: {integrity: sha512-snZbO7MEDOof+hvNa97EjEY7qD7h2kwvQr5AJC3ZhQudKW5dnej6k3kP9NQV88hJwaS8vDqRLFo9rivLEhle2g==}
     engines: {node: '>=6.9.0'}
@@ -51,6 +61,11 @@ packages:
     hasBin: true
     dependencies:
       '@babel/types': 7.29.11
+
+  /@babel/runtime@7.29.10:
+    resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
+    engines: {node: '>=6.9.0'}
+    dev: false
 
   /@babel/types@7.29.11:
     resolution: {integrity: sha512-WCsemW40Cpc6gouC1SrY6PBaZ+oLRlEVY9XBvZBI7il/HyUrb2nJ505wE1MHEFyDZNnrWDEuy4jL50WVHfTTSQ==}
@@ -296,6 +311,20 @@ packages:
   /@vue/shared@3.5.44:
     resolution: {integrity: sha512-H82XLH0DjmSOdbEwO15x3QTo1f5PWEtv237eLpYKc0mqLu+B8hnq16lFWmuBmNurkeiG3wr+oM1FhOll/YVFRg==}
 
+  /butterchurn-presets@3.0.0-beta.4:
+    resolution: {integrity: sha512-TbQLUPvGOYMZAtWKoCmBtludh9aQZ6NaMGQU4lvPeadBPy3Du3yNmwBjlTMLP5c5mRWElxQPjTL1PtR7FZK3OQ==}
+    dependencies:
+      '@babel/runtime': 7.29.10
+    dev: false
+
+  /butterchurn@3.0.0-beta.5:
+    resolution: {integrity: sha512-BStK4OAbBb9Pvt8PuQlS4WVmYBwU1KuDMRHF1V89QjoIFauAqq7tpV4EpYXj7K563r5daLrMX+2y5DBhZZ9Xig==}
+    dependencies:
+      '@assemblyscript/loader': 0.17.14
+      ecma-proposal-math-extensions: 0.0.2
+      eel-wasm: 0.0.16
+    dev: false
+
   /csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
@@ -303,6 +332,14 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
     dev: true
+
+  /ecma-proposal-math-extensions@0.0.2:
+    resolution: {integrity: sha512-80BnDp2Fn7RxXlEr5HHZblniY4aQ97MOAicdWWpSo0vkQiISSE9wLR4SqxKsu4gCtXFBIPPzy8JMhay4NWRg/Q==}
+    dev: false
+
+  /eel-wasm@0.0.16:
+    resolution: {integrity: sha512-1tkId7I7E1Vs4fXTRsH83Sjn2S/AbzrVQKLBRGys6NLc3eVH4NBffJsdEeLHOWWUgQpVXBEP3CV/srUZNIuBnw==}
+    dev: false
 
   /entities@7.0.1:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}

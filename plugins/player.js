@@ -69,14 +69,16 @@ export default function ({ app, store }, inject) {
     return element;
   }
   let audio = createAudio();
-  let motion = app.$djProfile
-    ? createAudioMotion(
-        audio,
-        app.$djProfile,
-        fallbackAudio,
-        () => !source() || isMainStream(),
-      )
-    : null;
+  function createMotion() {
+    return createAudioMotion(
+      audio,
+      app.$djProfile,
+      fallbackAudio,
+      () => !source() || wantsAnalysis(),
+      () => Boolean(app.$djProfile) && isMainStream(),
+    );
+  }
+  let motion = app.$djProfile ? createMotion() : null;
   const dj = shallowReactive({ current: motion });
   inject("dj", dj);
   let audioEvents;
@@ -87,6 +89,13 @@ export default function ({ app, store }, inject) {
   const isLive = () => !source() || source().kind === "station";
   function isMainStream() {
     return source()?.kind === "station" && source().stationId === 1;
+  }
+
+  function wantsAnalysis() {
+    return (
+      (Boolean(app.$djProfile) && isMainStream()) ||
+      state().visualization === "milkdrop"
+    );
   }
 
   let stations = [];
@@ -122,12 +131,13 @@ export default function ({ app, store }, inject) {
     audio.volume = clamp(settings.volume, 0, 1);
   }
   commit("SET_VOLUME", audio.volume);
-  if (settings.visuals) {
-    commit("SET_VISUALS", true);
+  if (settings.visualization || settings.visuals) {
+    commit("SET_VISUALS", settings.visualization || true);
   }
   store.watch(
-    (root) => root.player.visualsEnabled,
-    (visuals) => writeSettings({ visuals }),
+    (root) => root.player.visualization,
+    (visualization) =>
+      writeSettings({ visualization, visuals: visualization !== "off" }),
   );
 
   function setStatus(status, message = "") {
@@ -135,38 +145,39 @@ export default function ({ app, store }, inject) {
     updateMediaSession();
   }
 
+  function resetAnalysis() {
+    const enabled = motion?.state.enabled ?? true;
+    const available = motion?.state.available ?? true;
+    audioEvents.abort();
+    motion?.disable();
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    const volume = audio.volume;
+    audio = createAudio();
+    audio.volume = volume;
+    motion = app.$djProfile ? createMotion() : null;
+    if (motion) {
+      motion.state.enabled = enabled;
+      motion.state.available = available;
+    }
+    dj.current = motion;
+    bindAudioEvents();
+    inject("sound", audio);
+  }
   function setSrc(url) {
-    const mainStream = isMainStream();
     if (
       motion &&
-      !mainStream &&
+      !wantsAnalysis() &&
       (audio.crossOrigin === "anonymous" || motion.initialized)
-    ) {
-      // A media element attached to Web Audio cannot be detached again. Use a
-      // fresh native element for other streams, including ones without CORS.
-      const available = motion.state.available;
-      const enabled = motion.state.enabled;
-      audioEvents.abort();
-      motion.disable();
-      audio.pause();
-      audio.removeAttribute("src");
-      audio.load();
-      const volume = audio.volume;
-      audio = createAudio();
-      audio.volume = volume;
-      motion = createAudioMotion(
-        audio,
-        app.$djProfile,
-        fallbackAudio,
-        () => !source() || isMainStream(),
-      );
-      motion.state.available = available;
-      motion.state.enabled = enabled;
+    )
+      resetAnalysis();
+    if (state().visualization === "milkdrop" && !motion) {
+      motion = createMotion();
       dj.current = motion;
-      bindAudioEvents();
-      inject("sound", audio);
     }
-    if (motion?.state.available && mainStream) audio.crossOrigin = "anonymous";
+    if (motion?.state.available && wantsAnalysis())
+      audio.crossOrigin = "anonymous";
     resumeAt = null;
     srcSetAt = Date.now();
     audio.src = url;
@@ -189,10 +200,29 @@ export default function ({ app, store }, inject) {
     retryStartedAt = 0;
   }
 
+  function prepareVisualizationAudio() {
+    if (!motion) {
+      motion = createMotion();
+      dj.current = motion;
+    }
+    if (!motion.state.available || audio.crossOrigin === "anonymous")
+      return false;
+    const position = resumeAt ?? audio.currentTime;
+    audio.crossOrigin = "anonymous";
+    if (!audio.getAttribute("src")) return false;
+    srcSetAt = Date.now();
+    audio.load();
+    if (!isLive()) resumeAt = position;
+    return true;
+  }
+
   function start() {
     lastProgressAt = Date.now();
     armStallWatch();
-    if (!quiet && isMainStream()) motion?.resume();
+    if (!quiet && wantsAnalysis()) {
+      if (state().visualization === "milkdrop") prepareVisualizationAudio();
+      motion?.resume();
+    }
     const attemptAudio = audio;
     const attemptSrc = audio.getAttribute("src");
     const attempt = audio.play();
@@ -594,6 +624,27 @@ export default function ({ app, store }, inject) {
       return audio;
     },
     ready,
+    enableVisualizationAudio() {
+      const changed = prepareVisualizationAudio();
+      motion?.resume();
+      if (changed && intent === "play") start();
+    },
+    disableVisualizationAudio() {
+      if (!motion?.initialized || (app.$djProfile && isMainStream())) return;
+      const url = audio.getAttribute("src");
+      const position = resumeAt ?? audio.currentTime;
+      resetAnalysis();
+      if (url) {
+        setSrc(url);
+        if (!isLive()) resumeAt = position;
+        if (intent === "play") start();
+      }
+    },
+    getVisualizationAudio() {
+      return motion?.state.available && motion.context && motion.node
+        ? { context: motion.context, node: motion.node }
+        : null;
+    },
     get stations() {
       return stations;
     },

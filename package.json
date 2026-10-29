@@ -20,16 +20,18 @@
     "start": "node scripts/serve-dist.mjs"
   },
   "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "butterchurn": "3.0.0-beta.5",
+    "butterchurn-presets": "3.0.0-beta.4",
     "vue": "^3.5.44",
     "vue-router": "^4.6.3",
     "vuex": "^4.1.0",
-    "webamp": "2.3.1",
-    "@mdi/font": "^7.4.47"
+    "webamp": "2.3.1"
   },
   "devDependencies": {
-    "vite": "^8.3.5",
-    "@vitejs/plugin-vue": "^6.0.10",
     "@playwright/test": "^1.58.0",
-    "prettier": "^3.6.2"
+    "@vitejs/plugin-vue": "^6.0.10",
+    "prettier": "^3.6.2",
+    "vite": "^8.3.5"
   }
 }
