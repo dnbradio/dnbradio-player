@@ -826,6 +826,12 @@ export default {
   background: linear-gradient(90deg, rgba(0, 10, 0, 0.3), transparent);
 }
 
+.player--framed.player--milkdrop {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 /* Top bar: visuals on the left, stations and popup on the right. */
 .player__bar {
   position: absolute;
