@@ -280,6 +280,7 @@ export default {
       clock: null,
       portrait: true,
       whatsNew: false,
+      whatsNewTimer: null,
     };
   },
   computed: {
@@ -532,6 +533,9 @@ export default {
     } catch (error) {
       this.whatsNew = false;
     }
+    if (this.whatsNew) {
+      this.whatsNewTimer = setTimeout(this.dismissWhatsNew, 15000);
+    }
     if (this.$store.state.player.initialLoad) {
       this.$store.dispatch("player/SET_INITIAL_LOAD", false);
       // Browsers that allow autoplay (frequent desktop listeners) start
@@ -547,6 +551,7 @@ export default {
     window.removeEventListener("resize", this.measure);
     window.removeEventListener("keydown", this.onKey);
     clearInterval(this.clock);
+    clearTimeout(this.whatsNewTimer);
   },
   methods: {
     dismissWhatsNew() {
@@ -1136,10 +1141,11 @@ export default {
   opacity: 0.8;
 }
 
+/* Over the station header, so the controls and nav stay usable. */
 .whats-new {
   position: fixed;
   left: 50%;
-  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  top: calc(env(safe-area-inset-top) + 8px);
   transform: translateX(-50%);
   z-index: 20;
   display: flex;
@@ -1182,7 +1188,7 @@ export default {
 .whats-new-enter,
 .whats-new-leave-to {
   opacity: 0;
-  transform: translate(-50%, 12px);
+  transform: translate(-50%, -12px);
 }
 
 /* Logo transitions between stations */

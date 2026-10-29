@@ -204,16 +204,14 @@ export default function ({ app, store }, inject) {
       } else {
         audio.pause();
       }
-      setStatus("error", "Can't reach the stream. Press play to try again.");
+      setStatus("error", "Can't connect · press play");
       return;
     }
     const delay = RETRY_DELAYS[Math.min(retryCount, RETRY_DELAYS.length - 1)];
     retryCount++;
     setStatus(
       "reconnecting",
-      navigator.onLine === false
-        ? "You're offline. Waiting for a connection…"
-        : "Connection lost. Reconnecting…"
+      navigator.onLine === false ? "Offline · will reconnect" : "Reconnecting…"
     );
     clearTimeout(retryTimer);
     retryTimer = setTimeout(reconnect, delay);
