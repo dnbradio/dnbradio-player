@@ -151,7 +151,7 @@ export default function ({ app, store }, inject) {
   function start() {
     lastProgressAt = Date.now();
     armStallWatch();
-    motion?.resume();
+    if (!quiet) motion?.resume();
     const attemptAudio = audio;
     const attemptSrc = audio.getAttribute("src");
     const attempt = audio.play();
