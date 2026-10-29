@@ -79,7 +79,6 @@ import stations from "@/data/stations";
 import Station from "@/models/Station";
 
 // comp
-import StationSchedule from "~/components/StationSchedule";
 import Logo from "~/components/Logo.vue";
 
 export default {

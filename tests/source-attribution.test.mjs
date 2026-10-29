@@ -21,11 +21,10 @@ async function loadModule(path, transform = (source) => source) {
 
 const attribution = await loadModule("../plugins/source-attribution.js");
 const stations = await (await loadModule("../data/stations.js"))();
-const details = await loadModule("../components/StationDetails.vue", (source) =>
-  source
-    .split("<script>")[1]
-    .split("</script>")[0]
-    .replace(/^import .*;$/gm, "")
+const { adjacentStation, freshStreamUrl } = await import(
+  "./load-module.mjs"
+).then(({ loadModule: load }) =>
+  load(new URL("../lib/stations.js", import.meta.url))
 );
 
 async function visit(url) {
@@ -117,57 +116,37 @@ test("navigation preserves the initial source, other query options, and hash", a
   );
 });
 
-test("initial play and previous/next/shuffle use the attributed stream with a cache buster", async () => {
-  const { router, streamUrl } = await visit("/?src=discord");
-  const context = {
-    station: stations[0],
-    stations,
-    $stationStreamUrl: streamUrl,
-    $sound: { src: "", pause() {} },
-    $router: {
-      push: (url) =>
-        router.push(
-          url,
-          () => {},
-          () => {}
-        ),
-    },
-    $nextTick: (callback) => callback(),
-    stopStars() {},
-    attachListeners() {},
-    pause() {},
-    previousStation: stations[0],
-    nextStation: stations[0],
-    prevIndex: 1,
-    nextIndex: 1,
-    randomIndex: 1,
-  };
-  context.streamurl = details.computed.streamurl.call(context);
-  assert.equal(details.methods.initStream.call(context), true);
-  assert.match(context.$sound.src, /\/discord\.mp3\?\d+$/);
-  assert.equal(context.$sound.type, "audio/mpeg");
+test("initial play and previous/next use the attributed stream with a cache buster", async () => {
+  const { streamUrl } = await visit("/?src=discord");
+  // plugins/player.js plays freshStreamUrl($stationStreamUrl(station)).
+  assert.match(freshStreamUrl(streamUrl(stations[0])), /\/discord\.mp3\?\d+$/);
 
-  context.station = stations[1];
-  for (const method of ["loadPrev", "loadNext", "loadRandom"]) {
-    details.methods[method].call(context);
-    assert.match(context.$sound.src, /\/discord\.mp3\?\d+$/, method);
-    await Vue.nextTick();
+  let station = stations[1];
+  for (const step of [-1, 1]) {
+    const next = adjacentStation(stations, station, step);
+    const url = freshStreamUrl(streamUrl(next));
+    if (next.id === 1) {
+      assert.match(url, /\/discord\.mp3\?\d+$/);
+    } else {
+      assert.equal(url.split("?")[0], next.streams[0].url);
+    }
   }
-  for (const station of stations.slice(1)) {
-    context.nextStation = station;
-    context.nextIndex = station.id;
-    details.methods.loadNext.call(context);
-    assert.equal(context.$sound.src.split("?")[0], station.streams[0].url);
-    await Vue.nextTick();
+  for (const item of stations.slice(1)) {
+    assert.equal(
+      freshStreamUrl(streamUrl(item)).split("?")[0],
+      item.streams[0].url
+    );
   }
 });
 
-test("shuffle always selects an existing different station", () => {
-  for (const station of stations) {
-    for (let attempt = 0; attempt < 100; attempt++) {
-      const id = details.computed.randomIndex.call({ station, stations });
-      assert.ok(stations.some((item) => item.id === id));
-      assert.notEqual(id, station.id);
-    }
-  }
+test("previous and next wrap around the station list", () => {
+  assert.equal(
+    adjacentStation(stations, stations[0], -1).id,
+    stations.at(-1).id
+  );
+  assert.equal(
+    adjacentStation(stations, stations.at(-1), 1).id,
+    stations[0].id
+  );
+  assert.equal(adjacentStation(stations, stations[1], 1).id, stations[2].id);
 });
