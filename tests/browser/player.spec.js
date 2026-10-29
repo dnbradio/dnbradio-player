@@ -48,6 +48,30 @@ const nowplaying = {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
+    // Enforce a consistent user-gesture policy across browser engines.
+    let activated = false;
+    document.addEventListener(
+      "click",
+      () => {
+        activated = true;
+      },
+      true,
+    );
+    document.addEventListener(
+      "keydown",
+      () => {
+        activated = true;
+      },
+      true,
+    );
+    const nativePlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      if (!activated)
+        return Promise.reject(
+          new DOMException("User gesture required", "NotAllowedError"),
+        );
+      return nativePlay.call(this);
+    };
     const create = document.createElement.bind(document);
     window.testAudio = [];
     document.createElement = (tag, ...args) => {
@@ -148,4 +172,54 @@ test("unknown app paths show the recovery page", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("link", { name: "Back to the player" }).click();
   await expect(page.locator(".player__controls")).toBeVisible();
+});
+
+test("broadcast overlays stay transparent and chat shows newest messages", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 400, height: 180 });
+  await page.route("**/api/chat_log", (route) =>
+    route.fulfill({
+      json: Array.from({ length: 30 }, (_, i) => ({
+        nick: "DJ",
+        message: "Message " + (30 - i),
+      })),
+    }),
+  );
+  await page.goto("./stations/1/widget-chat");
+  await expect(page.locator(".chat-line")).toHaveCount(30);
+  await expect
+    .poll(() =>
+      page
+        .locator(".broadcast-widget")
+        .evaluate((element) =>
+          Math.abs(
+            element.scrollHeight - element.clientHeight - element.scrollTop,
+          ),
+        ),
+    )
+    .toBeLessThan(2);
+  expect(
+    await page.evaluate(() =>
+      ["html", "body", "#app"].map(
+        (selector) =>
+          getComputedStyle(document.querySelector(selector)).backgroundColor,
+      ),
+    ),
+  ).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]);
+  await expect(page.locator(".chat-line").last()).toHaveText("DJMessage 30");
+});
+
+test("Webamp keeps its framing rules in a landscape embed", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 480, height: 280 });
+  await page.goto("./webamp/");
+  await expect(page.locator("#main-window")).toBeVisible();
+  await expect(page.locator("html")).toHaveClass(/dnb-embed/);
+  expect(
+    await page
+      .locator("html")
+      .evaluate((element) => getComputedStyle(element).overflowY),
+  ).toBe("hidden");
 });

@@ -9,7 +9,7 @@ The deprecated `server/` directory is historical and is not part of this build.
 
 ## Development and verification
 
-Use Node 22.21.1 (`.node-version`) and pnpm 8.15.9.
+Use Node 22.23.4 (`.node-version`) and pnpm 8.15.9.
 
 ```sh
 corepack enable
@@ -53,6 +53,7 @@ location /player/ {
 `pnpm start` serves a local production build at http://127.0.0.1:4173/player/.
 Use HOST and PORT to override the bind address and port. This preview server
 is for validation and container previews; production remains static nginx.
+Docker Compose maps host NODE_PORT (default 4173) to the container listener on 4173.
 
 ## Player
 

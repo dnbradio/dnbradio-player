@@ -162,12 +162,6 @@ function downloadText(text, filename, type) {
 export default {
   layout: "ls-widget",
   components: { ExtraWindows },
-  head() {
-    return {
-      title: this.station ? `${this.station.title} live player` : "live player",
-      htmlAttrs: { class: "dnb-embed" },
-    };
-  },
   data() {
     const layout = initialLayout(this.$route.query);
     const extraWindows = {};
@@ -1011,6 +1005,7 @@ export default {
     },
   },
   async mounted() {
+    document.title = `${this.station.title} live player`;
     this.entries = new Map();
     this.audioInfo = new Map();
     this.scaledEvents = new WeakSet();

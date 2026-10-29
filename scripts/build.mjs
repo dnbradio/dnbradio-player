@@ -13,7 +13,19 @@ for (const route of staticRoutes) {
   await mkdir(output, { recursive: true });
   await writeFile(
     output + "/index.html",
-    html.replace("</head>", `${tags}</head>`),
+    html
+      .replace(
+        '<html lang="en">',
+        '<html lang="en" class="' +
+          (route.includes("/widget-")
+            ? "broadcast-overlay"
+            : /\/(webamp|embed)$/.test(route) ||
+                route.startsWith("/x-card-test/")
+              ? "dnb-embed"
+              : "") +
+          '">',
+      )
+      .replace("</head>", `${tags}</head>`),
   );
 }
 await writeFile("dist/200.html", html);

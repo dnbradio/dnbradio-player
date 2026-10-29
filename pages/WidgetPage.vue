@@ -1,5 +1,9 @@
 <template>
-  <section class="broadcast-widget" :class="'broadcast-widget--' + kind">
+  <section
+    ref="container"
+    class="broadcast-widget"
+    :class="'broadcast-widget--' + kind"
+  >
     <template v-if="kind === 'nowplaying'"
       ><p>{{ np.live ? "LIVE NOW" : "PLAYLIST ROTATION" }}</p>
       <strong>{{ np.artist }}</strong
@@ -139,8 +143,12 @@ export default {
             .sort((a, b) => b.gross - a.gross)
             .slice(0, 10);
         else if (kind === "socials") this.socials = data;
-        else if (kind === "chat") this.chat = data.slice(0, 30).reverse();
-        else this.data = data;
+        else if (kind === "chat") {
+          this.chat = data.slice(0, 30).reverse();
+          await this.$nextTick();
+          const container = this.$refs.container;
+          if (container) container.scrollTop = container.scrollHeight;
+        } else this.data = data;
       } catch (error) {
         if (error.name !== "AbortError") this.failed = true;
       }
@@ -181,6 +189,8 @@ export default {
   color: #39ff14;
 }
 .broadcast-widget--chat {
+  height: 100svh;
+  overflow-y: auto;
   text-align: left;
 }
 .chat-line {

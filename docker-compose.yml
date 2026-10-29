@@ -6,7 +6,7 @@ services:
     container_name: app
     restart: always
     ports:
-      - "${NODE_PORT}:${NODE_PORT}"
+      - "${NODE_PORT:-4173}:4173"
     command: "npm run start"
     networks:
       - app-network

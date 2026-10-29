@@ -1,4 +1,4 @@
-FROM node:22.21.1-slim
+FROM node:22.23.4-slim
 WORKDIR /src
 RUN corepack enable && corepack prepare pnpm@8.15.9 --activate
 COPY package.json pnpm-lock.yaml ./
