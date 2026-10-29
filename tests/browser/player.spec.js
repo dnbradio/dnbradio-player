@@ -428,3 +428,59 @@ test("initial reduced motion keeps the DJ still while audio plays", async ({
     .toBeGreaterThan(0);
   await expect(page.locator(".dj-mode__head")).toHaveCSS("transform", "none");
 });
+
+test("a late analysis failure cannot restart a paused podcast", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const resume = AudioContext.prototype.resume;
+    AudioContext.prototype.resume = function () {
+      resume.call(this);
+      return new Promise((resolve, reject) => {
+        window.rejectAnalysis = reject;
+      });
+    };
+  });
+  await page.goto("./stations/1/podcast/58124?dj=drastic");
+  const play = page.locator(".ep__controls .play-button");
+  await play.click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+    .toBeGreaterThan(0);
+  await play.click();
+  expect(await page.evaluate(() => window.testAudio[0].paused)).toBe(true);
+  await page.evaluate(() =>
+    window.rejectAnalysis(new DOMException("Unavailable", "NotSupportedError")),
+  );
+  await expect.poll(() => page.evaluate(() => window.testAudio.length)).toBe(3);
+  expect(await page.evaluate(() => window.testAudio.at(-1).paused)).toBe(true);
+  await play.click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+});
+
+test("an analysis failure before play cannot assign an empty source or start audio", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    AudioContext.prototype.resume = () =>
+      Promise.reject(new DOMException("Unavailable", "NotSupportedError"));
+  });
+  await page.goto("./?dj=djaffirmation");
+  await page.getByRole("button", { name: "Motion on", exact: true }).click();
+  await page.getByRole("button", { name: "Motion off", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Motion unavailable", exact: true }),
+  ).toBeDisabled();
+  expect(
+    await page.evaluate(() => ({
+      paused: window.testAudio.at(-1).paused,
+      src: window.testAudio.at(-1).getAttribute("src"),
+    })),
+  ).toEqual({ paused: true, src: null });
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+});

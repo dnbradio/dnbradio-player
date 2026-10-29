@@ -341,9 +341,11 @@ export default function ({ app, store }, inject) {
     audio.volume = volume;
     bindAudioEvents();
     inject("sound", audio);
-    setSrc(url);
-    if (!isLive()) resumeAt = position;
-    start();
+    if (url) {
+      setSrc(url);
+      if (!isLive()) resumeAt = position;
+      if (intent === "play") start();
+    }
     return true;
   }
   window.addEventListener("online", () => {
