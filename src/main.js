@@ -3,6 +3,7 @@ import App from "./App.vue";
 import router from "./router.js";
 import store from "../store/index.js";
 import playerPlugin from "../plugins/player.js";
+import djPlugin from "../plugins/dj.js";
 import sourcePlugin from "../plugins/source-attribution.js";
 import UiIcon from "../components/ui/Icon.vue";
 import Spinner from "../components/ui/Spinner.vue";
@@ -31,6 +32,7 @@ const inject = (name, value) => {
   pluginApp["$" + name] = value;
 };
 await router.isReady();
+djPlugin({ route: router.currentRoute.value, app: pluginApp }, inject);
 sourcePlugin({ route: router.currentRoute.value, app: pluginApp }, inject);
 playerPlugin(
   {

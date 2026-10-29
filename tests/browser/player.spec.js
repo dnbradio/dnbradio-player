@@ -223,3 +223,264 @@ test("Webamp keeps its framing rules in a landscape embed", async ({
       .evaluate((element) => getComputedStyle(element).overflowY),
   ).toBe("hidden");
 });
+
+for (const [id, name, image] of [
+  ["djaffirmation", "DJ Affirmation", "dj-affirmation.webp"],
+  ["drastic", "Drastic", "dj-drastic.webp"],
+]) {
+  test(`${name} reacts to audio, respects motion controls and survives navigation`, async ({
+    page,
+    browserName,
+  }) => {
+    await page.addInitScript(() => {
+      window.analysisReads = 0;
+      window.analysisPeak = 0;
+      const read = AnalyserNode.prototype.getByteFrequencyData;
+      AnalyserNode.prototype.getByteFrequencyData = function (bins) {
+        read.call(this, bins);
+        window.analysisReads++;
+        window.analysisPeak = Math.max(window.analysisPeak, ...bins);
+      };
+    });
+    await page.goto(`./?dj=${id}&src=discord`);
+    const head = page.locator(".dj-mode__head");
+    await expect(head).toHaveAttribute("src", new RegExp(image));
+    await expect(head).toHaveAttribute("alt", new RegExp(name));
+    await page.locator(".player__controls .play-button").click();
+    await expect
+      .poll(() => page.evaluate(() => window.analysisReads))
+      .toBeGreaterThan(0);
+    if (browserName !== "webkit" || process.platform !== "darwin") {
+      await expect
+        .poll(() => page.evaluate(() => window.analysisPeak))
+        .toBeGreaterThan(0);
+    } else {
+      test.info().annotations.push({
+        type: "verification-limit",
+        description:
+          "macOS Playwright WebKit returns zero FFT bins for decoded media. Nonzero FFT is required in Chromium and Linux WebKit CI.",
+      });
+    }
+    await expect
+      .poll(() => head.evaluate((el) => el.style.transform))
+      .toContain("translate");
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", {
+        value: true,
+        configurable: true,
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(head).toHaveCSS("transform", "none");
+    const hiddenReads = await page.evaluate(() => window.analysisReads);
+    const hiddenTime = await page.evaluate(
+      () => window.testAudio[0].currentTime,
+    );
+    await expect
+      .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+      .toBeGreaterThan(hiddenTime);
+    expect(await page.evaluate(() => window.analysisReads)).toBe(hiddenReads);
+    await page.evaluate(() => {
+      delete document.hidden;
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect
+      .poll(() => page.evaluate(() => window.analysisReads))
+      .toBeGreaterThan(hiddenReads);
+    await page.getByRole("button", { name: "Motion on", exact: true }).click();
+    await expect(head).toHaveCSS("transform", "none");
+    const time = await page.evaluate(() => window.testAudio[0].currentTime);
+    await expect
+      .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+      .toBeGreaterThan(time);
+    await page.getByRole("button", { name: "Motion off", exact: true }).click();
+    await expect
+      .poll(() => head.evaluate((el) => el.style.transform))
+      .toContain("translate");
+    await page.locator('a.station-nav__item[href*="schedule"]').click();
+    await expect(page).toHaveURL(new RegExp(`dj=${id}`));
+    await expect(page).toHaveURL(/src=discord/);
+    await page.locator(".mini__body").click();
+    await expect(head).toBeVisible();
+    await expect
+      .poll(() => head.evaluate((el) => el.style.transform))
+      .toContain("translate");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(
+      page.getByRole("button", { name: "Reduced motion", exact: true }),
+    ).toBeDisabled();
+    await expect(head).toHaveCSS("transform", "none");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect
+      .poll(() => head.evaluate((el) => el.style.transform))
+      .toContain("translate");
+    await page.locator(".player__controls .play-button").click();
+    await expect(head).toHaveCSS("transform", "none");
+  });
+}
+
+test("DJ mode falls back to native playback if CORS analysis cannot load the stream", async ({
+  page,
+}) => {
+  let rejected = false;
+  await page.route("**/listen/**", async (route) => {
+    if (
+      await page.evaluate(
+        () =>
+          window.testAudio.filter((a) => a.preload === "none").at(-1)
+            .crossOrigin === "anonymous",
+      )
+    ) {
+      rejected = true;
+      return route.abort("failed");
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: "audio/wav",
+      body: tone(),
+    });
+  });
+  await page.goto("./?dj=drastic");
+  await page.locator(".player__controls .play-button").click();
+  await expect(
+    page.getByRole("button", { name: "Motion unavailable", exact: true }),
+  ).toBeDisabled();
+  expect(rejected).toBe(true);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const audio = window.testAudio.at(-1);
+        return !audio.paused && audio.currentTime > 0;
+      }),
+    )
+    .toBe(true);
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => window.testAudio.at(-1).getAttribute("src")),
+    )
+    .toBe(null);
+});
+
+test("normal and unknown DJ queries keep the original audio path", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.contexts = 0;
+    const Context = window.AudioContext || window.webkitAudioContext;
+    window.AudioContext = new Proxy(Context, {
+      construct(target, args) {
+        window.contexts++;
+        return Reflect.construct(target, args);
+      },
+    });
+  });
+  for (const query of [
+    "",
+    "?dj=unknown",
+    "?dj=constructor",
+    "?dj=drastic&dj=djaffirmation",
+  ]) {
+    await page.goto("./" + query);
+    await expect(page.locator(".dj-mode")).toHaveCount(0);
+    await page.locator(".player__controls .play-button").click();
+    await expect
+      .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+      .toBeGreaterThan(0);
+    expect(
+      await page.evaluate(() => ({
+        contexts: window.contexts,
+        cors: window.testAudio[0].crossOrigin,
+      })),
+    ).toEqual({ contexts: 0, cors: null });
+  }
+});
+
+test("DJ analysis setup failures preserve native audio playback", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    AudioContext.prototype.createMediaElementSource = () => {
+      throw new DOMException("Unavailable", "NotSupportedError");
+    };
+  });
+  await page.goto("./?dj=djaffirmation");
+  await page.locator(".player__controls .play-button").click();
+  await expect(
+    page.getByRole("button", { name: "Motion unavailable", exact: true }),
+  ).toBeDisabled();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+});
+
+test("initial reduced motion keeps the DJ still while audio plays", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("./?dj=drastic");
+  await page.locator(".player__controls .play-button").click();
+  await expect(
+    page.getByRole("button", { name: "Reduced motion", exact: true }),
+  ).toBeDisabled();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+    .toBeGreaterThan(0);
+  await expect(page.locator(".dj-mode__head")).toHaveCSS("transform", "none");
+});
+
+test("a late analysis failure cannot restart a paused podcast", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const resume = AudioContext.prototype.resume;
+    AudioContext.prototype.resume = function () {
+      resume.call(this);
+      return new Promise((resolve, reject) => {
+        window.rejectAnalysis = reject;
+      });
+    };
+  });
+  await page.goto("./stations/1/podcast/58124?dj=drastic");
+  const play = page.locator(".ep__controls .play-button");
+  await play.click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+    .toBeGreaterThan(0);
+  await play.click();
+  expect(await page.evaluate(() => window.testAudio[0].paused)).toBe(true);
+  await page.evaluate(() =>
+    window.rejectAnalysis(new DOMException("Unavailable", "NotSupportedError")),
+  );
+  await expect.poll(() => page.evaluate(() => window.testAudio.length)).toBe(3);
+  expect(await page.evaluate(() => window.testAudio.at(-1).paused)).toBe(true);
+  await play.click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+});
+
+test("an analysis failure before play cannot assign an empty source or start audio", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    AudioContext.prototype.resume = () =>
+      Promise.reject(new DOMException("Unavailable", "NotSupportedError"));
+  });
+  await page.goto("./?dj=djaffirmation");
+  await page.getByRole("button", { name: "Motion on", exact: true }).click();
+  await page.getByRole("button", { name: "Motion off", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Motion unavailable", exact: true }),
+  ).toBeDisabled();
+  expect(
+    await page.evaluate(() => ({
+      paused: window.testAudio.at(-1).paused,
+      src: window.testAudio.at(-1).getAttribute("src"),
+    })),
+  ).toEqual({ paused: true, src: null });
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+});

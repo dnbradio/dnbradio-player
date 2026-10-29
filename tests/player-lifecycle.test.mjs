@@ -9,7 +9,7 @@ const engine = (
   .replace(/^import .*;\n/gm, "")
   .replace("export default function", "function plugin");
 
-test("podcast retries preserve position, source changes clear it, and sleep cancellation restores volume", () => {
+test("podcast retries and DJ fallback preserve position, source changes clear it, and sleep cancellation restores volume", () => {
   const timers = new Map();
   let timerId = 0;
   const handlers = {};
@@ -51,7 +51,20 @@ test("podcast retries preserve position, source changes clear it, and sleep canc
     },
   };
   let player;
+  let analysisFailure;
+  let clock = Date.now();
   const context = vm.createContext({
+    AbortController,
+    Date: class extends Date {
+      static now() {
+        return clock;
+      }
+    },
+    createAudioMotion(element, profile, onUnavailable) {
+      element.crossOrigin = "anonymous";
+      analysisFailure = onUnavailable;
+      return { resume() {}, disable() {} };
+    },
     document: { createElement: () => audio, addEventListener() {} },
     window: { addEventListener() {} },
     navigator: { onLine: true },
@@ -110,12 +123,28 @@ test("podcast retries preserve position, source changes clear it, and sleep canc
   assert.ok(audio.volume < 0.8);
   player.setSleep(0);
   assert.equal(audio.volume, 0.8);
+
+  timers.clear();
+  vm.runInContext(
+    "plugin({app: {$djProfile: {}}, store}, inject)",
+    context,
+  );
+  player.playEpisode({ id: 3, playback_url: "three.mp3" });
+  audio.currentTime = 1200;
+  clock += 13000;
+  [...timers.values()].at(-1)();
+  assert.equal(state.status, "reconnecting");
+  [...timers.values()].at(-1)();
+  assert.equal(audio.currentTime, 0);
+  analysisFailure();
+  handlers.loadedmetadata();
+  assert.equal(audio.currentTime, 1200);
 });
 
 test("replacing a deep link cannot leave the app via Back; pushes and pop work", async () => {
   const source = await readFile(
     new URL("../lib/history.js", import.meta.url),
-    "utf8"
+    "utf8",
   );
   let onPop;
   const history = {
@@ -154,7 +183,7 @@ test("replacing a deep link cannot leave the app via Back; pushes and pop work",
 test("archive retries request the failed page and append it once", async () => {
   const source = await readFile(
     new URL("../pages/stations/_stationId/podcast/index.vue", import.meta.url),
-    "utf8"
+    "utf8",
   );
   const script = source
     .match(/<script>([\s\S]*?)<\/script>/)[1]
@@ -183,7 +212,7 @@ test("archive retries request the failed page and append it once", async () => {
   });
   vm.runInContext(
     script + ";globalThis.load = component.methods.load",
-    context
+    context,
   );
   const state = {
     apiUrl: "https://dnbradio.com/api/podcast",
@@ -202,6 +231,6 @@ test("archive retries request the failed page and append it once", async () => {
   assert.deepEqual(requests, ["2", "2"]);
   assert.deepEqual(
     state.items.map((item) => item.id),
-    [1, 2]
+    [1, 2],
   );
 });
