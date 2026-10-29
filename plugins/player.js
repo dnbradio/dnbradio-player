@@ -1,6 +1,7 @@
 // One audio element for the whole app, so playback keeps going while the
 // listener browses the schedule, podcasts, or any other page. Components read
 // state from store/player.js and control playback through this.$player.
+import { shallowReactive } from "vue";
 import { createAudioMotion } from "../lib/audio-motion.js";
 import stationsData from "@/data/stations";
 import { normalizeNowPlaying } from "~/lib/nowplaying";
@@ -68,16 +69,25 @@ export default function ({ app, store }, inject) {
     return element;
   }
   let audio = createAudio();
-  const motion = app.$djProfile
-    ? createAudioMotion(audio, app.$djProfile, fallbackAudio)
+  let motion = app.$djProfile
+    ? createAudioMotion(
+        audio,
+        app.$djProfile,
+        fallbackAudio,
+        () => !source() || isMainStream(),
+      )
     : null;
-  inject("dj", motion);
+  const dj = shallowReactive({ current: motion });
+  inject("dj", dj);
   let audioEvents;
 
   const commit = (type, payload) => store.commit("player/" + type, payload);
   const state = () => store.state.player;
   const source = () => state().source;
   const isLive = () => !source() || source().kind === "station";
+  function isMainStream() {
+    return source()?.kind === "station" && source().stationId === 1;
+  }
 
   let stations = [];
   const ready = stationsData().then((list) => {
@@ -126,6 +136,37 @@ export default function ({ app, store }, inject) {
   }
 
   function setSrc(url) {
+    const mainStream = isMainStream();
+    if (
+      motion &&
+      !mainStream &&
+      (audio.crossOrigin === "anonymous" || motion.initialized)
+    ) {
+      // A media element attached to Web Audio cannot be detached again. Use a
+      // fresh native element for other streams, including ones without CORS.
+      const available = motion.state.available;
+      const enabled = motion.state.enabled;
+      audioEvents.abort();
+      motion.disable();
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      const volume = audio.volume;
+      audio = createAudio();
+      audio.volume = volume;
+      motion = createAudioMotion(
+        audio,
+        app.$djProfile,
+        fallbackAudio,
+        () => !source() || isMainStream(),
+      );
+      motion.state.available = available;
+      motion.state.enabled = enabled;
+      dj.current = motion;
+      bindAudioEvents();
+      inject("sound", audio);
+    }
+    if (motion?.state.available && mainStream) audio.crossOrigin = "anonymous";
     resumeAt = null;
     srcSetAt = Date.now();
     audio.src = url;
@@ -151,7 +192,7 @@ export default function ({ app, store }, inject) {
   function start() {
     lastProgressAt = Date.now();
     armStallWatch();
-    if (!quiet) motion?.resume();
+    if (!quiet && isMainStream()) motion?.resume();
     const attemptAudio = audio;
     const attemptSrc = audio.getAttribute("src");
     const attempt = audio.play();

@@ -6,6 +6,9 @@ const { build } = await import("vite");
 await build();
 const { xPlayerCardTags } = await import("./social-cards.mjs");
 const { staticRoutes } = await import("./static-routes.mjs");
+const { djProfiles } = await import("../lib/djs.js");
+const { mainDjRoutes, djPreviewFile, djNginxMaps } =
+  await import("./dj-previews.mjs");
 const html = await readFile("dist/index.html", "utf8");
 for (const route of staticRoutes) {
   const tags = await xPlayerCardTags(route);
@@ -31,4 +34,22 @@ for (const route of staticRoutes) {
 await writeFile("dist/200.html", html);
 console.log(
   `Generated ${staticRoutes.length} routes and SPA fallback at ${process.env.ROUTER_BASE}`,
+);
+
+for (const route of mainDjRoutes) {
+  for (const id of Object.keys(djProfiles)) {
+    const file =
+      "dist/" + djPreviewFile(route, new URLSearchParams({ dj: id }));
+    // Fail the build rather than publish a preview referencing missing artwork.
+    await readFile(`dist/djs/${id}-preview.png`);
+    await mkdir(file.slice(0, file.lastIndexOf("/")), { recursive: true });
+    await writeFile(
+      file,
+      html.replace("</head>", `${await xPlayerCardTags(route, id)}</head>`),
+    );
+  }
+}
+await writeFile(
+  "dist/dj-previews/nginx-maps.conf",
+  djNginxMaps(process.env.ROUTER_BASE),
 );

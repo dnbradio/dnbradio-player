@@ -81,8 +81,10 @@ Playback state lives in `store/player.js`; components call `this.$player`.
 ## DJ motion
 
 Open `/player/?dj=djaffirmation` or `/player/?dj=drastic` to add the corresponding
-DJ head alongside the approved station artwork. The selection persists through
-station, schedule, podcast and chat navigation, including `src` attribution.
+DJ head alongside the approved main-stream artwork. DJ mode only appears and
+analyses audio on station 1. Other stations and podcasts use native playback
+without DJ analysis. The selection persists through navigation, including `src`
+attribution, so returning to the main stream restores the head.
 Missing, unknown and repeated DJ values use the normal player.
 
 A Web Audio analyser drives bass bob, midrange tilt and treble shake from the
@@ -97,6 +99,23 @@ The supplied artwork and frequency mapping come from the independently published
 (source branch `feat/dj-affirmation-mockup`, commit `fd9415f`). The production
 integration adds no dependency and retains the existing player controls.
 
+### DJ share previews
+
+The build generates crawler-readable main-stream HTML variants for both DJs.
+`?dj=djaffirmation` and `?dj=drastic` use committed 1200×630 head cards in
+`static/djs/`. Regenerate them with `node scripts/render-dj-cards.mjs`.
+Missing, unknown or repeated DJ values keep `x-card/winamp-station-1.png` on
+both OG and X. Other stations retain their own station previews.
+
+Production needs `dist/dj-previews/nginx-maps.conf` included in nginx's http
+context, plus the scoped locations in `deploy/player.conf` in the site server
+context. The maps select only allowlisted files on `/player/` and
+`/player/stations/1/`. nginx `try_files` falls back to the regular page if a
+variant is missing. The local preview server applies the same selection.
+Install the maps outside the live build directory so a failed/partial upload
+cannot affect nginx configuration reloads. Save the current configuration before
+installing, run `nginx -t`, then reload. The generated map is base-path specific.
+
 ## X player card
 
 Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/darkstep/`, `/player/webamp/`, `/player/stations/<id>/webamp/`) on X renders a playable player inside the post on desktop web. Mobile apps and other clients show the station image and link through to the full player.
@@ -109,7 +128,7 @@ Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/da
   - Without URL options, every load starts with the main window above the playlist at its base size; the EQ, MilkDrop, and the DNBRADIO windows open in the playlist's place. Window placement is not remembered. Skin, volume, balance, EQ settings, visualizer, and both playlists are kept in `localStorage` (`dnbradio-embed`).
 - `scripts/social-cards.mjs` writes the `twitter:*` and `og:*` tags into each station and Webamp page during the static build so crawlers can read them without JavaScript. The card is square (480×480 player) to match the Winamp layout.
 - `static/x-card/winamp-station-<id>.png` are the 1200×1200 card images: screenshots of the embed for each station in a playing state (fed a short sample of that station's stream), taken in headless Chrome at 480×480 and 2.5× scale. Retake them when the stations or the layout change.
-- Facebook and Threads don't play third-party players from link previews (Facebook's `og:video` only takes MP4 or the retired Flash type), so they show a link card. `og:image` points at `static/x-card/og-station-<id>.png` (1200×630, the 1.91:1 ratio both crop to), made from the square card with the station name beside it; `twitter:image` keeps the square image for X.
+- Facebook and Threads don't play third-party players from link previews (Facebook's `og:video` only takes MP4 or the retired Flash type), so they show a link card. For the main stream, `og:image` and `twitter:image` both use `static/x-card/winamp-station-1.png`. For other stations, `og:image` points at `static/x-card/og-station-<id>.png` (1200×630, the 1.91:1 ratio both crop to), made from the square card with the station name beside it; `twitter:image` keeps the square image for X.
 - Cloudflare Pages previews point their card tags at the preview itself and add `/x-card-test/square/`, `/x-card-test/portrait/`, and `/x-card-test/landscape/`, so card shapes can be compared on X before deploying.
 
 ### Popup player source attribution
