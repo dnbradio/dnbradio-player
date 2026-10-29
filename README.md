@@ -114,7 +114,6 @@ visible playback. Pausing, hidden tabs and reduced motion pause rotation.
 Triple-tap the player background or press **N** to advance immediately, including
 while paused. Playback buttons, links and text inputs retain their usual actions.
 
-
 The top-left button collapses the player upward to a **40px marquee bar**. Artist,
 title and station remain visible alongside play/pause, effect selection and
 expand. Double-click the readout or use Expand to restore the full player.

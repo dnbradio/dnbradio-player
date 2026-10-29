@@ -1,10 +1,14 @@
 import { test, expect } from "@playwright/test";
 
-// A real, short PCM recording exercises HTMLMediaElement playback without
+let toneData;
+
+// A real PCM recording exercises HTMLMediaElement playback without
 // depending on the radio network or third-party APIs being available in CI.
 function tone() {
+  if (toneData) return toneData;
   const rate = 8000,
-    length = rate * 20;
+    // Longer than GPU-heavy CI checks, so a live fixture never ends mid-test.
+    length = rate * 120;
   const data = Buffer.alloc(44 + length * 2);
   data.write("RIFF");
   data.writeUInt32LE(data.length - 8, 4);
@@ -23,7 +27,8 @@ function tone() {
       Math.round(Math.sin((2 * Math.PI * 220 * i) / rate) * 1000),
       44 + i * 2,
     );
-  return data;
+  toneData = data;
+  return toneData;
 }
 const episode = {
   id: 58124,
@@ -48,6 +53,9 @@ const nowplaying = {
 
 test.beforeEach(async ({ page, baseURL }) => {
   await page.addInitScript(() => {
+    // Stable UI rendering: start with the original preset. Separate unit tests
+    // vary random sources, and the renderer matrix still exercises all 29.
+    Math.random = () => 0.1;
     // Enforce a consistent user-gesture policy across browser engines.
     let activated = false;
     document.addEventListener(
@@ -1033,20 +1041,31 @@ test("MilkDrop rotates during playback and triple taps or N advance without chan
   isMobile,
 }) => {
   test.setTimeout(60_000);
+  // A real small viewport limits GPU work without changing native input metrics.
+  await page.setViewportSize({ width: 320, height: 480 });
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   // Advance visual frame timestamps without changing media time or watchdog timers.
   await page.addInitScript(() => {
-    // Keep this control-wiring check at 128px shader resolution. The separate
-    // preset test covers every shader; viewport/layout checks run elsewhere.
-    Object.defineProperty(window, "innerWidth", {
-      configurable: true,
-      value: 128,
-    });
-    Object.defineProperty(window, "innerHeight", {
-      configurable: true,
-      value: 128,
-    });
+    window.tapTrace = [];
+    for (const type of ["pointerup", "touchend", "click"]) {
+      document.addEventListener(
+        type,
+        (event) => {
+          window.tapTrace.push({
+            type,
+            target: event.target.className,
+            pointer: event.pointerType,
+            primary: event.isPrimary,
+            button: event.button,
+            time: event.timeStamp,
+            touches: event.changedTouches?.length,
+          });
+          if (window.tapTrace.length > 12) window.tapTrace.shift();
+        },
+        true,
+      );
+    }
     window.visualTimeOffset = 0;
     const request = window.requestAnimationFrame.bind(window);
     window.requestAnimationFrame = (callback) =>
@@ -1078,10 +1097,21 @@ test("MilkDrop rotates during playback and triple taps or N advance without chan
   const surface = page.locator(".player__subtitle");
   if (isMobile) {
     const box = await surface.boundingBox();
-    for (let i = 0; i < 3; i++)
+    for (let i = 0; i < 3; i++) {
       await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+      if (i < 2)
+        await expect(canvas).toHaveAttribute("data-milkdrop-preset", initial);
+    }
   } else await surface.click({ clickCount: 3 });
-  await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", initial);
+  try {
+    await expect(canvas).not.toHaveAttribute("data-milkdrop-preset", initial);
+  } catch (error) {
+    console.log(
+      "Triple-tap input trace:",
+      await page.evaluate(() => window.tapTrace),
+    );
+    throw error;
+  }
   expect(await page.evaluate(() => window.currentAudio.paused)).toBe(true);
   const manual = await canvas.getAttribute("data-milkdrop-preset");
   await page.keyboard.press("n");
