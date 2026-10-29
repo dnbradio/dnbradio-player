@@ -90,3 +90,29 @@ test("silent MilkDrop test audio is isolated from speakers and cleaned up on eve
   input.setTestSignal(true);
   assert.equal(sources.length, 2);
 });
+
+test("MilkDrop disposal tolerates an already disconnected player graph only", () => {
+  let connected = false;
+  let failure = "InvalidAccessError";
+  const live = {
+    disconnect() {
+      connected = false;
+    },
+  };
+  const visualizer = {
+    connectAudio() {
+      connected = true;
+    },
+    disconnectAudio() {
+      if (!connected) throw new DOMException("No connection", failure);
+      connected = false;
+    },
+  };
+  const input = createMilkDropInput({}, visualizer, live);
+  live.disconnect();
+  assert.doesNotThrow(() => input.dispose());
+  const second = createMilkDropInput({}, visualizer, live);
+  live.disconnect();
+  failure = "InvalidStateError";
+  assert.throws(() => second.dispose(), { name: "InvalidStateError" });
+});

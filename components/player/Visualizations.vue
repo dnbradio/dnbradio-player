@@ -35,7 +35,13 @@ export default {
         return graph
           ? {
               ...graph,
-              paused: audio.paused || audio.ended || audio.readyState < 2,
+              paused:
+                audio.paused ||
+                audio.ended ||
+                audio.readyState < 3 ||
+                ["loading", "reconnecting"].includes(
+                  this.$store.state.player.status,
+                ),
             }
           : null;
       },

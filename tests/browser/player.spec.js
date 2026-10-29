@@ -789,6 +789,22 @@ test("MilkDrop uses an inaudible test signal while idle and returns to real audi
   expect(
     await page.evaluate(() => milkdropRouting.activeSources().length),
   ).toBe(0);
+  await page.evaluate(() => {
+    Object.defineProperty(window.currentAudio, "readyState", {
+      configurable: true,
+      value: 2,
+    });
+    window.currentAudio.dispatchEvent(new Event("waiting"));
+  });
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
+  expect(await page.evaluate(() => milkdropRouting.hasAudiblePath())).toBe(
+    false,
+  );
+  await page.evaluate(() => {
+    delete window.currentAudio.readyState;
+    window.currentAudio.dispatchEvent(new Event("playing"));
+  });
+  await expect(host).toHaveAttribute("data-milkdrop-input", "live");
   await page.locator(".player__controls .play-button").click();
   await expect(host).toHaveAttribute("data-milkdrop-input", "test");
   expect(await page.evaluate(() => milkdropRouting.hasAudiblePath())).toBe(
