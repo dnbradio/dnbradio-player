@@ -84,6 +84,7 @@
             @click="playIfStopped"
           />
         </transition>
+        <DjHead v-if="$dj" :dj="$dj" />
         <div class="player__dots" role="group" aria-label="Choose station">
           <button
             v-for="item in stations"
@@ -233,6 +234,7 @@
 </template>
 
 <script>
+import DjHead from "./player/DjHead.vue";
 import { mapGetters, mapState } from "vuex";
 import { stationList } from "@/data/stations";
 import { EventBus } from "@/components/eventbus.js";
@@ -255,6 +257,7 @@ const DEFAULT_TITLE =
 
 export default {
   components: {
+    DjHead,
     PlayButton,
     StarField,
     StationNav,
@@ -867,6 +870,7 @@ export default {
 
 /* Station logo: tap to play, pulses while playing, faded when stopped. */
 .player__art {
+  position: relative;
   flex: 1 1 auto;
   min-height: 120px;
   display: flex;

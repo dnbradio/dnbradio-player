@@ -78,6 +78,25 @@ Playback state lives in `store/player.js`; components call `this.$player`.
 - The visuals toggle and volume are saved in `localStorage`
   (`dnbradio-player`).
 
+## DJ motion
+
+Open `/player/?dj=djaffirmation` or `/player/?dj=drastic` to add the corresponding
+DJ head alongside the approved station artwork. The selection persists through
+station, schedule, podcast and chat navigation, including `src` attribution.
+Missing, unknown and repeated DJ values use the normal player.
+
+A Web Audio analyser drives bass bob, midrange tilt and treble shake from the
+same audio element used for playback. It starts on a user playback gesture.
+Motion off, reduced motion, pause, buffering and a hidden tab stop animation.
+Turning motion off leaves audio connected. If analysis or a CORS request fails,
+the player replaces the analysed element with ordinary native audio and disables
+motion for that page load. Streams keep their existing retry behavior.
+
+The supplied artwork and frequency mapping come from the independently published
+[DJ mockup](https://pages-d52757e2.s3.us-west-2.amazonaws.com/a/47f2e2701256b5a7763324ebe90d9e37/dj-affirmation.html?dj=drastic)
+(source branch `feat/dj-affirmation-mockup`, commit `fd9415f`). The production
+integration adds no dependency and retains the existing player controls.
+
 ## X player card
 
 Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/darkstep/`, `/player/webamp/`, `/player/stations/<id>/webamp/`) on X renders a playable player inside the post on desktop web. Mobile apps and other clients show the station image and link through to the full player.

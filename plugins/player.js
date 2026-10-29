@@ -1,6 +1,7 @@
 // One audio element for the whole app, so playback keeps going while the
 // listener browses the schedule, podcasts, or any other page. Components read
 // state from store/player.js and control playback through this.$player.
+import { createAudioMotion } from "../lib/audio-motion.js";
 import stationsData from "@/data/stations";
 import { normalizeNowPlaying } from "~/lib/nowplaying";
 import { adjacentStation, freshStreamUrl, stationPath } from "~/lib/stations";
@@ -26,7 +27,7 @@ function writeSettings(patch) {
   try {
     localStorage.setItem(
       SETTINGS_KEY,
-      JSON.stringify({ ...readSettings(), ...patch })
+      JSON.stringify({ ...readSettings(), ...patch }),
     );
   } catch (error) {
     // Private mode or storage full: settings just don't persist.
@@ -60,9 +61,18 @@ function pickEpisode(episode) {
 }
 
 export default function ({ app, store }, inject) {
-  const audio = document.createElement("audio");
-  audio.preload = "none";
-  audio.setAttribute("x-webkit-airplay", "allow");
+  function createAudio() {
+    const element = document.createElement("audio");
+    element.preload = "none";
+    element.setAttribute("x-webkit-airplay", "allow");
+    return element;
+  }
+  let audio = createAudio();
+  const motion = app.$djProfile
+    ? createAudioMotion(audio, app.$djProfile, fallbackAudio)
+    : null;
+  inject("dj", motion);
+  let audioEvents;
 
   const commit = (type, payload) => store.commit("player/" + type, payload);
   const state = () => store.state.player;
@@ -107,7 +117,7 @@ export default function ({ app, store }, inject) {
   }
   store.watch(
     (root) => root.player.visualsEnabled,
-    (visuals) => writeSettings({ visuals })
+    (visuals) => writeSettings({ visuals }),
   );
 
   function setStatus(status, message = "") {
@@ -141,11 +151,16 @@ export default function ({ app, store }, inject) {
   function start() {
     lastProgressAt = Date.now();
     armStallWatch();
+    motion?.resume();
+    const attemptAudio = audio;
+    const attemptSrc = audio.getAttribute("src");
     const attempt = audio.play();
     if (!attempt || !attempt.catch) {
       return;
     }
     attempt.catch((error) => {
+      if (attemptAudio !== audio || attemptSrc !== audio.getAttribute("src"))
+        return;
       if (error && error.name === "AbortError") {
         return; // superseded by a newer source
       }
@@ -163,7 +178,7 @@ export default function ({ app, store }, inject) {
         setStatus(source() ? "paused" : "idle");
         return;
       }
-      fail();
+      if (!fallbackAudio()) fail();
     });
   }
 
@@ -214,7 +229,7 @@ export default function ({ app, store }, inject) {
     retryCount++;
     setStatus(
       "reconnecting",
-      navigator.onLine === false ? "Offline · will reconnect" : "Reconnecting…"
+      navigator.onLine === false ? "Offline · will reconnect" : "Reconnecting…",
     );
     clearTimeout(retryTimer);
     retryTimer = setTimeout(reconnect, delay);
@@ -231,7 +246,7 @@ export default function ({ app, store }, inject) {
     const current = source();
     if (current.kind === "station") {
       setSrc(
-        freshStreamUrl(app.$stationStreamUrl(stationById(current.stationId)))
+        freshStreamUrl(app.$stationStreamUrl(stationById(current.stationId))),
       );
     } else {
       if (resumeAt === null) {
@@ -243,68 +258,94 @@ export default function ({ app, store }, inject) {
     start();
   }
 
-  audio.addEventListener("playing", () => {
-    quiet = false;
-    clearRetry();
-    lastProgressAt = Date.now();
-    setStatus("playing");
-    registerActionHandlers();
-    armStallWatch();
-  });
-  audio.addEventListener("waiting", () => {
-    if (intent === "play" && state().status === "playing") {
-      setStatus("loading", "Buffering…");
-    }
-    armStallWatch();
-  });
-  audio.addEventListener("stalled", armStallWatch);
-  audio.addEventListener("timeupdate", () => {
-    lastProgressAt = Date.now();
-    if (!isLive() && lastProgressAt - lastPositionCommit > 500) {
-      lastPositionCommit = lastProgressAt;
-      commitPosition();
-    }
-  });
-  audio.addEventListener("loadedmetadata", () => {
-    if (resumeAt !== null) {
-      audio.currentTime = resumeAt;
-      resumeAt = null;
-    }
-    commitPosition();
-  });
-  audio.addEventListener("durationchange", commitPosition);
-  audio.addEventListener("volumechange", () => {
-    commit("SET_VOLUME", audio.volume);
-  });
-  audio.addEventListener("error", () => {
-    if (intent === "play" && audio.getAttribute("src")) {
-      fail();
-    }
-  });
-  audio.addEventListener("ended", () => {
-    if (isLive()) {
-      fail();
-      return;
-    }
-    intent = "stop";
-    setStatus("paused");
-  });
-  // Headphones unplugged, a call, or another app took the audio.
-  audio.addEventListener("pause", () => {
-    if (intent !== "play" || audio.ended || Date.now() - srcSetAt < 1500) {
-      return;
-    }
-    setTimeout(() => {
-      if (intent === "play" && audio.paused && state().status === "playing") {
-        intent = "stop";
-        clearTimeout(stallTimer);
-        if (isLive()) {
-          release();
-        }
-        setStatus("paused");
+  function bindAudioEvents() {
+    audioEvents = new AbortController();
+    const on = (name, handler) =>
+      audio.addEventListener(name, handler, { signal: audioEvents.signal });
+    on("playing", () => {
+      quiet = false;
+      clearRetry();
+      lastProgressAt = Date.now();
+      setStatus("playing");
+      registerActionHandlers();
+      armStallWatch();
+    });
+    on("waiting", () => {
+      if (intent === "play" && state().status === "playing") {
+        setStatus("loading", "Buffering…");
       }
-    }, 300);
-  });
+      armStallWatch();
+    });
+    on("stalled", armStallWatch);
+    on("timeupdate", () => {
+      lastProgressAt = Date.now();
+      if (!isLive() && lastProgressAt - lastPositionCommit > 500) {
+        lastPositionCommit = lastProgressAt;
+        commitPosition();
+      }
+    });
+    on("loadedmetadata", () => {
+      if (resumeAt !== null) {
+        audio.currentTime = resumeAt;
+        resumeAt = null;
+      }
+      commitPosition();
+    });
+    on("durationchange", commitPosition);
+    on("volumechange", () => {
+      commit("SET_VOLUME", audio.volume);
+    });
+    on("error", () => {
+      if (intent === "play" && audio.getAttribute("src")) {
+        if (!fallbackAudio()) fail();
+      }
+    });
+    on("ended", () => {
+      if (isLive()) {
+        fail();
+        return;
+      }
+      intent = "stop";
+      setStatus("paused");
+    });
+    // Headphones unplugged, a call, or another app took the audio.
+    on("pause", () => {
+      if (intent !== "play" || audio.ended || Date.now() - srcSetAt < 1500) {
+        return;
+      }
+      setTimeout(() => {
+        if (intent === "play" && audio.paused && state().status === "playing") {
+          intent = "stop";
+          clearTimeout(stallTimer);
+          if (isLive()) {
+            release();
+          }
+          setStatus("paused");
+        }
+      }, 300);
+    });
+  }
+  bindAudioEvents();
+
+  function fallbackAudio() {
+    if (!motion || audio.crossOrigin !== "anonymous") return false;
+    const url = audio.getAttribute("src");
+    const position = audio.currentTime;
+    const volume = audio.volume;
+    audioEvents.abort();
+    motion.disable();
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    audio = createAudio();
+    audio.volume = volume;
+    bindAudioEvents();
+    inject("sound", audio);
+    setSrc(url);
+    if (!isLive()) resumeAt = position;
+    start();
+    return true;
+  }
   window.addEventListener("online", () => {
     if (intent === "play" && state().status === "reconnecting") {
       clearTimeout(retryTimer);
@@ -350,8 +391,8 @@ export default function ({ app, store }, inject) {
       intent === "play" || status === "playing"
         ? "playing"
         : current
-        ? "paused"
-        : "none";
+          ? "paused"
+          : "none";
     if (!current) {
       lastMetaKey = "";
       session.metadata = null;
@@ -414,7 +455,7 @@ export default function ({ app, store }, inject) {
       set("previoustrack", null);
       set("nexttrack", null);
       set("seekbackward", (details) =>
-        player.seek(-(details.seekOffset || 30))
+        player.seek(-(details.seekOffset || 30)),
       );
       set("seekforward", (details) => player.seek(details.seekOffset || 30));
       set("seekto", (details) => player.seekTo(details.seekTime));
@@ -459,7 +500,7 @@ export default function ({ app, store }, inject) {
         ids.forEach((id) => refresh(stationById(id)));
         schedulePoll();
       },
-      hidden ? POLL_HIDDEN : POLL_VISIBLE
+      hidden ? POLL_HIDDEN : POLL_VISIBLE,
     );
   }
 
@@ -492,7 +533,7 @@ export default function ({ app, store }, inject) {
       if (volumeSupported) {
         audio.volume = Math.max(
           0,
-          startVolume * (1 - step / SLEEP_FADE_SECONDS)
+          startVolume * (1 - step / SLEEP_FADE_SECONDS),
         );
       }
       if (step >= SLEEP_FADE_SECONDS) {
@@ -506,7 +547,9 @@ export default function ({ app, store }, inject) {
   }
 
   const player = {
-    audio,
+    get audio() {
+      return audio;
+    },
     ready,
     get stations() {
       return stations;
@@ -556,7 +599,7 @@ export default function ({ app, store }, inject) {
         player.playEpisode(current.episode);
       } else {
         player.playStation(
-          stationById(current ? current.stationId : focusedStationId)
+          stationById(current ? current.stationId : focusedStationId),
         );
       }
     },
@@ -648,7 +691,7 @@ export default function ({ app, store }, inject) {
       commit("SET_SLEEP", Date.now() + delay);
       sleepTimer = setTimeout(
         sleepNow,
-        Math.max(0, delay - SLEEP_FADE_SECONDS * 1000)
+        Math.max(0, delay - SLEEP_FADE_SECONDS * 1000),
       );
     },
   };
