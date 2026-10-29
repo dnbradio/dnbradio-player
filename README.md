@@ -78,6 +78,12 @@ Playback state lives in `store/player.js`; components call `this.$player`.
 - The visuals toggle and volume are saved in `localStorage`
   (`dnbradio-player`).
 
+Live station requests use a fresh Icecast `_ic2` token on each play and retry.
+This avoids Icecast's Safari redirect to an internal proxy address while keeping
+main-channel source attribution. Jungletrain uses the HTTPS stream published
+on its own player. Native WebKit buffering may still add a few seconds before
+live audio starts, even when the connection succeeds immediately.
+
 ## DJ motion
 
 Open `/player/?dj=djaffirmation` or `/player/?dj=drastic` to add the corresponding
