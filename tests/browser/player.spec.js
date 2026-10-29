@@ -945,3 +945,68 @@ test("MilkDrop resumes after audio-context interruption", async ({ page }) => {
   );
   await expect(host).toHaveAttribute("data-milkdrop-input", "test");
 });
+
+test("MilkDrop visibly responds to bass attacks instead of only elapsed time", async ({
+  page,
+}) => {
+  let moduleUrl;
+  page.on("response", (response) => {
+    if (/\/milkdrop-[^/]+\.js$/.test(new URL(response.url()).pathname)) {
+      moduleUrl = response.url();
+    }
+  });
+  await page.goto("./");
+  const fx = page.getByRole("button", { name: /^Visualizations:/ });
+  await fx.click();
+  await fx.click();
+  await expect(page.locator("[data-visualization=milkdrop]")).toHaveAttribute(
+    "data-milkdrop-input",
+    "test",
+  );
+  const result = await page.evaluate(async (url) => {
+    const { createMilkDrop } = await import(url);
+    const context = new AudioContext();
+    const source = context.createGain();
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 64;
+    const visualizer = await createMilkDrop(context, canvas, source, 64, 64);
+    try {
+      // Run the actual compiled preset and renderer with controlled audio.
+      // Hold timing constant so a stronger beat must change rendered parameters.
+      const runner = visualizer.renderer.presetEquationRunner;
+      const run = runner.runFrameEquations.bind(runner);
+      let frame;
+      runner.runFrameEquations = (vars) => {
+        frame = run(vars);
+        return frame;
+      };
+      function render(amplitude) {
+        const wave = Uint8Array.from({ length: 1024 }, (_, i) =>
+          Math.round(128 + amplitude * Math.sin((2 * Math.PI * 2 * i) / 1024)),
+        );
+        visualizer.render({
+          elapsedTime: 1 / 60,
+          audioLevels: {
+            timeByteArray: wave,
+            timeByteArrayL: wave,
+            timeByteArrayR: wave,
+          },
+        });
+        return { zoom: frame.zoom, alpha: frame.wave_a };
+      }
+      let steady;
+      for (let i = 0; i < 100; i++) steady = render(10);
+      const attack = render(90);
+      for (let i = 0; i < 100; i++) render(90);
+      const settled = render(90);
+      return { steady, attack, settled };
+    } finally {
+      visualizer.dispose();
+      await context.close();
+    }
+  }, moduleUrl);
+  expect(result.steady.alpha).toBeLessThan(0.05);
+  expect(result.attack.alpha).toBeGreaterThan(0.3);
+  expect(result.attack.zoom).toBeLessThan(result.steady.zoom - 0.01);
+  expect(result.settled.alpha).toBeLessThan(0.05);
+});
