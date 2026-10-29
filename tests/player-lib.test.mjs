@@ -19,6 +19,7 @@ test("metadata is decoded to plain text", () => {
     "<img src=x onerror=alert(1)>"
   );
   assert.equal(cleanMeta(null), "");
+  assert.equal(cleanMeta("&#999999999;"), "&#999999999;");
   assert.equal(stripTags("One<br />Two &amp; Three"), "One\nTwo & Three");
 });
 

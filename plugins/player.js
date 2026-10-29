@@ -115,6 +115,7 @@ export default function ({ app, store }, inject) {
   }
 
   function setSrc(url) {
+    resumeAt = null;
     srcSetAt = Date.now();
     audio.src = url;
   }
@@ -125,6 +126,7 @@ export default function ({ app, store }, inject) {
     clearTimeout(stallTimer);
     srcSetAt = Date.now();
     audio.pause();
+    resumeAt = null;
     audio.removeAttribute("src");
     audio.load();
   }
@@ -231,7 +233,9 @@ export default function ({ app, store }, inject) {
         freshStreamUrl(app.$stationStreamUrl(stationById(current.stationId)))
       );
     } else {
-      resumeAt = audio.currentTime;
+      if (resumeAt === null) {
+        resumeAt = audio.currentTime;
+      }
       srcSetAt = Date.now();
       audio.load();
     }
