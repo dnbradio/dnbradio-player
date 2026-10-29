@@ -469,7 +469,7 @@ export default {
       } else {
         this.stopStars();
       }
-      if (this.$sound?.src == this.station?.streams?.[0]?.url) {
+      if (this.$sound?.src == this.streamurl) {
         if (this.$sound?.paused) {
           this.$sound.play();
         }
@@ -477,9 +477,7 @@ export default {
         this.isPlaying = true;
         return true;
       }
-      const streamUrl = this.station?.streams?.[0]?.url
-        ? this.station.streams[0].url
-        : null;
+      const streamUrl = this.streamurl;
       const streamMimeType = this.station?.streams?.[0]?.mimetype;
       if (streamUrl) {
         const unixtime = new Date().getTime();
@@ -610,7 +608,7 @@ export default {
         // this.$sound = null;
         //previousStation
         const unixtime = new Date().getTime();
-        this.$sound.src = this.previousStation.streams[0].url + '?' + unixtime.toString();
+        this.$sound.src = this.$stationStreamUrl(this.previousStation) + '?' + unixtime.toString();
       }
       // this.$sound = null;
       if (this.shuffleOn) {
@@ -628,7 +626,7 @@ export default {
       clearInterval(this.npInterval);
       if (this.$sound) {
         const unixtime = new Date().getTime();
-        this.$sound.src = this.nextStation.streams[0].url + '?' + unixtime.toString();
+        this.$sound.src = this.$stationStreamUrl(this.nextStation) + '?' + unixtime.toString();
       }
       if (this.shuffleOn) {
         this.loadRandom();
@@ -640,12 +638,14 @@ export default {
       });
     },
     loadRandom() {
+      const stationId = this.randomIndex;
+      const station = this.stations.find((item) => item.id === stationId);
       if (this.$sound) {
         this.$sound.pause();
         const unixtime = new Date().getTime();
-        this.$sound.src = this.previousStation.streams[0].url + '?' + unixtime.toString();
+        this.$sound.src = this.$stationStreamUrl(station) + '?' + unixtime.toString();
       }
-      this.$router.push("/stations/" + this.randomIndex);
+      this.$router.push("/stations/" + stationId);
     },
     async play() {
       //EventBus.$emit('stop-howler');
@@ -978,13 +978,8 @@ export default {
       return this.$route.params.stationId ? this.$route.params.stationId : 1;
     },
     randomIndex() {
-      let stations = Station.query().get();
-      let currIndex = stations.find((item) => item.id == this.station.id).id;
-      let rand = null;
-      while (rand === null || rand === currIndex) {
-        rand = Math.round(Math.random() * stations.length);
-      }
-      return rand;
+      const stations = this.stations.filter((item) => item.id !== this.station.id);
+      return stations[Math.floor(Math.random() * stations.length)].id;
     },
     nextIndex() {
       let stations = Station.query().get();
@@ -1026,7 +1021,7 @@ export default {
       return this.nowplaying ? this.nowplaying.listeners : null;
     },
     streamurl() {
-      return this.station?.streams?.[0].url;
+      return this.$stationStreamUrl(this.station);
     },
   },
   mounted() {
