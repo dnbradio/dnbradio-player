@@ -198,6 +198,7 @@ import {
   formatTime,
   googleCalendarUrl,
   liveShow,
+  overlapsLocalDay,
   recurrence,
   relativeTime,
   sameLocalDay,
@@ -293,7 +294,7 @@ export default {
     showsFor(day) {
       return this.shows.filter(
         (show) =>
-          sameLocalDay(show.startAt, day) &&
+          overlapsLocalDay(show, day) &&
           (show.endAt > this.now || !sameLocalDay(day, this.now))
       );
     },

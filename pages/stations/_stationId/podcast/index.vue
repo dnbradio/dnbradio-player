@@ -64,7 +64,7 @@
     </div>
     <p v-else-if="failed" class="archive-state">
       The archive didn't load.
-      <button type="button" class="text-button" @click="load(page)">
+      <button type="button" class="text-button" @click="load(requestedPage)">
         Try again
       </button>
     </p>
@@ -97,6 +97,7 @@ export default {
     return {
       items: [],
       page: 0,
+      requestedPage: 1,
       totalPages: 0,
       total: 0,
       loading: false,
@@ -139,6 +140,7 @@ export default {
       if (!this.apiUrl) {
         return;
       }
+      this.requestedPage = page;
       this.loading = true;
       this.failed = false;
       const params = new URLSearchParams({ page: String(page) });
@@ -148,6 +150,9 @@ export default {
       const sort = this.sort;
       try {
         const response = await fetch(this.apiUrl + "?" + params.toString());
+        if (!response.ok) {
+          throw new Error(response.status);
+        }
         const data = await response.json();
         if (search !== this.search || sort !== this.sort) {
           return; // a newer search replaced this one

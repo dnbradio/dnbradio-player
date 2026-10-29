@@ -166,3 +166,16 @@ test("calendar entries repeat like the show", () => {
   );
   assert.equal(google.searchParams.get("recur"), "RRULE:FREQ=WEEKLY");
 });
+
+test("overnight shows overlap both local dates, excluding the end boundary", () => {
+  const [show] = schedule.normalizeShows([
+    {
+      id: 1,
+      start: new Date(2026, 9, 28, 23).toISOString(),
+      end: new Date(2026, 9, 29, 1).toISOString(),
+    },
+  ]);
+  assert.equal(schedule.overlapsLocalDay(show, new Date(2026, 9, 28)), true);
+  assert.equal(schedule.overlapsLocalDay(show, new Date(2026, 9, 29)), true);
+  assert.equal(schedule.overlapsLocalDay(show, new Date(2026, 9, 30)), false);
+});

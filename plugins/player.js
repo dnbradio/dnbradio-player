@@ -89,6 +89,7 @@ export default function ({ app, store }, inject) {
   let stallTimer = null;
   let sleepTimer = null;
   let fadeTimer = null;
+  let fadeVolume = null;
   let pollTimer = null;
   let pollAll = false;
   let focusedStationId = 1;
@@ -474,11 +475,16 @@ export default function ({ app, store }, inject) {
     clearInterval(fadeTimer);
     sleepTimer = null;
     fadeTimer = null;
+    if (fadeVolume !== null && volumeSupported) {
+      audio.volume = fadeVolume;
+    }
+    fadeVolume = null;
     commit("SET_SLEEP", null);
   }
 
   function sleepNow() {
     const startVolume = audio.volume;
+    fadeVolume = startVolume;
     let step = 0;
     clearInterval(fadeTimer);
     fadeTimer = setInterval(() => {
