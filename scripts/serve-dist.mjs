@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
+import { djPreviewFile } from "./dj-previews.mjs";
 const root = resolve("dist");
 const base = process.env.ROUTER_BASE || "/player/";
 const mime = {
@@ -20,14 +21,24 @@ const mime = {
 };
 createServer(async (req, res) => {
   try {
-    const pathname = decodeURIComponent(
-      new URL(req.url, "http://localhost").pathname,
-    );
+    const url = new URL(req.url, "http://localhost");
+    const pathname = decodeURIComponent(url.pathname);
     if (!pathname.startsWith(base)) {
       res.writeHead(404).end();
       return;
     }
-    let file = resolve(root, pathname.slice(base.length));
+    let preview = djPreviewFile(
+      "/" + pathname.slice(base.length),
+      url.searchParams,
+    );
+    if (preview) {
+      try {
+        await stat(resolve(root, preview));
+      } catch {
+        preview = null;
+      }
+    }
+    let file = resolve(root, preview || pathname.slice(base.length));
     if (file !== root && !file.startsWith(root + sep)) {
       res.writeHead(403).end();
       return;

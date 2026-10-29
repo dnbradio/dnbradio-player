@@ -85,6 +85,7 @@ test.beforeEach(async ({ page }) => {
     const url = route.request().url();
     if (
       url.includes("/listen/") ||
+      url.includes("/streamtest/") ||
       url.startsWith("https://audio.example.test/")
     ) {
       return route.fulfill({
@@ -429,16 +430,17 @@ test("initial reduced motion keeps the DJ still while audio plays", async ({
   await expect(page.locator(".dj-mode__head")).toHaveCSS("transform", "none");
 });
 
-test("a late analysis failure cannot restart a paused podcast", async ({
+test("a DJ query keeps podcasts on native audio without analysis", async ({
   page,
 }) => {
   await page.addInitScript(() => {
-    const resume = AudioContext.prototype.resume;
-    AudioContext.prototype.resume = function () {
-      resume.call(this);
-      return new Promise((resolve, reject) => {
-        window.rejectAnalysis = reject;
-      });
+    window.contexts = 0;
+    const Context = window.AudioContext;
+    window.AudioContext = class extends Context {
+      constructor(...args) {
+        super(...args);
+        window.contexts++;
+      }
     };
   });
   await page.goto("./stations/1/podcast/58124?dj=drastic");
@@ -447,17 +449,11 @@ test("a late analysis failure cannot restart a paused podcast", async ({
   await expect
     .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
     .toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.contexts)).toBe(0);
+  expect(await page.evaluate(() => window.testAudio[0].crossOrigin)).toBe(null);
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
   await play.click();
   expect(await page.evaluate(() => window.testAudio[0].paused)).toBe(true);
-  await page.evaluate(() =>
-    window.rejectAnalysis(new DOMException("Unavailable", "NotSupportedError")),
-  );
-  await expect.poll(() => page.evaluate(() => window.testAudio.length)).toBe(3);
-  expect(await page.evaluate(() => window.testAudio.at(-1).paused)).toBe(true);
-  await play.click();
-  await expect
-    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
-    .toBeGreaterThan(0);
 });
 
 test("an analysis failure before play cannot assign an empty source or start audio", async ({
@@ -483,4 +479,113 @@ test("an analysis failure before play cannot assign an empty source or start aud
   await expect
     .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
     .toBeGreaterThan(0);
+});
+
+test("DJ mode stops on other stations and returns on the main stream", async ({
+  page,
+}) => {
+  await page.goto("./?dj=drastic&src=discord");
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+    .toBeGreaterThan(0);
+  await expect(page.locator(".dj-mode__head")).toBeVisible();
+  await page.getByRole("button", { name: "Next station", exact: true }).click();
+  await expect(page).toHaveURL(/stations\/2/);
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
+  expect(await page.evaluate(() => window.testAudio.at(-1).crossOrigin)).toBe(
+    null,
+  );
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+  await page
+    .getByRole("button", { name: "Previous station", exact: true })
+    .click();
+  await expect(page.locator(".dj-mode__head")).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.testAudio.at(-1).crossOrigin)).toBe(
+    "anonymous",
+  );
+  for (const path of [
+    "stations/2",
+    "stations/3",
+    "stations/4",
+    "stations/5",
+    "darkstep",
+  ]) {
+    await page.goto(`./${path}?dj=drastic`);
+    await expect(page.locator(".dj-mode")).toHaveCount(0);
+    await page.locator(".player__controls .play-button").click();
+    await expect
+      .poll(() => page.evaluate(() => window.testAudio[0].currentTime))
+      .toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.testAudio[0].crossOrigin)).toBe(
+      null,
+    );
+  }
+});
+
+test("link crawlers receive DJ previews only on the main stream", async ({
+  request,
+}) => {
+  const meta = (html, key) =>
+    html.match(new RegExp(`(?:property|name)="${key}" content="([^"]+)"`))?.[1];
+  for (const path of ["", "stations/1/"]) {
+    for (const id of ["drastic", "djaffirmation"]) {
+      const html = await (
+        await request.get(`./${path}?src=discord&dj=${id}`)
+      ).text();
+      expect(meta(html, "og:image")).toContain(`/djs/${id}-preview.png`);
+      expect(meta(html, "twitter:image")).toBe(meta(html, "og:image"));
+      expect(meta(html, "og:url")).toContain(`?dj=${id}`);
+      expect(meta(html, "twitter:card")).toBe("summary_large_image");
+    }
+  }
+  for (const query of [
+    "",
+    "?dj=unknown",
+    "?dj=drastic&dj=djaffirmation",
+    "?dj=drastic&%64j=drastic",
+  ]) {
+    const html = await (await request.get(`./${query}`)).text();
+    expect(meta(html, "og:image")).toContain("/x-card/winamp-station-1.png");
+    expect(meta(html, "twitter:image")).toBe(meta(html, "og:image"));
+  }
+  const html = await (await request.get("./stations/2/?dj=drastic")).text();
+  expect(meta(html, "og:image")).toContain("og-station-2.png");
+  const image = await request.get("./djs/drastic-preview.png");
+  expect(image.status()).toBe(200);
+  expect(image.headers()["content-type"]).toBe("image/png");
+});
+
+test("a late main-stream analysis failure cannot replace another station's audio", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const resume = AudioContext.prototype.resume;
+    AudioContext.prototype.resume = function () {
+      resume.call(this);
+      return new Promise((resolve, reject) => {
+        window.rejectOldAnalysis = reject;
+      });
+    };
+  });
+  await page.goto("./?dj=drastic");
+  await page.locator(".player__controls .play-button").click();
+  await page.getByRole("button", { name: "Next station", exact: true }).click();
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio.at(-1).currentTime))
+    .toBeGreaterThan(0);
+  const count = await page.evaluate(() => window.testAudio.length);
+  await page.evaluate(() =>
+    window.rejectOldAnalysis(
+      new DOMException("Unavailable", "NotSupportedError"),
+    ),
+  );
+  expect(await page.evaluate(() => window.testAudio.length)).toBe(count);
+  expect(await page.evaluate(() => window.testAudio.at(-1).paused)).toBe(false);
 });

@@ -9,7 +9,7 @@ const engine = (
   .replace(/^import .*;\n/gm, "")
   .replace("export default function", "function plugin");
 
-test("podcast retries and DJ fallback preserve position, source changes clear it, and sleep cancellation restores volume", () => {
+test("podcast retries with a DJ query preserve position, source changes clear it, and sleep cancellation restores volume", () => {
   const timers = new Map();
   let timerId = 0;
   const handlers = {};
@@ -60,10 +60,14 @@ test("podcast retries and DJ fallback preserve position, source changes clear it
         return clock;
       }
     },
+    shallowReactive: (value) => value,
     createAudioMotion(element, profile, onUnavailable) {
-      element.crossOrigin = "anonymous";
       analysisFailure = onUnavailable;
-      return { resume() {}, disable() {} };
+      return {
+        state: { available: true, enabled: true },
+        resume() {},
+        disable() {},
+      };
     },
     document: { createElement: () => audio, addEventListener() {} },
     window: { addEventListener() {} },
@@ -125,10 +129,7 @@ test("podcast retries and DJ fallback preserve position, source changes clear it
   assert.equal(audio.volume, 0.8);
 
   timers.clear();
-  vm.runInContext(
-    "plugin({app: {$djProfile: {}}, store}, inject)",
-    context,
-  );
+  vm.runInContext("plugin({app: {$djProfile: {}}, store}, inject)", context);
   player.playEpisode({ id: 3, playback_url: "three.mp3" });
   audio.currentTime = 1200;
   clock += 13000;

@@ -84,7 +84,10 @@
             @click="playIfStopped"
           />
         </transition>
-        <DjHead v-if="$dj" :dj="$dj" />
+        <DjHead
+          v-if="$dj.current && station && station.id === 1"
+          :dj="$dj.current"
+        />
         <div class="player__dots" role="group" aria-label="Choose station">
           <button
             v-for="item in stations"
