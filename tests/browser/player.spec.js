@@ -949,6 +949,8 @@ test("MilkDrop resumes after audio-context interruption", async ({ page }) => {
 test("MilkDrop visibly responds to bass attacks instead of only elapsed time", async ({
   page,
 }) => {
+  // This test compiles the entire bundled library on software GPU runners.
+  test.setTimeout(90_000);
   let moduleUrl;
   page.on("response", (response) => {
     if (/\/milkdrop-[^/]+\.js$/.test(new URL(response.url()).pathname)) {
@@ -963,6 +965,8 @@ test("MilkDrop visibly responds to bass attacks instead of only elapsed time", a
     "data-milkdrop-input",
     "test",
   );
+  // Stop the full-screen instance while exercising a separate 64px renderer.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   const result = await page.evaluate(async (url) => {
     const { createMilkDrop } = await import(url);
     const context = new AudioContext();
@@ -1028,10 +1032,21 @@ test("MilkDrop rotates during playback and triple taps or N advance without chan
   page,
   isMobile,
 }) => {
+  test.setTimeout(60_000);
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   // Advance visual frame timestamps without changing media time or watchdog timers.
   await page.addInitScript(() => {
+    // Keep this control-wiring check at 128px shader resolution. The separate
+    // preset test covers every shader; viewport/layout checks run elsewhere.
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 128,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 128,
+    });
     window.visualTimeOffset = 0;
     const request = window.requestAnimationFrame.bind(window);
     window.requestAnimationFrame = (callback) =>

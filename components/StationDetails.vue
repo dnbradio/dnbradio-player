@@ -7,6 +7,7 @@
         'player--framed': framed,
         'player--desktop': $device.isDesktop,
         'player--minimized': minimized,
+        'player--milkdrop': visualization === 'milkdrop',
       }"
       @dblclick="expandFromBar"
     >
@@ -788,6 +789,9 @@ export default {
   inset: 0;
   z-index: 0;
   overflow: hidden;
+}
+.player--milkdrop {
+  touch-action: manipulation;
 }
 .player {
   --gap: clamp(6px, 1.6svh, 16px);
