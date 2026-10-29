@@ -46,7 +46,7 @@ const nowplaying = {
   song_history: [],
 };
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, baseURL }) => {
   await page.addInitScript(() => {
     // Enforce a consistent user-gesture policy across browser engines.
     let activated = false;
@@ -104,7 +104,7 @@ test.beforeEach(async ({ page }) => {
       return route.fulfill({
         json: { data: [episode], pagination: { total_pages: 1, total: 1 } },
       });
-    if (!url.startsWith("http://127.0.0.1:4173/")) return route.abort();
+    if (!url.startsWith(new URL(baseURL).origin + "/")) return route.abort();
     return route.continue();
   });
 });
