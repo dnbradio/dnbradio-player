@@ -2,6 +2,7 @@
 // plugins/player.js; components read this state and call this.$player.
 export const state = () => ({
   visualsEnabled: false,
+  visualization: "off",
   initialLoad: true,
   // { kind: "station", stationId } or { kind: "episode", episode }
   source: null,
@@ -34,10 +35,18 @@ export const getters = {
 
 export const mutations = {
   TOGGLE_VISUALS: (state) => {
-    state.visualsEnabled = !state.visualsEnabled;
+    const modes = ["off", "stars", "milkdrop", "rain"];
+    state.visualization =
+      modes[(modes.indexOf(state.visualization) + 1) % modes.length];
+    state.visualsEnabled = state.visualization !== "off";
   },
   SET_VISUALS: (state, payload) => {
-    state.visualsEnabled = Boolean(payload);
+    state.visualization = ["off", "stars", "milkdrop", "rain"].includes(payload)
+      ? payload
+      : payload === true
+        ? "stars"
+        : "off";
+    state.visualsEnabled = state.visualization !== "off";
   },
   SET_INITIAL_LOAD: (state, payload) => {
     state.initialLoad = payload;

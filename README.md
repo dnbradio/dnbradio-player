@@ -83,7 +83,8 @@ Playback state lives in `store/player.js`; components call `this.$player`.
 Open `/player/?dj=djaffirmation` or `/player/?dj=drastic` to add the corresponding
 DJ head alongside the approved main-stream artwork. DJ mode only appears and
 analyses audio on station 1. Other stations and podcasts use native playback
-without DJ analysis. The selection persists through navigation, including `src`
+without DJ analysis. Selecting MilkDrop separately opts into audio analysis for
+its visualization on any supported stream. The DJ selection persists through navigation, including `src`
 attribution, so returning to the main stream restores the head.
 Missing, unknown and repeated DJ values use the normal player.
 
@@ -96,8 +97,34 @@ motion for that page load. Streams keep their existing retry behavior.
 
 The supplied artwork and frequency mapping come from the independently published
 [DJ mockup](https://pages-d52757e2.s3.us-west-2.amazonaws.com/a/47f2e2701256b5a7763324ebe90d9e37/dj-affirmation.html?dj=drastic)
-(source branch `feat/dj-affirmation-mockup`, commit `fd9415f`). The production
-integration adds no dependency and retains the existing player controls.
+(source branch `feat/dj-affirmation-mockup`, commit `fd9415f`). The DJ integration retains the existing player controls.
+
+## Background visualizations and minimal player
+
+The waveform button cycles **Stars → MilkDrop → Rain → Off** and remembers the
+selection. Existing saved stars preferences remain supported. MilkDrop lazily
+loads the same pinned Butterchurn engine/presets as Webamp, using the player's
+single playback graph. Stars and rain require no audio analysis. Native playback
+remains the default outside main-stream DJ mode unless MilkDrop is selected.
+Streams that reject analysis/CORS fall back to native playback; stars and rain
+remain available. Changing audio sources preserves playback and podcast position.
+
+The top-left button collapses the player upward to a **40px marquee bar**. Artist,
+title and station remain visible alongside play/pause, effect selection and
+expand. Double-click the readout or use Expand to restore the full player.
+Minimizing stops hidden DJ-head animation while audio and background effects
+continue. Reduced motion replaces marquee scrolling with an ellipsis.
+
+When MilkDrop is selected and playback is stopped, paused or buffering, it uses
+an inaudible ambient harmonic source with a 24-second breathing cycle and a
+slower rendering clock. It has no connection to speakers or the DJ analyser.
+Real playback replaces the synthetic input. Leaving MilkDrop, hiding the tab,
+reduced motion and component teardown stop the source and animation work.
+No audio starts merely by selecting a visualization. WebGL 2 is required for
+MilkDrop; unsupported devices retain the other effects and native playback.
+
+Adapted from the approved FX mockup (`feat/dj-affirmation-mockup`, `917c2db`),
+with the current main-stream DJ restrictions and social previews retained.
 
 ### DJ share previews
 

@@ -74,6 +74,11 @@ test.beforeEach(async ({ page, baseURL }) => {
     };
     const create = document.createElement.bind(document);
     window.testAudio = [];
+    Object.defineProperty(window, "currentAudio", {
+      get: () =>
+        document.getElementById("app").__vue_app__.config.globalProperties
+          .$player.audio,
+    });
     document.createElement = (tag, ...args) => {
       const element = create(tag, ...args);
       if (tag === "audio") window.testAudio.push(element);
@@ -606,4 +611,310 @@ test("a late main-stream analysis failure cannot replace another station's audio
   );
   expect(await page.evaluate(() => window.testAudio.length)).toBe(count);
   expect(await page.evaluate(() => window.testAudio.at(-1).paused)).toBe(false);
+});
+
+test("visualizations cycle through stars, audio-reactive MilkDrop, rain and off", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("./");
+  const toggle = page.getByRole("button", { name: /^Visualizations:/ });
+  await expect(toggle).toHaveAttribute(
+    "aria-label",
+    "Visualizations: Off. Next: Stars",
+  );
+  await toggle.click();
+  await expect(page.locator('[data-visualization="stars"]')).toBeVisible();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute(
+    "aria-label",
+    "Visualizations: MilkDrop. Next: Rain",
+  );
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const canvas = document.querySelector(
+          '[data-visualization="milkdrop"] canvas:last-child',
+        );
+        if (!canvas) return false;
+        const data = canvas
+          .getContext("2d")
+          .getImageData(0, 0, canvas.width, canvas.height).data;
+        return data.some((value, index) => index % 4 !== 3 && value > 30);
+      }),
+    )
+    .toBe(true);
+  const time = await page.evaluate(() => window.currentAudio.currentTime);
+  await toggle.click();
+  await expect(page.locator('[data-visualization="rain"]')).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThan(time);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator('[data-visualization="off"]')).toBeHidden();
+  await expect(page.locator(".player__icon .mdi-waveform")).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
+test("turning on MilkDrop during podcast playback keeps position", async ({
+  page,
+}) => {
+  await page.route("https://audio.example.test/**", (route) => {
+    const data = tone();
+    const range = route.request().headers().range;
+    const start = range ? Number(range.match(/bytes=(\d+)/)[1]) : 0;
+    const requestedEnd = range?.match(/bytes=\d+-(\d+)/)?.[1];
+    const end = requestedEnd
+      ? Math.min(Number(requestedEnd), data.length - 1)
+      : data.length - 1;
+    return route.fulfill({
+      status: range ? 206 : 200,
+      contentType: "audio/wav",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Accept-Ranges": "bytes",
+        ...(range
+          ? {
+              "Content-Range": `bytes ${start}-${end}/${data.length}`,
+            }
+          : {}),
+      },
+      body: data.subarray(start, end + 1),
+    });
+  });
+  await page.goto("./");
+  await page.locator('a.station-nav__item[href*="podcast"]').click();
+  await page.locator(".play-button").first().click();
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.readyState))
+    .toBeGreaterThanOrEqual(2);
+  await page.evaluate(() => {
+    window.currentAudio.currentTime = 7;
+  });
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThanOrEqual(7);
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  const toggle = page.getByRole("button", { name: /^Visualizations:/ });
+  await toggle.click();
+  await toggle.click();
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThanOrEqual(7);
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.paused))
+    .toBe(false);
+});
+
+test("player collapses upward to a 40px marquee while visuals and audio keep running", async ({
+  page,
+}) => {
+  await page.goto("./?dj=drastic");
+  await page.locator(".player__controls .play-button").click();
+  const visuals = page.getByRole("button", { name: /^Visualizations:/ });
+  await visuals.click();
+  await visuals.click();
+  const bounds = await page.locator(".player").boundingBox();
+  await page
+    .getByRole("button", { name: "Minimize player", exact: true })
+    .click();
+  await expect
+    .poll(async () =>
+      Math.round((await page.locator(".player").boundingBox()).height),
+    )
+    .toBe(40);
+  const collapsed = await page.locator(".player").boundingBox();
+  expect(collapsed.y).toBe(bounds.y);
+  await expect(page.locator(".player__marquee")).toHaveAttribute(
+    "aria-label",
+    /Test Artist.*Live test/,
+  );
+  await expect(page.locator(".player__controls")).toBeHidden();
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
+  await expect(page.locator("[data-visualization=milkdrop]")).toBeVisible();
+  const time = await page.evaluate(() => window.currentAudio.currentTime);
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThan(time);
+  await visuals.click();
+  await expect(page.locator("[data-visualization=rain]")).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(page.locator(".player__marquee-track")).toHaveCSS(
+    "animation-name",
+    "none",
+  );
+  await page.locator(".player__marquee").dblclick();
+  await expect(
+    page.getByRole("button", { name: "Minimize player", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".player__controls")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Minimize player", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Expand player", exact: true })
+    .click();
+  await expect(page.locator(".player__controls")).toBeVisible();
+});
+
+test("MilkDrop uses an inaudible test signal while idle and returns to real audio", async ({
+  page,
+}) => {
+  const { instrumentAudioRouting } = await import("./audio-routing.js");
+  await page.addInitScript(instrumentAudioRouting);
+  await page.goto("./");
+  const visuals = page.getByRole("button", { name: /^Visualizations:/ });
+  await visuals.click();
+  await visuals.click();
+  const host = page.locator("[data-visualization=milkdrop]");
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
+  await expect
+    .poll(() => page.evaluate(() => milkdropRouting.peak()))
+    .toBeGreaterThan(0);
+  expect(
+    await page.evaluate(() => milkdropRouting.activeSources().length),
+  ).toBe(1);
+  expect(await page.evaluate(() => milkdropRouting.hasAudiblePath())).toBe(
+    false,
+  );
+  expect(await page.evaluate(() => window.currentAudio.paused)).toBe(true);
+  await expect(
+    page.getByRole("status").filter({ hasText: "silent test signal" }),
+  ).toBeVisible();
+  await page.locator(".player__controls .play-button").click();
+  await expect(host).toHaveAttribute("data-milkdrop-input", "live");
+  expect(
+    await page.evaluate(() => milkdropRouting.activeSources().length),
+  ).toBe(0);
+  await page.locator(".player__controls .play-button").click();
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
+  expect(await page.evaluate(() => milkdropRouting.hasAudiblePath())).toBe(
+    false,
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect
+    .poll(() => page.evaluate(() => milkdropRouting.activeSources().length))
+    .toBe(0);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: true,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  expect(
+    await page.evaluate(() => milkdropRouting.activeSources().length),
+  ).toBe(0);
+  await page.evaluate(() => {
+    delete document.hidden;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
+  await visuals.click();
+  await expect
+    .poll(() => page.evaluate(() => milkdropRouting.activeSources().length))
+    .toBe(0);
+});
+
+test("visualizations load MilkDrop on demand and retain the selected mode", async ({
+  page,
+}) => {
+  const chunks = [];
+  page.on("request", (request) => {
+    if (/\/milkdrop-.*\.js/.test(request.url())) chunks.push(request.url());
+  });
+  await page.goto("./");
+  const visuals = page.getByRole("button", { name: /^Visualizations:/ });
+  expect(chunks).toHaveLength(0);
+  await visuals.click();
+  expect(chunks).toHaveLength(0);
+  await visuals.click();
+  await expect.poll(() => chunks.length).toBe(1);
+  await visuals.click();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: /^Visualizations:/ }),
+  ).toHaveAttribute("aria-label", "Visualizations: Rain. Next: Off");
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
+});
+
+test("MilkDrop WebGL failure leaves other effects and native playback usable", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const get = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type === "webgl2" ? null : get.call(this, type, ...args);
+    };
+  });
+  await page.goto("./");
+  const visuals = page.getByRole("button", { name: /^Visualizations:/ });
+  await visuals.click();
+  await visuals.click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "MilkDrop requires WebGL 2" }),
+  ).toBeVisible();
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThan(0);
+  await visuals.click();
+  await expect(page.locator("[data-visualization=rain]")).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.currentAudio.crossOrigin)).toBe(null);
+});
+
+test("MilkDrop CORS failure restores native audio without requiring a DJ", async ({
+  page,
+}) => {
+  await page.route("**/listen/**", (route) => {
+    if (route.request().headers().origin) return route.abort("failed");
+    return route.fulfill({
+      status: 200,
+      contentType: "audio/wav",
+      body: tone(),
+    });
+  });
+  await page.goto("./");
+  const visuals = page.getByRole("button", { name: /^Visualizations:/ });
+  await visuals.click();
+  await visuals.click();
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() => page.evaluate(() => window.currentAudio.currentTime))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.currentAudio.crossOrigin)).toBe(null);
+  await expect(page.locator(".dj-mode")).toHaveCount(0);
+  await visuals.click();
+  await expect(page.locator("[data-visualization=rain]")).toBeVisible();
+});
+
+test("MilkDrop resumes after audio-context interruption", async ({ page }) => {
+  await page.goto("./");
+  const visuals = page.getByRole("button", { name: /^Visualizations:/ });
+  await visuals.click();
+  await visuals.click();
+  const host = page.locator("[data-visualization=milkdrop]");
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
+  await page.evaluate(() =>
+    document
+      .getElementById("app")
+      .__vue_app__.config.globalProperties.$player.getVisualizationAudio()
+      .context.suspend(),
+  );
+  await expect(host).toHaveAttribute("data-milkdrop-input", "inactive");
+  await page.evaluate(() =>
+    document
+      .getElementById("app")
+      .__vue_app__.config.globalProperties.$player.getVisualizationAudio()
+      .context.resume(),
+  );
+  await expect(host).toHaveAttribute("data-milkdrop-input", "test");
 });
