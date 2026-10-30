@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { xPlayerCardTags } from "../scripts/social-cards.mjs";
+import { canonicalTag, xPlayerCardTags } from "../scripts/social-cards.mjs";
 import { staticRoutes } from "../scripts/static-routes.mjs";
 
 test("social cards keep production station and Webamp URLs", async () => {
@@ -69,5 +70,47 @@ test("DJ metadata uses the selected head, with Winamp as the main-stream default
       /og:image" content="https:\/\/dnbradio.com\/player\/x-card\/winamp-station-1.png/,
     );
     assert.match(html, /og:image:height" content="1200"/);
+  }
+});
+
+test("the player installs as its own app scoped to its folder", async () => {
+  const manifest = JSON.parse(
+    await readFile(new URL("../static/manifest.webmanifest", import.meta.url)),
+  );
+  assert.equal(manifest.name, "DNBRADIO Player");
+  // Relative to the manifest, so every build base (/player/, /player-dev/) scopes to itself.
+  assert.equal(manifest.start_url, "./");
+  assert.equal(manifest.scope, "./");
+  for (const icon of manifest.icons) {
+    const png = await readFile(
+      new URL(`../static/${icon.src}`, import.meta.url),
+    );
+    assert.equal(`${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`, icon.sizes);
+  }
+  const html = await readFile(
+    new URL("../index.html", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    html,
+    /<link rel="manifest" href="%BASE_URL%manifest.webmanifest" \/>/,
+  );
+});
+
+test("each generated page names its own production URL as canonical", () => {
+  const previous = process.env.ROUTER_BASE;
+  process.env.ROUTER_BASE = "/player/";
+  try {
+    assert.equal(
+      canonicalTag("/"),
+      '<link rel="canonical" href="https://dnbradio.com/player/" />',
+    );
+    assert.equal(
+      canonicalTag("/stations/2/webamp"),
+      '<link rel="canonical" href="https://dnbradio.com/player/stations/2/webamp/" />',
+    );
+  } finally {
+    if (previous === undefined) delete process.env.ROUTER_BASE;
+    else process.env.ROUTER_BASE = previous;
   }
 });

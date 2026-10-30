@@ -26,6 +26,13 @@ const escapeAttr = (value) =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
+// Each generated route is its own page. DJ previews share their route's URL.
+export function canonicalTag(route) {
+  const path = route === "/" ? "" : route.slice(1) + "/";
+  const href = X_CARD_ORIGIN + (process.env.ROUTER_BASE || "/") + path;
+  return `<link rel="canonical" href="${escapeAttr(href)}" />`;
+}
+
 export async function xPlayerCardTags(route, dj) {
   // A webamp page gets its station's card, so its own URL can be posted too.
   const stationRoute = route.replace(/\/?(webamp|embed)$/, "") || "/";

@@ -4,7 +4,7 @@ if (!/^\/(?:[a-zA-Z0-9_-]+\/)*$/.test(process.env.ROUTER_BASE))
   throw new Error("Invalid base path");
 const { build } = await import("vite");
 await build();
-const { xPlayerCardTags } = await import("./social-cards.mjs");
+const { canonicalTag, xPlayerCardTags } = await import("./social-cards.mjs");
 const { staticRoutes } = await import("./static-routes.mjs");
 const { djProfiles } = await import("../lib/djs.js");
 const { mainDjRoutes, djPreviewFile, djNginxMaps } =
@@ -28,7 +28,7 @@ for (const route of staticRoutes) {
               : "") +
           '">',
       )
-      .replace("</head>", `${tags}</head>`),
+      .replace("</head>", `${canonicalTag(route)}${tags}</head>`),
   );
 }
 await writeFile("dist/200.html", html);
@@ -45,7 +45,10 @@ for (const route of mainDjRoutes) {
     await mkdir(file.slice(0, file.lastIndexOf("/")), { recursive: true });
     await writeFile(
       file,
-      html.replace("</head>", `${await xPlayerCardTags(route, id)}</head>`),
+      html.replace(
+        "</head>",
+        `${canonicalTag(route)}${await xPlayerCardTags(route, id)}</head>`,
+      ),
     );
   }
 }
