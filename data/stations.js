@@ -7,7 +7,7 @@ export const stationList = [
       subtitle: "all flavors",
       cover:
         "https://dnbradio.com/images/logotags.png",
-      website: "https://dnbradio.com/?forceMobile=0",
+      website: "https://dnbradio.com/",
       facebook: "https://facebook.com/dnbradio",
       twitter: "https://twitter.com/dnbradio",
       twitterId: "dnbradio",
