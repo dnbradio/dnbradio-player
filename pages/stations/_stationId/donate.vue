@@ -63,38 +63,11 @@
           Visit the shop<UiIcon size="16">mdi-arrow-top-right</UiIcon>
         </a>
       </ActionCard>
-
-      <ActionCard
-        v-for="wallet in wallets"
-        :key="wallet.name"
-        :icon="wallet.icon"
-        :title="'Send ' + wallet.name"
-        :text="
-          'Send ' +
-          wallet.name +
-          ' to the station\'s ' +
-          wallet.symbol +
-          ' wallet.'
-        "
-      >
-        <div class="dnb-code">
-          <code>{{ wallet.address }}</code>
-          <button
-            type="button"
-            class="dnb-button"
-            :aria-label="'Copy ' + wallet.symbol + ' address'"
-            @click="copy(wallet)"
-          >
-            <UiIcon size="16">mdi-content-copy</UiIcon>Copy
-          </button>
-        </div>
-      </ActionCard>
     </div>
   </PageShell>
 </template>
 
 <script>
-import { EventBus } from "@/components/eventbus.js";
 import PageShell from "~/components/ui/PageShell.vue";
 import ActionCard from "~/components/ui/ActionCard.vue";
 import stationMixin from "~/mixins/station.js";
@@ -102,34 +75,6 @@ import stationMixin from "~/mixins/station.js";
 export default {
   components: { PageShell, ActionCard },
   mixins: [stationMixin],
-  data() {
-    return {
-      wallets: [
-        {
-          name: "Bitcoin",
-          symbol: "BTC",
-          icon: "mdi-bitcoin",
-          address: "1FGW9JXGPNfvgGMpSKiRSVuaaz6DiYYpyv",
-        },
-        {
-          name: "Ethereum",
-          symbol: "ETH",
-          icon: "mdi-ethereum",
-          address: "0x5659C68c3176CFF2641CeFA2f4F9eE9C26F66EE6",
-        },
-      ],
-    };
-  },
-  methods: {
-    async copy(wallet) {
-      try {
-        await navigator.clipboard.writeText(wallet.address);
-        EventBus.$emit("toast", wallet.symbol + " address copied");
-      } catch (error) {
-        EventBus.$emit("toast", "Copy failed. Select the address to copy it.");
-      }
-    },
-  },
 };
 </script>
 
