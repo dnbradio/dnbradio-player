@@ -23,6 +23,17 @@ test("metadata is decoded to plain text", () => {
   assert.equal(stripTags("One<br />Two &amp; Three"), "One\nTwo & Three");
 });
 
+test('"(Original Mix)" is dropped from titles, like dnbradio.com', () => {
+  assert.equal(cleanMeta("Track (Original Mix)"), "Track");
+  assert.equal(cleanMeta("Track (original mix)"), "Track");
+  assert.equal(cleanMeta("Track [Original Mix] (VIP)"), "Track (VIP)");
+  assert.equal(
+    cleanMeta("Something (Original Mixdown Remix)"),
+    "Something (Original Mixdown Remix)"
+  );
+  assert.equal(cleanMeta("Track (Original Title)"), "Track");
+});
+
 const station = {
   id: 1,
   title: "dnbradio.com",

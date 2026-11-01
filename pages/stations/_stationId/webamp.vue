@@ -53,6 +53,7 @@ import {
   toPls,
 } from "~/components/embed/playlistFiles.js";
 import { loadSettings, saveSettings } from "~/components/embed/settings.js";
+import { cleanMeta } from "~/lib/text.js";
 
 const LAYOUT_WIDTH = 275;
 const MAIN_HEIGHT = 116;
@@ -135,12 +136,6 @@ function initialLayout(query) {
       },
     },
   };
-}
-
-function decodeEntities(text) {
-  const element = document.createElement("textarea");
-  element.innerHTML = text || "";
-  return element.value;
 }
 
 async function loadWebamp() {
@@ -778,8 +773,8 @@ export default {
             default:
               return;
           }
-          nowplaying.artist = decodeEntities(nowplaying.artist);
-          nowplaying.title = decodeEntities(nowplaying.title);
+          nowplaying.artist = cleanMeta(nowplaying.artist);
+          nowplaying.title = cleanMeta(nowplaying.title);
           this.nowplaying[station.id] = nowplaying;
           const track = this.webamp
             .getPlaylistTracks()
