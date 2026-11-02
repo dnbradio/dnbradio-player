@@ -35,13 +35,6 @@ function writeSettings(patch) {
   }
 }
 
-// iOS ignores HTMLMediaElement.volume and always reads back 1.
-function canSetVolume() {
-  const probe = document.createElement("audio");
-  probe.volume = 0.5;
-  return Math.abs(probe.volume - 0.5) < 0.01;
-}
-
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
@@ -125,12 +118,17 @@ export default function ({ app, store }, inject) {
   let lastMetaKey = "";
 
   const settings = readSettings();
-  const volumeSupported = canSetVolume();
-  commit("SET_VOLUME_SUPPORTED", volumeSupported);
-  if (volumeSupported && typeof settings.volume === "number") {
-    audio.volume = clamp(settings.volume, 0, 1);
+  // Always full volume: listeners set the level on their device. Forget a
+  // level an earlier version saved.
+  audio.volume = 1;
+  if ("volume" in settings) {
+    const { volume, ...rest } = settings;
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(rest));
+    } catch (error) {
+      // Private mode: nothing to forget.
+    }
   }
-  commit("SET_VOLUME", audio.volume);
   if (settings.visualization || settings.visuals) {
     commit("SET_VISUALS", settings.visualization || true);
   }
@@ -363,9 +361,6 @@ export default function ({ app, store }, inject) {
       commitPosition();
     });
     on("durationchange", commitPosition);
-    on("volumechange", () => {
-      commit("SET_VOLUME", audio.volume);
-    });
     on("error", () => {
       if (intent === "play" && audio.getAttribute("src")) {
         if (!fallbackAudio()) fail();
@@ -589,7 +584,7 @@ export default function ({ app, store }, inject) {
     clearInterval(fadeTimer);
     sleepTimer = null;
     fadeTimer = null;
-    if (fadeVolume !== null && volumeSupported) {
+    if (fadeVolume !== null) {
       audio.volume = fadeVolume;
     }
     fadeVolume = null;
@@ -603,18 +598,11 @@ export default function ({ app, store }, inject) {
     clearInterval(fadeTimer);
     fadeTimer = setInterval(() => {
       step++;
-      if (volumeSupported) {
-        audio.volume = Math.max(
-          0,
-          startVolume * (1 - step / SLEEP_FADE_SECONDS),
-        );
-      }
+      audio.volume = Math.max(0, startVolume * (1 - step / SLEEP_FADE_SECONDS));
       if (step >= SLEEP_FADE_SECONDS) {
         clearSleep();
         player.pause();
-        if (volumeSupported) {
-          audio.volume = startVolume;
-        }
+        audio.volume = startVolume;
       }
     }, 1000);
   }
@@ -753,13 +741,6 @@ export default function ({ app, store }, inject) {
       }
       audio.currentTime = clamp(time, 0, audio.duration);
       commitPosition();
-    },
-    setVolume(volume) {
-      if (!volumeSupported) {
-        return;
-      }
-      audio.volume = clamp(Math.round(volume * 100) / 100, 0, 1);
-      writeSettings({ volume: audio.volume });
     },
     focusStation(station) {
       if (!station) {

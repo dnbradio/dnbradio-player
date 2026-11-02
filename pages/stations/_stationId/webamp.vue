@@ -815,8 +815,10 @@ export default {
     restoreSettings() {
       const { media, equalizer, visualizerStyle } = this.settings;
       const store = this.webamp.store;
+      // Always full volume: listeners set the level on their device, so a
+      // level from the slider is never kept.
+      store.dispatch({ type: "SET_VOLUME", volume: 100 });
       if (media) {
-        store.dispatch({ type: "SET_VOLUME", volume: media.volume });
         store.dispatch({ type: "SET_BALANCE", balance: media.balance });
         const state = store.getState().media;
         if (state.shuffle !== media.shuffle) {
@@ -860,7 +862,6 @@ export default {
         saveSettings({
           skinUrl: this.skinUrl,
           media: {
-            volume: state.media.volume,
             balance: state.media.balance,
             shuffle: state.media.shuffle,
             repeat: state.media.repeat,
@@ -896,7 +897,6 @@ export default {
         this.rememberPlaylist();
       }
       const persisted = JSON.stringify([
-        state.media.volume,
         state.media.balance,
         state.media.shuffle,
         state.media.repeat,

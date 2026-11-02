@@ -67,16 +67,15 @@ Playback state lives in `store/player.js`; components call `this.$player`.
   immediately when the device comes back online.
 - Lock screens and headsets get the station or track title and artwork,
   play/pause/stop, and previous/next station (seek for podcasts).
-- iOS ignores `HTMLMediaElement.volume`, so the volume buttons are hidden
-  there and their slots stay empty, keeping play and the station arrows in
-  place.
+- The player has no volume control and always plays at full volume:
+  listeners set the level on their device. The classic Webamp skin's volume
+  slider resets to full on every load and is never saved.
 - Tapping the track (or the line under it) opens recently played, up next,
   the next live shows, and a sleep timer. The home icon opens the station
   list with each station's now playing.
-- Desktop keys: Space or K plays and pauses, Left and Right switch stations,
-  Up and Down change volume.
-- The visuals toggle and volume are saved in `localStorage`
-  (`dnbradio-player`).
+- Desktop keys: Space or K plays and pauses, Left and Right switch stations.
+- The visuals toggle is saved in `localStorage` (`dnbradio-player`); a volume
+  saved there by an earlier version is removed on load.
 
 Live station requests use a fresh Icecast `_ic2` token on each play and retry.
 This avoids Icecast's Safari redirect to an internal proxy address while keeping
@@ -163,7 +162,7 @@ Posting `https://dnbradio.com/player/` (or `/player/stations/<id>/`, `/player/da
   - ADD > Add URL, ADD > Add file, LIST OPTS > Save list (.m3u or .pls) and Load list open Winamp-style windows from `components/embed/`. Winamp's main menu (top-left icon or right-click) adds DNBRADIO Schedule, DNBRADIO Podcasts, and Station Info windows.
   - The kbps, kHz, and mono/stereo readouts come from the stream's or file's own frame headers (`components/embed/audioInfo.js`); Webamp alone shows fixed values for anything it doesn't tag-scan.
   - MilkDrop runs through Webamp's bundled Butterchurn engine and presets. Open the main menu (top-left icon or right-click) and select Milkdrop. By default it starts closed and opens in the playlist's place. While focused, Space advances presets and L opens the preset list. Presets also cycle every 15 seconds during playback. Double-click the visuals for fullscreen where the browser or embedding frame allows it. Rendering needs WebGL 2.
-  - Without URL options, every load starts with the main window above the playlist at its base size; the EQ, MilkDrop, and the DNBRADIO windows open in the playlist's place. Window placement is not remembered. Skin, volume, balance, EQ settings, visualizer, and both playlists are kept in `localStorage` (`dnbradio-embed`).
+  - Without URL options, every load starts with the main window above the playlist at its base size; the EQ, MilkDrop, and the DNBRADIO windows open in the playlist's place. Window placement is not remembered. Skin, balance, EQ settings, visualizer, and both playlists are kept in `localStorage` (`dnbradio-embed`); volume always starts at full.
 - `scripts/social-cards.mjs` writes the `twitter:*` and `og:*` tags into each station and Webamp page during the static build so crawlers can read them without JavaScript. The card is square (480×480 player) to match the Winamp layout.
 - `static/x-card/winamp-station-<id>.png` are the 1200×1200 card images: screenshots of the embed for each station in a playing state (fed a short sample of that station's stream), taken in headless Chrome at 480×480 and 2.5× scale. Retake them when the stations or the layout change.
 - Facebook and Threads don't play third-party players from link previews (Facebook's `og:video` only takes MP4 or the retired Flash type), so they show a link card. For the main stream, `og:image` and `twitter:image` both use `static/x-card/winamp-station-1.png`. For other stations, `og:image` points at `static/x-card/og-station-<id>.png` (1200×630, the 1.91:1 ratio both crop to), made from the square card with the station name beside it; `twitter:image` keeps the square image for X.

@@ -188,23 +188,14 @@
       <div class="player__controls">
         <button
           type="button"
-          class="player__control"
+          class="player__control player__control--start"
           aria-label="Previous station"
           @click="step(-1)"
         >
           <UiIcon :size="controlSize">skip_previous</UiIcon>
         </button>
-        <button
-          v-if="volumeSupported"
-          type="button"
-          class="player__control"
-          aria-label="Volume down"
-          @click="nudgeVolume(-0.1)"
-        >
-          <UiIcon :size="controlSize">mdi-volume-minus</UiIcon>
-        </button>
-        <span v-else aria-hidden="true" />
         <PlayButton
+          class="player__play"
           :size="68"
           :active="stationActive"
           :busy="stationBusy"
@@ -212,18 +203,8 @@
           @click="toggle"
         />
         <button
-          v-if="volumeSupported"
           type="button"
-          class="player__control"
-          aria-label="Volume up"
-          @click="nudgeVolume(0.1)"
-        >
-          <UiIcon :size="controlSize">mdi-volume-plus</UiIcon>
-        </button>
-        <span v-else aria-hidden="true" />
-        <button
-          type="button"
-          class="player__control"
+          class="player__control player__control--end"
           aria-label="Next station"
           @click="step(1)"
         >
@@ -281,7 +262,6 @@
 import DjHead from "./player/DjHead.vue";
 import { mapGetters, mapState } from "vuex";
 import { stationList } from "@/data/stations";
-import { EventBus } from "@/components/eventbus.js";
 import PlayButton from "~/components/player/PlayButton.vue";
 import Visualizations from "~/components/player/Visualizations.vue";
 import StationNav from "~/components/player/StationNav.vue";
@@ -331,8 +311,6 @@ export default {
       "source",
       "message",
       "nowplaying",
-      "volume",
-      "volumeSupported",
       "visualsEnabled",
       "visualization",
       "sleepAt",
@@ -719,13 +697,6 @@ export default {
       this.slide = direction > 0 ? "logo-next" : "logo-prev";
       this.$router.push(stationPath(next));
     },
-    nudgeVolume(delta) {
-      this.$player.setVolume(this.volume + delta);
-      EventBus.$emit(
-        "toast",
-        "Volume " + Math.round(this.$player.audio.volume * 100) + "%",
-      );
-    },
     onKey(event) {
       if (
         event.defaultPrevented ||
@@ -751,8 +722,6 @@ export default {
         k: () => this.toggle(),
         ArrowLeft: () => this.step(-1),
         ArrowRight: () => this.step(1),
-        ArrowUp: () => this.volumeSupported && this.nudgeVolume(0.1),
-        ArrowDown: () => this.volumeSupported && this.nudgeVolume(-0.1),
       };
       if (actions[event.key]) {
         event.preventDefault();
@@ -1178,6 +1147,17 @@ export default {
   max-width: 420px;
   width: 100%;
   margin: calc(var(--gap) + 4px) auto 0;
+}
+/* Previous and next keep the outer places of the five-place row, play the
+   middle one, as when the row also held volume buttons. */
+.player__control--start {
+  grid-column: 1;
+}
+.player__play {
+  grid-column: 3;
+}
+.player__control--end {
+  grid-column: 5;
 }
 .player__control {
   width: 52px;

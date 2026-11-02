@@ -290,6 +290,59 @@ test("broadcast overlays stay transparent and chat shows newest messages", async
   await expect(page.locator(".chat-line").last()).toHaveText("DJMessage 30");
 });
 
+test("the player has no volume control, plays at full volume and forgets a saved level", async ({
+  page,
+}) => {
+  // Settings from an earlier version, which saved the volume.
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem("volume-seeded")) {
+      localStorage.setItem(
+        "dnbradio-player",
+        JSON.stringify({ volume: 0.3, visualization: "off" }),
+      );
+      sessionStorage.setItem("volume-seeded", "1");
+    }
+  });
+  await page.goto("./?src=discord");
+  const controls = page.locator(".player__controls > *");
+  await expect(controls).toHaveCount(3);
+  await expect(page.getByRole("button", { name: /volume/i })).toHaveCount(0);
+  // Previous and next keep the outer places, play the middle.
+  const [previous, play, next] = await Promise.all(
+    [0, 1, 2].map((index) => controls.nth(index).boundingBox()),
+  );
+  const row = await page.locator(".player__controls").boundingBox();
+  expect(previous.x - row.x).toBeLessThan(row.width / 5);
+  expect(
+    Math.abs(play.x + play.width / 2 - (row.x + row.width / 2)),
+  ).toBeLessThan(4);
+  expect(row.x + row.width - (next.x + next.width)).toBeLessThan(row.width / 5);
+
+  await page.locator(".player__controls .play-button").click();
+  await expect
+    .poll(() => page.evaluate(() => window.testAudio[0]?.paused))
+    .toBe(false);
+  await page.keyboard.press("ArrowDown");
+  expect(await page.evaluate(() => window.testAudio[0].volume)).toBe(1);
+  expect(
+    await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("dnbradio-player")),
+    ),
+  ).toEqual({ visualization: "off" });
+});
+
+test("Webamp starts at full volume whatever was saved", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "dnbradio-embed",
+      JSON.stringify({ media: { volume: 20, balance: 0 } }),
+    );
+  });
+  await page.goto("./webamp/");
+  await expect(page.locator("#main-window")).toBeVisible();
+  await expect(page.locator("#volume input")).toHaveValue("100");
+});
+
 test("Webamp keeps its framing rules in a landscape embed", async ({
   page,
 }) => {

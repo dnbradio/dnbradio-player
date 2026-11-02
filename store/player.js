@@ -9,8 +9,6 @@ export const state = () => ({
   // idle | loading | playing | paused | reconnecting | error
   status: "idle",
   message: "",
-  volume: 1,
-  volumeSupported: true,
   currentTime: 0,
   duration: 0,
   nowplaying: {},
@@ -57,12 +55,6 @@ export const mutations = {
   SET_STATUS: (state, { status, message = "" }) => {
     state.status = status;
     state.message = message;
-  },
-  SET_VOLUME: (state, payload) => {
-    state.volume = payload;
-  },
-  SET_VOLUME_SUPPORTED: (state, payload) => {
-    state.volumeSupported = payload;
   },
   SET_POSITION: (state, { currentTime, duration }) => {
     state.currentTime = currentTime || 0;
