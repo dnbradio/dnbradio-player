@@ -9,7 +9,7 @@ const engine = (
   .replace(/^import .*;\n/gm, "")
   .replace("export default function", "function plugin");
 
-test("podcast retries with a DJ query preserve position, source changes clear it, and sleep cancellation restores volume", () => {
+test("the player starts at full volume and forgets a saved level; podcast retries with a DJ query preserve position, source changes clear it, and sleep cancellation restores volume", () => {
   const timers = new Map();
   let timerId = 0;
   const handlers = {};
@@ -50,6 +50,10 @@ test("podcast retries with a DJ query preserve position, source changes clear it
       if (type === "player/SET_STATUS") state.status = payload.status;
     },
   };
+  // Settings from an earlier version, which saved the volume.
+  const saved = {
+    "dnbradio-player": JSON.stringify({ volume: 0.3, visualization: "off" }),
+  };
   let player;
   let analysisFailure;
   let clock = Date.now();
@@ -73,10 +77,12 @@ test("podcast retries with a DJ query preserve position, source changes clear it
     window: { addEventListener() {} },
     navigator: { onLine: true },
     localStorage: {
-      getItem() {
-        return null;
+      getItem(key) {
+        return saved[key] ?? null;
       },
-      setItem() {},
+      setItem(key, value) {
+        saved[key] = value;
+      },
     },
     stationsData: () => Promise.resolve([]),
     normalizeNowPlaying: () => ({}),
@@ -103,6 +109,10 @@ test("podcast retries with a DJ query preserve position, source changes clear it
     },
   });
   vm.runInContext(engine + ";plugin({app: {}, store}, inject)", context);
+  assert.equal(audio.volume, 1);
+  assert.deepEqual(JSON.parse(saved["dnbradio-player"]), {
+    visualization: "off",
+  });
   const retry = () => {
     handlers.error();
     const [id, fn] = [...timers.entries()].at(-1);
